@@ -1,0 +1,53 @@
+# Dependencias
+node_modules/
+.pnp/
+.pnp.js
+
+# Expo / React Native
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.jsbundle
+ios/Pods/
+ios/build/
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+*.xcuserstate
+
+# Secretos — nunca deben entrar al repositorio
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.mobileprovision
+*.keystore
+!debug.keystore
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+supabase/.temp/
+.supabase/
+
+# Pruebas y cobertura
+coverage/
+.nyc_output/
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Editores
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Claude Code — configuración personal, no compartida
+.claude/settings.local.json
