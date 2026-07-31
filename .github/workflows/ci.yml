@@ -1,0 +1,79 @@
+name: CI
+
+# Comprobaciones obligatorias del Documento 14. Ninguna fusión debe ocurrir
+# si alguna falla.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: Lint, formato, tipos y pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalación limpia
+        run: npm ci
+
+      - name: Linter
+        run: npm run lint
+
+      - name: Formato
+        run: npm run format:check
+
+      - name: Comprobación de tipos
+        run: npm run typecheck
+
+      - name: Pruebas con cobertura
+        run: npm run test:coverage
+
+      - name: Auditoría de dependencias
+        run: npm audit --audit-level=high
+
+  esquema:
+    name: Migraciones y aislamiento entre usuarios
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: qfaith_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Aplicar migraciones y probar el aislamiento
+        env:
+          PGURL: postgres://postgres:postgres@localhost:5432/qfaith_test
+        run: bash supabase/tests/ejecutar-pruebas.sh
+
+  secretos:
+    name: Escaneo de secretos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Buscar secretos en el historial
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
