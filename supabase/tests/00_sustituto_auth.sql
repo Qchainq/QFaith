@@ -60,3 +60,13 @@ $$;
 grant usage on schema public to anon, authenticated;
 grant usage on schema auth to anon, authenticated;
 grant select on auth.users to authenticated;
+
+-- Supabase concede por defecto TODOS los privilegios sobre las tablas nuevas
+-- de `public` a `anon` y `authenticated`. Reproducirlo aquí no es un detalle:
+-- sin esto, una prueba local parte de una base cerrada que el proyecto real
+-- no tiene, y no detecta que una migración se olvide de revocar lo heredado.
+-- Fue exactamente el fallo que se coló hasta el proyecto real: `authenticated`
+-- conservaba DELETE sobre `journal_entries` y solo RLS lo frenaba.
+alter default privileges in schema public grant all on tables to anon, authenticated;
+alter default privileges in schema public grant all on sequences to anon, authenticated;
+alter default privileges in schema public grant all on functions to anon, authenticated;
