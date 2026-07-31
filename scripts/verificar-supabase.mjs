@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Verifica el aislamiento entre usuarios contra un proyecto de Supabase real.
+// Verifica el esquema y el aislamiento entre usuarios contra un proyecto de
+// Supabase real.
 //
 // Las pruebas de `supabase/tests/` corren sobre un PostgreSQL local con un
 // sustituto del esquema `auth`. Esto ejecuta las mismas comprobaciones contra
@@ -7,27 +8,63 @@
 // Supabase, que es lo único que confirma que `auth.uid()` se comporta como
 // esperamos.
 //
-// Uso:
+// Se ejecuta en dos fases:
+//
+//   · Fase anónima — siempre. Comprueba que las diez tablas existen y que el
+//     rol anónimo no alcanza ninguna. Solo necesita URL y clave publicable.
+//
+//   · Fase autenticada — solo si hay dos usuarios de prueba. Comprueba el
+//     aislamiento real entre ellos.
+//
+// Uso mínimo:
 //   EXPO_PUBLIC_SUPABASE_URL=... EXPO_PUBLIC_SUPABASE_ANON_KEY=... \
-//   QFAITH_USUARIO_A=correo:clave QFAITH_USUARIO_B=correo:clave \
 //   node scripts/verificar-supabase.mjs
 //
+// Con aislamiento entre usuarios, dando dos cuentas ya creadas:
+//   ... QFAITH_USUARIO_A=correo:clave QFAITH_USUARIO_B=correo:clave
+//
+// O dejando que el propio script las cree y confirme (API de administración):
+//   ... QFAITH_SUPABASE_SECRET=sb_secret_...
+//
 // Los dos usuarios deben ser cuentas de prueba desechables. Nunca uses
-// credenciales de una persona real.
+// credenciales de una persona real (invariante 15).
+//
+// Detrás de un proxy corporativo, añade NODE_USE_ENV_PROXY=1: el `fetch`
+// integrado de Node no lee HTTPS_PROXY por su cuenta y, si el proxy responde
+// por él, todas las peticiones fallan de la misma forma. El script lo detecta
+// y aborta en lugar de dar por buenas esas respuestas.
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const clave = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-const usuarioA = process.env.QFAITH_USUARIO_A;
-const usuarioB = process.env.QFAITH_USUARIO_B;
+const secreto = process.env.QFAITH_SUPABASE_SECRET;
 
-if (!url || !clave || !usuarioA || !usuarioB) {
+if (!url || !clave) {
   console.error(
-    'Faltan variables. Se necesitan EXPO_PUBLIC_SUPABASE_URL,\n' +
-      'EXPO_PUBLIC_SUPABASE_ANON_KEY, QFAITH_USUARIO_A y QFAITH_USUARIO_B\n' +
-      'con el formato correo:clave.',
+    'Faltan variables. Se necesitan al menos EXPO_PUBLIC_SUPABASE_URL y\n' +
+      'EXPO_PUBLIC_SUPABASE_ANON_KEY.',
   );
   process.exit(2);
 }
+
+// Cuentas que el script crea por sí mismo cuando se le da la clave secreta.
+// El dominio debe resolver MX: Supabase rechaza `.invalid` y `example.com`.
+const CUENTAS_GENERADAS = [
+  { correo: 'qfaith.prueba.a@mailinator.com', contrasena: 'Prueba-QFaith-A-2026!' },
+  { correo: 'qfaith.prueba.b@mailinator.com', contrasena: 'Prueba-QFaith-B-2026!' },
+];
+
+const TABLAS = [
+  'profiles',
+  'user_settings',
+  'devices',
+  'user_key_envelopes',
+  'recovery_configurations',
+  'account_deletion_requests',
+  'journal_entries',
+  'sync_change_log',
+  'sync_conflicts',
+  'audit_events',
+];
 
 const comprobaciones = [];
 let fallos = 0;
@@ -58,11 +95,35 @@ async function peticion(ruta, { token, metodo = 'GET', cuerpo, cabeceras = {} } 
   return { estado: respuesta.status, datos };
 }
 
-async function iniciarSesion(credenciales) {
-  const separador = credenciales.indexOf(':');
-  const correo = credenciales.slice(0, separador);
-  const contrasena = credenciales.slice(separador + 1);
+/** Código de error de PostgREST, o null si la respuesta no es un error. */
+const codigo = ({ datos }) => (datos && !Array.isArray(datos) ? (datos.code ?? null) : null);
 
+/**
+ * ¿La respuesta viene realmente de PostgREST?
+ *
+ * Importa más de lo que parece. Un proxy o una pasarela puede devolver 401,
+ * 403 o 404 a *todo*, y entonces una comprobación del tipo «denegado, luego
+ * correcto» pasa sin haber tocado la base de datos. Solo se acepta un cuerpo
+ * con la forma de PostgREST: o una lista de filas, o un error con `code`.
+ */
+const esRespuestaPostgrest = ({ datos }) =>
+  Array.isArray(datos) || (datos !== null && typeof datos === 'object' && 'code' in datos);
+
+/** Aborta si la respuesta no llegó a PostgREST: seguir sería engañarse. */
+function exigirPostgrest(respuesta, contexto) {
+  if (esRespuestaPostgrest(respuesta)) return;
+  const cuerpo =
+    typeof respuesta.datos === 'string'
+      ? respuesta.datos.slice(0, 200)
+      : JSON.stringify(respuesta.datos);
+  throw new Error(
+    `La respuesta de ${contexto} no viene de PostgREST (HTTP ${respuesta.estado}): ${cuerpo}\n` +
+      'Suele ser un proxy interponiéndose. Con el `fetch` de Node hace falta\n' +
+      'NODE_USE_ENV_PROXY=1 para que respete HTTPS_PROXY.',
+  );
+}
+
+async function iniciarSesion({ correo, contrasena }) {
   const { estado, datos } = await peticion('/auth/v1/token?grant_type=password', {
     metodo: 'POST',
     cuerpo: { email: correo, password: contrasena },
@@ -74,6 +135,32 @@ async function iniciarSesion(credenciales) {
     );
   }
   return { correo, token: datos.access_token, id: datos.user?.id };
+}
+
+/**
+ * Crea la cuenta con la API de administración, ya confirmada. Es idempotente:
+ * si ya existe, no se toca y se reutiliza tal cual.
+ */
+async function asegurarCuenta({ correo, contrasena }) {
+  const respuesta = await fetch(`${url}/auth/v1/admin/users`, {
+    method: 'POST',
+    headers: {
+      apikey: secreto,
+      Authorization: `Bearer ${secreto}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email: correo, password: contrasena, email_confirm: true }),
+  });
+
+  if (respuesta.ok) return { correo, creada: true };
+
+  const detalle = await respuesta.text();
+  // 422 con código de duplicado: la cuenta ya estaba, que es lo deseable en
+  // ejecuciones sucesivas.
+  if (respuesta.status === 422 && detalle.includes('already been registered')) {
+    return { correo, creada: false };
+  }
+  throw new Error(`No se pudo crear ${correo} (HTTP ${respuesta.status}): ${detalle}`);
 }
 
 /** Descompone el JWT para leer sus reclamaciones sin verificar la firma. */
@@ -89,15 +176,77 @@ const sobre = (marca) => ({
   nonce: `nonce-de-${marca}`,
 });
 
-async function main() {
-  console.log(`▸ Proyecto: ${url}\n`);
+/** Resuelve qué dos cuentas usar, creándolas si hace falta y se puede. */
+async function resolverCuentas() {
+  const desdeEntorno = [process.env.QFAITH_USUARIO_A, process.env.QFAITH_USUARIO_B];
 
-  const a = await iniciarSesion(usuarioA);
-  const b = await iniciarSesion(usuarioB);
-  console.log(`▸ Sesión de A: ${a.correo} (${a.id})`);
-  console.log(`▸ Sesión de B: ${b.correo} (${b.id})\n`);
+  if (desdeEntorno.every(Boolean)) {
+    return desdeEntorno.map((credenciales) => {
+      const separador = credenciales.indexOf(':');
+      return {
+        correo: credenciales.slice(0, separador),
+        contrasena: credenciales.slice(separador + 1),
+      };
+    });
+  }
 
-  // ── El JWT lleva el sub que auth.uid() debe resolver ────────────────────
+  if (!secreto) return null;
+
+  console.log('▸ Aprovisionando cuentas de prueba con la clave de administración');
+  for (const cuenta of CUENTAS_GENERADAS) {
+    const { correo, creada } = await asegurarCuenta(cuenta);
+    console.log(`  · ${correo} ${creada ? 'creada' : 'ya existía'}`);
+  }
+  return CUENTAS_GENERADAS;
+}
+
+// ── Fase 1: lo que se puede comprobar sin ninguna sesión ──────────────────
+
+async function faseAnonima() {
+  console.log('▸ Fase anónima: esquema y cierre del rol público\n');
+
+  // Tablas que no existen: PGRST205 al no encontrarlas en la caché de esquema,
+  // 42P01 si la consulta llega a PostgreSQL.
+  const NO_EXISTE = ['PGRST205', '42P01'];
+
+  for (const tabla of TABLAS) {
+    const lectura = await peticion(`/rest/v1/${tabla}?select=*&limit=1`, {});
+    exigirPostgrest(lectura, `GET ${tabla}`);
+    const cod = codigo(lectura);
+
+    comprobar(
+      `la tabla ${tabla} existe`,
+      !NO_EXISTE.includes(cod),
+      `HTTP ${lectura.estado}${cod ? ` ${cod}` : ''}`,
+    );
+    // 42501 es «la tabla existe pero no tienes privilegios», que es justo lo
+    // que la migración 0004 deja al rol anónimo. Una lista vacía no valdría:
+    // significaría que puede leer y que simplemente no hay filas.
+    comprobar(
+      `el rol anónimo no puede leer ${tabla}`,
+      cod === '42501',
+      `HTTP ${lectura.estado}${cod ? ` ${cod}` : ''}`,
+    );
+
+    const escritura = await peticion(`/rest/v1/${tabla}`, { metodo: 'POST', cuerpo: {} });
+    exigirPostgrest(escritura, `POST ${tabla}`);
+    comprobar(
+      `el rol anónimo no puede escribir en ${tabla}`,
+      codigo(escritura) === '42501',
+      `HTTP ${escritura.estado}${codigo(escritura) ? ` ${codigo(escritura)}` : ''}`,
+    );
+  }
+}
+
+// ── Fase 2: aislamiento real entre dos usuarios autenticados ──────────────
+
+async function faseAutenticada(cuentas) {
+  const [a, b] = await Promise.all(cuentas.map(iniciarSesion));
+  console.log(`\n▸ Fase autenticada`);
+  console.log(`  · Sesión de A: ${a.correo} (${a.id})`);
+  console.log(`  · Sesión de B: ${b.correo} (${b.id})\n`);
+
+  // El JWT lleva el sub que auth.uid() debe resolver.
   const claims = reclamaciones(a.token);
   comprobar('el JWT incluye el «sub» del usuario', claims.sub === a.id, `sub=${claims.sub}`);
   comprobar(
@@ -106,7 +255,7 @@ async function main() {
     `role=${claims.role}`,
   );
 
-  // ── A crea su contenido ─────────────────────────────────────────────────
+  // A crea su contenido.
   const perfilA = await peticion('/rest/v1/profiles', {
     token: a.token,
     metodo: 'POST',
@@ -131,7 +280,15 @@ async function main() {
     entradaA.estado < 300,
     `HTTP ${entradaA.estado}`,
   );
-  const idEntradaA = Array.isArray(entradaA.datos) ? entradaA.datos[0]?.id : undefined;
+  const filaA = Array.isArray(entradaA.datos) ? entradaA.datos[0] : undefined;
+  const idEntradaA = filaA?.id;
+
+  // El trigger de sincronización sella la revisión en la propia fila.
+  comprobar(
+    'la entrada nace con una revisión de sincronización asignada',
+    typeof filaA?.sync_revision === 'number' && filaA.sync_revision > 0,
+    `sync_revision=${filaA?.sync_revision}`,
+  );
 
   const propiasDeA = await peticion('/rest/v1/journal_entries?select=id', { token: a.token });
   comprobar(
@@ -140,13 +297,27 @@ async function main() {
     `${propiasDeA.datos?.length ?? 0} filas`,
   );
 
-  // ── B no alcanza nada de A ──────────────────────────────────────────────
+  // La bitácora refleja el cambio sin exponer contenido.
+  const bitacoraDeA = await peticion('/rest/v1/sync_change_log?select=*', { token: a.token });
+  const entradasBitacora = Array.isArray(bitacoraDeA.datos) ? bitacoraDeA.datos : [];
+  comprobar(
+    'el trigger registró el cambio en la bitácora',
+    entradasBitacora.some((fila) => fila.entity_id === idEntradaA),
+    `${entradasBitacora.length} filas`,
+  );
+  comprobar(
+    'la bitácora no contiene ningún criptograma',
+    !JSON.stringify(entradasBitacora).includes('criptograma-de-A'),
+  );
+
+  // B no alcanza nada de A.
   for (const tabla of [
     'journal_entries',
     'profiles',
     'devices',
     'user_key_envelopes',
     'recovery_configurations',
+    'sync_change_log',
   ]) {
     const vistoPorB = await peticion(`/rest/v1/${tabla}?select=*`, { token: b.token });
     const filas = Array.isArray(vistoPorB.datos) ? vistoPorB.datos.length : -1;
@@ -179,7 +350,7 @@ async function main() {
     `HTTP ${intentoSuplantar.estado}`,
   );
 
-  // ── Tablas que el cliente no debe poder escribir ────────────────────────
+  // Tablas que el cliente no debe poder escribir.
   const bitacora = await peticion('/rest/v1/sync_change_log', {
     token: a.token,
     metodo: 'POST',
@@ -218,25 +389,72 @@ async function main() {
       borradoFisico.estado >= 400,
       `HTTP ${borradoFisico.estado}`,
     );
+
+    // El borrado lógico sí está permitido y se propaga como delete.
+    const borradoLogico = await peticion(`/rest/v1/journal_entries?id=eq.${idEntradaA}`, {
+      token: a.token,
+      metodo: 'PATCH',
+      cuerpo: { deleted_at: new Date().toISOString() },
+      cabeceras: { Prefer: 'return=representation' },
+    });
+    comprobar(
+      'el borrado lógico sí está permitido',
+      borradoLogico.estado < 300,
+      `HTTP ${borradoLogico.estado}`,
+    );
+
+    const traslLogico = await peticion(
+      `/rest/v1/sync_change_log?select=operation&entity_id=eq.${idEntradaA}&operation=eq.delete`,
+      { token: a.token },
+    );
+    comprobar(
+      'el borrado lógico se propaga a la bitácora como delete',
+      Array.isArray(traslLogico.datos) && traslLogico.datos.length >= 1,
+      `${traslLogico.datos?.length ?? 0} filas`,
+    );
   }
 
-  // ── El rol anónimo no alcanza nada ──────────────────────────────────────
-  const anonimo = await peticion('/rest/v1/journal_entries?select=id');
+  // Los parámetros de derivación no se pueden rebajar.
+  const kdfDebil = await peticion('/rest/v1/recovery_configurations', {
+    token: a.token,
+    metodo: 'POST',
+    cuerpo: {
+      user_id: a.id,
+      encrypted_recovery_envelope: 'sobre',
+      recovery_nonce: 'nonce',
+      kdf_algorithm: 'argon2id',
+      kdf_parameters: {
+        memoriaKiB: 8,
+        iteraciones: 1,
+        paralelismo: 1,
+        salBase64: 'YWJjZA==',
+      },
+    },
+  });
   comprobar(
-    'el rol anónimo no puede leer el diario',
-    anonimo.estado >= 400 || (Array.isArray(anonimo.datos) && anonimo.datos.length === 0),
-    `HTTP ${anonimo.estado}`,
+    'el servidor rechaza parámetros de Argon2id por debajo del mínimo',
+    kdfDebil.estado >= 400,
+    `HTTP ${kdfDebil.estado}`,
   );
+}
 
-  // ── El servidor no ve contenido en claro ────────────────────────────────
-  const crudo = JSON.stringify(propiasDeA.datos ?? []);
-  comprobar(
-    'la respuesta no contiene texto en claro del usuario',
-    !crudo.includes('criptograma-de-A') || true,
-  );
+async function main() {
+  console.log(`▸ Proyecto: ${url}\n`);
 
-  // ── Informe ─────────────────────────────────────────────────────────────
-  console.log('─'.repeat(70));
+  await faseAnonima();
+
+  const cuentas = await resolverCuentas();
+  if (cuentas === null) {
+    console.log(
+      '\n▸ Fase autenticada omitida: no hay cuentas de prueba.\n' +
+        '  Da QFAITH_USUARIO_A y QFAITH_USUARIO_B (correo:clave), o bien\n' +
+        '  QFAITH_SUPABASE_SECRET para que el script las cree por sí mismo.',
+    );
+  } else {
+    await faseAutenticada(cuentas);
+  }
+
+  console.log(`\n${'─'.repeat(70)}`);
   for (const { descripcion, ok, detalle } of comprobaciones) {
     console.log(`${ok ? '✓' : '✗'} ${descripcion}${detalle ? `  (${detalle})` : ''}`);
   }
@@ -249,7 +467,11 @@ async function main() {
     console.error(`\n${fallos} FALLO(S). No continúes hasta resolverlos.`);
     process.exit(1);
   }
-  console.log('\nAislamiento verificado contra el proyecto real.');
+  console.log(
+    cuentas === null
+      ? '\nEsquema y cierre del rol anónimo verificados contra el proyecto real.'
+      : '\nEsquema y aislamiento verificados contra el proyecto real.',
+  );
 }
 
 main().catch((error) => {
