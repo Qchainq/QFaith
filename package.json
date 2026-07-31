@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test"
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test",
+    "sql:combinar": "bash scripts/combinar-migraciones.sh"
   },
   "repository": {
     "type": "git",
