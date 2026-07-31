@@ -28,6 +28,9 @@ for archivo in "$DIRECTORIO"/migrations/*.sql; do
 done
 
 echo "▸ Pruebas de aislamiento"
-ejecutar "$DIRECTORIO/tests/01_aislamiento_rls.sql"
+for archivo in "$DIRECTORIO"/tests/0[1-9]_*.sql; do
+  echo "  · $(basename "$archivo")"
+  ejecutar "$archivo"
+done
 
 echo "✓ Esquema y aislamiento verificados"
