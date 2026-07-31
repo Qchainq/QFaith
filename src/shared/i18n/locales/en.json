@@ -35,7 +35,21 @@
     "fraseRecuperacionDescripcion": "These 24 words are the only way to recover your private content if you lose access. Keep them somewhere safe and don't share them with anyone.",
     "fraseRecuperacionAviso": "No one else can recover them for you, not even us.",
     "generandoClaves": "Preparing your private space…",
-    "restaurando": "Restoring your content…"
+    "restaurando": "Restoring your content…",
+    "fraseRecuperacionInstruccion": "Write them down on paper and keep them where you'd keep an important document. Don't take a screenshot.",
+    "fraseRecuperacionYaLaGuarde": "I've saved them",
+    "verificacionTitulo": "Let's check you have them",
+    "verificacionDescripcion": "Type the words we ask for. That way we know you wrote them down correctly.",
+    "verificacionPalabra": "Word {{numero}}",
+    "verificacionErrorPalabra": "This word doesn't match. Please check your notes.",
+    "verificacionCorrecta": "All good. Your private content is protected.",
+    "verMiFrase": "Show my words again",
+    "restaurarTitulo": "Restore your content",
+    "restaurarDescripcion": "Type the 24 words of your recovery phrase, separated by spaces.",
+    "restaurarCampo": "Recovery phrase",
+    "restaurar": "Restore",
+    "bloqueado": "QFaith is locked",
+    "bloqueadoDescripcion": "Unlock to see your private content."
   },
   "errores": {
     "generico": "Something went wrong. Please try again.",
@@ -61,5 +75,31 @@
     "oraciones": "Once you write your first request, it will appear here.",
     "memorial": "This is where you'll remember the prayers God has answered.",
     "habitos": "Choose a habit to start walking with consistency."
+  },
+  "onboarding": {
+    "bienvenidaTitulo": "Welcome to QFaith",
+    "bienvenidaTexto": "A space to walk with God each day, at your own pace.",
+    "privacidadTitulo": "What's yours stays yours",
+    "privacidadTexto": "Your journal, prayers and notes are encrypted on this device before they leave it. Not even we can read them.",
+    "habitosTitulo": "Consistency without pressure",
+    "habitosTexto": "Choose the habits you want to grow. There are no streaks to lose and no reproach here.",
+    "iaTitulo": "A companion, not an authority",
+    "iaTexto": "The AI helps you study the Bible and prepare devotionals. It never speaks for God and never replaces your pastor.",
+    "iglesiaTitulo": "Your church, if you want",
+    "iglesiaTexto": "You can join your community for events and groups. Your private content stays private.",
+    "crearCuentaTitulo": "Let's begin",
+    "crearCuentaTexto": "Create your account to keep your spiritual history and restore it on any device.",
+    "saltar": "Skip",
+    "siguiente": "Next"
+  },
+  "autenticacion": {
+    "crearCuenta": "Create account",
+    "iniciarSesion": "Sign in",
+    "correo": "Email",
+    "contrasena": "Password",
+    "olvideContrasena": "I forgot my password",
+    "yaTengoCuenta": "I already have an account",
+    "correoInvalido": "Please enter a valid email.",
+    "contrasenaCorta": "Your password needs at least 8 characters."
   }
 }

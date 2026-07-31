@@ -35,7 +35,21 @@
     "fraseRecuperacionDescripcion": "Estas 24 palabras son la única forma de recuperar tu contenido privado si pierdes el acceso. Guárdalas en un lugar seguro y no las compartas con nadie.",
     "fraseRecuperacionAviso": "Nadie más puede recuperarlas por ti, tampoco nosotros.",
     "generandoClaves": "Preparando tu espacio privado…",
-    "restaurando": "Restaurando tu contenido…"
+    "restaurando": "Restaurando tu contenido…",
+    "fraseRecuperacionInstruccion": "Anótalas en papel y guárdalas donde guardarías un documento importante. No hagas una captura de pantalla.",
+    "fraseRecuperacionYaLaGuarde": "Ya las he guardado",
+    "verificacionTitulo": "Confirmemos que las tienes",
+    "verificacionDescripcion": "Escribe las palabras que te pedimos. Así sabemos que las anotaste bien.",
+    "verificacionPalabra": "Palabra {{numero}}",
+    "verificacionErrorPalabra": "Esta palabra no coincide. Revisa tu anotación.",
+    "verificacionCorrecta": "Todo correcto. Tu contenido privado está protegido.",
+    "verMiFrase": "Ver mis palabras otra vez",
+    "restaurarTitulo": "Restaurar tu contenido",
+    "restaurarDescripcion": "Escribe las 24 palabras de tu frase de recuperación, separadas por espacios.",
+    "restaurarCampo": "Frase de recuperación",
+    "restaurar": "Restaurar",
+    "bloqueado": "QFaith está bloqueado",
+    "bloqueadoDescripcion": "Desbloquea para ver tu contenido privado."
   },
   "errores": {
     "generico": "Algo no ha salido bien. Inténtalo de nuevo.",
@@ -61,5 +75,31 @@
     "oraciones": "Cuando escribas tu primera petición, aparecerá aquí.",
     "memorial": "Aquí recordarás las oraciones que Dios ya respondió.",
     "habitos": "Elige un hábito para empezar a caminar con constancia."
+  },
+  "onboarding": {
+    "bienvenidaTitulo": "Bienvenido a QFaith",
+    "bienvenidaTexto": "Un espacio para caminar con Dios cada día, a tu ritmo.",
+    "privacidadTitulo": "Lo tuyo es tuyo",
+    "privacidadTexto": "Tu diario, tus oraciones y tus notas se cifran en este dispositivo antes de salir. Ni siquiera nosotros podemos leerlos.",
+    "habitosTitulo": "Constancia sin presión",
+    "habitosTexto": "Elige los hábitos que quieras cultivar. Aquí no hay rachas que perder ni reproches.",
+    "iaTitulo": "Un acompañante, no una autoridad",
+    "iaTexto": "La IA te ayuda a estudiar la Biblia y preparar devocionales. Nunca habla en nombre de Dios ni sustituye a tu pastor.",
+    "iglesiaTitulo": "Tu iglesia, si tú quieres",
+    "iglesiaTexto": "Puedes unirte a tu comunidad para eventos y grupos. Tu contenido privado sigue siendo privado.",
+    "crearCuentaTitulo": "Empecemos",
+    "crearCuentaTexto": "Crea tu cuenta para guardar tu historia espiritual y recuperarla en cualquier dispositivo.",
+    "saltar": "Saltar",
+    "siguiente": "Siguiente"
+  },
+  "autenticacion": {
+    "crearCuenta": "Crear cuenta",
+    "iniciarSesion": "Iniciar sesión",
+    "correo": "Correo electrónico",
+    "contrasena": "Contraseña",
+    "olvideContrasena": "Olvidé mi contraseña",
+    "yaTengoCuenta": "Ya tengo cuenta",
+    "correoInvalido": "Escribe un correo válido.",
+    "contrasenaCorta": "La contraseña necesita al menos 8 caracteres."
   }
 }
