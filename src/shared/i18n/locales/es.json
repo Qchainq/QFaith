@@ -1,0 +1,65 @@
+{
+  "comun": {
+    "continuar": "Continuar",
+    "cancelar": "Cancelar",
+    "guardar": "Guardar",
+    "volver": "Volver",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando…"
+  },
+  "navegacion": {
+    "inicio": "Inicio",
+    "biblia": "Biblia",
+    "oracion": "Oración",
+    "ia": "IA",
+    "perfil": "Perfil"
+  },
+  "inicio": {
+    "saludoManana": "Buenos días",
+    "saludoTarde": "Buenas tardes",
+    "saludoNoche": "Buenas noches",
+    "versiculoDelDia": "Versículo de hoy",
+    "sinPendientes": "No tienes nada pendiente hoy."
+  },
+  "sincronizacion": {
+    "sincronizando": "Sincronizando",
+    "pendiente": "Pendiente",
+    "sinConexion": "Sin conexión",
+    "sincronizado": "Sincronizado",
+    "guardadoLocal": "Guardado en este dispositivo. Se sincronizará cuando vuelvas a tener conexión."
+  },
+  "seguridad": {
+    "desbloquear": "Desbloquear",
+    "desbloquearMotivo": "Desbloquea QFaith para ver tu contenido privado.",
+    "fraseRecuperacionTitulo": "Tu frase de recuperación",
+    "fraseRecuperacionDescripcion": "Estas 24 palabras son la única forma de recuperar tu contenido privado si pierdes el acceso. Guárdalas en un lugar seguro y no las compartas con nadie.",
+    "fraseRecuperacionAviso": "Nadie más puede recuperarlas por ti, tampoco nosotros.",
+    "generandoClaves": "Preparando tu espacio privado…",
+    "restaurando": "Restaurando tu contenido…"
+  },
+  "errores": {
+    "generico": "Algo no ha salido bien. Inténtalo de nuevo.",
+    "sinConexion": "Sin conexión. Guardamos tu cambio y lo sincronizaremos más tarde.",
+    "validacion": "Revisa los datos e inténtalo de nuevo.",
+    "autenticacion": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
+    "permisos": "No tienes acceso a este contenido.",
+    "servidor": "El servicio no está disponible ahora mismo. Inténtalo en unos minutos.",
+    "cifrado": {
+      "claveInvalida": "No pudimos preparar tu espacio privado. Inténtalo de nuevo.",
+      "claveNoCorresponde": "No pudimos abrir este contenido en este dispositivo.",
+      "envoltorioInvalido": "No pudimos preparar tus claves en este dispositivo.",
+      "descifradoFallido": "No pudimos abrir este contenido. Puede que esté dañado.",
+      "fraseInvalida": "Esa frase de recuperación no es válida. Revisa las palabras.",
+      "recuperacionFallida": "La frase no corresponde a esta cuenta."
+    },
+    "sincronizacion": {
+      "conflicto": "Este elemento cambió en otro dispositivo. Elige qué versión conservar."
+    }
+  },
+  "vacios": {
+    "diario": "Aquí guardarás lo que Dios va haciendo en tu vida.",
+    "oraciones": "Cuando escribas tu primera petición, aparecerá aquí.",
+    "memorial": "Aquí recordarás las oraciones que Dios ya respondió.",
+    "habitos": "Elige un hábito para empezar a caminar con constancia."
+  }
+}

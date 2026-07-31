@@ -1,0 +1,65 @@
+{
+  "comun": {
+    "continuar": "Continue",
+    "cancelar": "Cancel",
+    "guardar": "Save",
+    "volver": "Back",
+    "reintentar": "Try again",
+    "cargando": "Loading…"
+  },
+  "navegacion": {
+    "inicio": "Home",
+    "biblia": "Bible",
+    "oracion": "Prayer",
+    "ia": "AI",
+    "perfil": "Profile"
+  },
+  "inicio": {
+    "saludoManana": "Good morning",
+    "saludoTarde": "Good afternoon",
+    "saludoNoche": "Good evening",
+    "versiculoDelDia": "Today's verse",
+    "sinPendientes": "Nothing pending today."
+  },
+  "sincronizacion": {
+    "sincronizando": "Syncing",
+    "pendiente": "Pending",
+    "sinConexion": "Offline",
+    "sincronizado": "Synced",
+    "guardadoLocal": "Saved on this device. It will sync once you're back online."
+  },
+  "seguridad": {
+    "desbloquear": "Unlock",
+    "desbloquearMotivo": "Unlock QFaith to see your private content.",
+    "fraseRecuperacionTitulo": "Your recovery phrase",
+    "fraseRecuperacionDescripcion": "These 24 words are the only way to recover your private content if you lose access. Keep them somewhere safe and don't share them with anyone.",
+    "fraseRecuperacionAviso": "No one else can recover them for you, not even us.",
+    "generandoClaves": "Preparing your private space…",
+    "restaurando": "Restoring your content…"
+  },
+  "errores": {
+    "generico": "Something went wrong. Please try again.",
+    "sinConexion": "You're offline. We saved your change and will sync it later.",
+    "validacion": "Please check the details and try again.",
+    "autenticacion": "Your session expired. Please sign in again.",
+    "permisos": "You don't have access to this content.",
+    "servidor": "The service isn't available right now. Try again in a few minutes.",
+    "cifrado": {
+      "claveInvalida": "We couldn't prepare your private space. Please try again.",
+      "claveNoCorresponde": "We couldn't open this content on this device.",
+      "envoltorioInvalido": "We couldn't set up your keys on this device.",
+      "descifradoFallido": "We couldn't open this content. It may be damaged.",
+      "fraseInvalida": "That recovery phrase isn't valid. Please check the words.",
+      "recuperacionFallida": "That phrase doesn't match this account."
+    },
+    "sincronizacion": {
+      "conflicto": "This item changed on another device. Choose which version to keep."
+    }
+  },
+  "vacios": {
+    "diario": "This is where you'll keep what God is doing in your life.",
+    "oraciones": "Once you write your first request, it will appear here.",
+    "memorial": "This is where you'll remember the prayers God has answered.",
+    "habitos": "Choose a habit to start walking with consistency."
+  }
+}
