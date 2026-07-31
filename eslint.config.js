@@ -53,6 +53,22 @@ module.exports = defineConfig([
     rules: { 'no-console': 'off' },
   },
   {
+    // Utilidades que se ejecutan en Node, no en el dispositivo: tienen a su
+    // disposición las globales de Node y sí pueden escribir por consola,
+    // porque su salida es precisamente el informe que lee quien las lanza.
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        Buffer: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        crypto: 'readonly',
+      },
+    },
+    rules: { 'no-console': 'off' },
+  },
+  {
     files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}', 'jest.setup.js'],
     languageOptions: {
       globals: {
