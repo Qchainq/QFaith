@@ -3,3 +3,10 @@ coverage
 .expo
 dist
 package-lock.json
+
+# Prosa con saltos de línea deliberados: la especificación, las skills y el
+# resto de documentación se escriben para leerse, no para ajustarse a un
+# ancho automático. El formato obligatorio aplica al código.
+docs/
+.claude/skills/
+*.md

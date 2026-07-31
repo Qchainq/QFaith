@@ -75,6 +75,10 @@ export function PantallaOnboarding({ alTerminar }: PropsPantallaOnboarding) {
         {/* Indicador de progreso: informa sin gamificar. */}
         <View
           style={styles.progreso}
+          // Se marca como elemento accesible para que el lector de pantalla
+          // lo anuncie como una unidad con su valor; sin esto, la barra pasa
+          // desapercibida y el usuario no sabe cuántos pasos quedan.
+          accessible
           accessibilityRole="progressbar"
           accessibilityValue={{ min: 1, max: PASOS.length, now: indice + 1 }}
         >

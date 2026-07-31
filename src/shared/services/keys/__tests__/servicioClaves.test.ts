@@ -227,3 +227,35 @@ describe('aislamiento entre cuentas', () => {
     ).rejects.toThrow(expect.objectContaining({ codigo: 'ENVOLTORIO_INVALIDO' }));
   });
 });
+
+describe('caminos poco frecuentes', () => {
+  it('desbloquear con la sesión ya abierta no vuelve a leer el almacén', async () => {
+    const material = await nuevaCuenta();
+    jest.clearAllMocks();
+
+    expect(await desbloquear(material.sobresClaves)).toBe(true);
+    expect(AlmacenSeguro.getItemAsync).not.toHaveBeenCalled();
+  });
+
+  it('bloquear dos veces seguidas no rompe nada', async () => {
+    await nuevaCuenta();
+    bloquear();
+    expect(() => bloquear()).not.toThrow();
+    expect(estaDesbloqueada()).toBe(false);
+  });
+
+  it('pedir un dominio que no llegó en los sobres da un error claro', async () => {
+    const material = await nuevaCuenta();
+    // Se restaura sin el sobre del diario, como si el servidor lo hubiera
+    // perdido: mejor fallar señalando el dominio que descifrar en blanco.
+    const sinDiario = material.sobresClaves.filter((sobre) => sobre.dominio !== 'diario');
+
+    bloquear();
+    await desbloquear(sinDiario);
+
+    expect(() => claveDeDominio('diario')).toThrow(
+      expect.objectContaining({ codigo: 'CLAVE_DOMINIO_AUSENTE' }),
+    );
+    expect(claveDeDominio('oracion')).toBeDefined();
+  });
+});
