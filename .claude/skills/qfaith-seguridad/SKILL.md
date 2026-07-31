@@ -15,10 +15,22 @@ description: >-
 
 # Seguridad y cifrado de QFaith
 
-Fuente: [Documento 5](../../../docs/master-prompt/05-seguridad-y-cifrado.md).
+Fuente: [Documento 5](docs/master-prompt/05-seguridad-y-cifrado.md).
 
-> **Los cambios en cifrado, autenticación, recuperación, pagos y modo crisis
-> requieren revisión de Opus antes de darse por terminados.**
+## Quién decide qué — léelo antes de escribir una sola línea
+
+| | |
+| --- | --- |
+| **Opus diseña y aprueba** | Esquema de cifrado, derivación y rotación de claves, sobres por dispositivo, flujo de recuperación, autenticación, políticas RLS, modelo de amenazas, pagos, modo crisis |
+| **Sonnet implementa** | El diseño **ya aprobado**, sin alterarlo. Puede escribir pruebas de seguridad y corregir errores que no cambien el modelo |
+| **Haiku** | Nada de esta área. No aprueba ni modifica seguridad, cifrado, recuperación ni pagos |
+
+> **Ningún cambio en cifrado, autenticación, recuperación, pagos o modo crisis
+> se da por terminado sin revisión de Opus.** Si eres Sonnet o Haiku y la tarea
+> te obliga a inventar un esquema criptográfico, cambiar una política RLS o
+> tocar el flujo de recuperación: **para y escala a Opus.**
+
+Si dudas de si algo es "de seguridad", lo es. Escala.
 
 ## Principios
 

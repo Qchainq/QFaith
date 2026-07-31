@@ -2,21 +2,34 @@
 name: qfaith-offline-sync
 description: >-
   Arquitectura offline-first y sincronización de QFaith: base local cifrada,
-  cola de cambios, orden de sincronización, control de versiones con revisiones
-  incrementales, los seis estados de un registro, detección y resolución de
-  conflictos sin sobrescribir, borrado en dos fases, respaldos cifrados
-  incrementales, cambio de dispositivo y restauración. Úsala SIEMPRE que
-  trabajes en persistencia local, en el servicio de sincronización, en la cola
-  de cambios, en resolución de conflictos, en respaldos, en restaurar una
-  cuenta en un dispositivo nuevo, o cuando escribas cualquier operación de
-  crear, editar o borrar que deba funcionar sin conexión. Actívala si se
-  menciona offline, sin conexión, sincronizar, sync, cola, conflicto,
-  restaurar, respaldo, backup o migrar de dispositivo en QFaith.
+  cola de cambios, orden de sincronización, revisiones incrementales, los seis
+  estados de un registro, resolución de conflictos sin sobrescribir, borrado en
+  dos fases, respaldos cifrados y restauración en un dispositivo nuevo. Úsala
+  SIEMPRE que trabajes en persistencia local o en el servicio de
+  sincronización, y cuando escribas cualquier operación de crear, editar o
+  borrar que deba funcionar sin conexión. Actívala si se menciona offline, sin
+  conexión, sincronizar, sync, cola, conflicto, restaurar, respaldo, backup o
+  migrar de dispositivo en QFaith.
 ---
 
 # Offline y sincronización
 
-Fuente: [Documento 7](../../../docs/master-prompt/07-offline-y-sincronizacion.md).
+Fuente: [Documento 7](docs/master-prompt/07-offline-y-sincronizacion.md).
+
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Opus diseña** | El protocolo de sincronización, el esquema de revisiones, la estrategia de resolución de conflictos, el formato de respaldo y el flujo de restauración |
+| **Sonnet implementa** | El servicio de sync, la cola, la persistencia local, la interfaz de conflictos y todas las pruebas offline |
+| **Haiku** | Nada de esta área |
+
+Escala a Opus si la tarea te lleva a cambiar el orden de sincronización, la
+semántica de `version`/`sync_revision`, o a resolver conflictos sin preguntar
+al usuario.
+
+**Skills relacionadas:** `qfaith-datos` (campos de sincronización) y
+`qfaith-seguridad` (la base local va cifrada).
 
 ## Regla principal
 

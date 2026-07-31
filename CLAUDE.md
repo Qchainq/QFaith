@@ -54,7 +54,11 @@ carga la skill del área en la que trabajas:
 | Cola de cambios, conflictos, restauración | `qfaith-offline-sync` |
 | Recordatorios, push, tareas de fondo, widgets | `qfaith-notificaciones` |
 | Roles, permisos de iglesia, mentores, compartir | `qfaith-iglesia` |
+| Textos, traducciones, errores, datos ficticios | `qfaith-textos` |
 | Tests, cobertura, CI/CD, rendimiento, publicación | `qfaith-calidad` |
+
+Cada skill indica **qué modelo decide, cuál implementa y cuándo escalar a
+Opus** en su área. Consúltala antes de asumir que puedes tomar una decisión.
 
 Ante contradicción entre documentos: **gana el más específico y reciente.** El
 Documento 12 prevalece sobre el 4 en todo lo relativo al esquema.

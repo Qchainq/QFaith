@@ -14,11 +14,26 @@ description: >-
 # Design System — Liquid Glass
 
 Fuente:
-[Documento 3](../../../docs/master-prompt/03-design-system-liquid-glass.md).
+[Documento 3](docs/master-prompt/03-design-system-liquid-glass.md).
 
 > Todo estilo sale del Design System. **Ningún componente lleva estilos
 > propios.** Si necesitas algo que no existe, se añade al sistema, no al
 > componente.
+
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Sonnet es el dueño** | Construye y mantiene el Design System, los tokens y los componentes. Es el modelo principal de esta área |
+| **Opus** | Solo interviene si un cambio visual afecta a rendimiento, accesibilidad o a la arquitectura de componentes |
+| **Haiku** | Ajustes mecánicos: renombrar tokens, formatear, corregir textos. No crea componentes ni decide estilos |
+
+Añadir un token o una variante al sistema es decisión de Sonnet y no requiere
+consulta. Lo que **nunca** se hace es resolver una necesidad puntual con un
+estilo suelto en un componente.
+
+**Skill relacionada:** `qfaith-textos` para el contenido que va dentro de los
+componentes.
 
 ## Filosofía
 

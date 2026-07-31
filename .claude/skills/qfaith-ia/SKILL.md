@@ -15,12 +15,21 @@ description: >-
 
 # Sistema de IA de QFaith
 
-Fuente: [Documento 6](../../../docs/master-prompt/06-sistema-de-ia.md) y las
+Fuente: [Documento 6](docs/master-prompt/06-sistema-de-ia.md) y las
 pruebas de IA del
-[Documento 14](../../../docs/master-prompt/14-ejecucion-pruebas-publicacion.md).
+[Documento 14](docs/master-prompt/14-ejecucion-pruebas-publicacion.md).
 
-> El diseño del sistema de IA y toda la lógica de Modo Crisis **requieren
-> revisión de Opus**.
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Opus diseña y aprueba** | El system prompt, los límites doctrinales, la política de envío de contexto al proveedor, toda la lógica de Modo Crisis y el conjunto de evaluación |
+| **Sonnet implementa** | El servicio de IA, la pantalla de chat, el historial, la integración con módulos y las pruebas de la batería de evaluación |
+| **Haiku** | Nada de prompts ni de crisis. Puede traducir textos de interfaz del módulo, nunca las instrucciones del modelo |
+
+> **Ningún cambio de prompt, de modelo o de lógica de crisis se da por
+> terminado sin revisión de Opus, y sin volver a ejecutar la batería de
+> evaluación completa.**
 
 ## Posición de la IA
 

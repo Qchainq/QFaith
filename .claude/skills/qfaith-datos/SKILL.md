@@ -15,9 +15,24 @@ description: >-
 
 # Modelo de datos de QFaith
 
-Fuente: [Documento 12](../../../docs/master-prompt/12-modelo-de-datos.md), que
+Fuente: [Documento 12](docs/master-prompt/12-modelo-de-datos.md), que
 **prevalece sobre el Documento 4**. Consulta el documento para el listado
 completo campo a campo; aquí están las reglas que se aplican a cada decisión.
+
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Opus decide** | Alta o baja de tablas y campos, cambios de tipos, qué se cifra, políticas RLS, índices sobre datos sensibles, migraciones destructivas o que bloqueen tablas |
+| **Sonnet implementa** | Migraciones rutinarias que siguen el modelo aprobado, repositorios, tipos TypeScript, consultas, seeds ficticios |
+| **Haiku** | Solo datos de prueba ficticios y documentación del esquema. No modifica el esquema |
+
+Escala a Opus si la tarea te pide una tabla o un campo **que no está en el
+Documento 12**, mover un dato de cifrado a claro (o al revés), o relajar una
+política RLS.
+
+**Skills relacionadas:** `qfaith-seguridad` (qué se cifra y cómo son las
+políticas RLS) y `qfaith-offline-sync` (campos de versión y revisión).
 
 ## Principios innegociables
 

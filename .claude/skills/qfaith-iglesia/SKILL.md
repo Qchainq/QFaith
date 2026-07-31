@@ -1,25 +1,35 @@
 ---
 name: qfaith-iglesia
 description: >-
-  Módulo Iglesia y comunidad de QFaith: los seis roles, qué puede y qué nunca
-  podrá ver una iglesia, compartición voluntaria y revocable de peticiones,
-  relación con un mentor y sus permisos limitados, grupos, eventos e
-  inscripciones, sermones publicados frente a notas privadas, cursos,
-  biblioteca, estadísticas permitidas, donaciones y ausencia de chat grupal
-  público. Úsala SIEMPRE que trabajes en el módulo de iglesia, en membresías,
-  roles, mentores, grupos, eventos, sermones institucionales, o en cualquier
-  función que comparta información de un usuario con otra persona u
-  organización. Actívala si se menciona iglesia, pastor, líder, mentor,
-  discipulado, grupo, ministerio, evento, membresía, compartir una petición o
-  permisos de terceros en QFaith.
+  Módulo Iglesia y comunidad de QFaith: los seis roles, qué nunca podrá ver una
+  iglesia, compartición voluntaria y revocable de peticiones, permisos
+  limitados del mentor, grupos, eventos, sermones publicados frente a notas
+  privadas, estadísticas permitidas y donaciones. Úsala SIEMPRE que trabajes en
+  este módulo o en cualquier función que comparta información de un usuario con
+  otra persona u organización. Actívala si se menciona iglesia, pastor, líder,
+  mentor, discipulado, grupo, ministerio, evento, membresía, compartir una
+  petición o permisos de terceros en QFaith.
 ---
 
 # Módulo Iglesia y Comunidad
 
-Fuente: [Documento 8](../../../docs/master-prompt/08-modulo-iglesia-comunidad.md).
+Fuente: [Documento 8](docs/master-prompt/08-modulo-iglesia-comunidad.md).
 
 > La iglesia acompaña. La aplicación facilita. **El usuario decide.** La
 > privacidad siempre prevalece.
+
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Opus aprueba** | Toda política RLS de compartición, el modelo de permisos de mentor, y el cifrado dirigido a destinatarios (`prayer_shares`) |
+| **Sonnet implementa** | Pantallas de iglesia, grupos, eventos, inscripciones, sermones, membresías y las pruebas de aislamiento |
+| **Haiku** | Textos y datos ficticios de iglesias de prueba |
+
+Compartir información entre usuarios es una operación de seguridad, no una
+función social: **si tocas quién ve qué, escala a Opus.**
+
+**Skill relacionada:** `qfaith-seguridad` para las políticas RLS.
 
 ## Roles
 

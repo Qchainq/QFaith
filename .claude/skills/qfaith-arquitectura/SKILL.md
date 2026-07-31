@@ -14,8 +14,21 @@ description: >-
 
 # Arquitectura de QFaith
 
-Fuente: [Documento 2](../../../docs/master-prompt/02-arquitectura-general.md) y
-[Documento 9](../../../docs/master-prompt/09-backend-y-api.md).
+Fuente: [Documento 2](docs/master-prompt/02-arquitectura-general.md) y
+[Documento 9](docs/master-prompt/09-backend-y-api.md).
+
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Opus decide** | Capas, límites entre módulos, contratos de los servicios únicos, alta de cualquier dependencia nueva, cambios de estructura |
+| **Sonnet implementa** | Pantallas, componentes, hooks, servicios, repositorios, casos de uso y navegación **dentro** de la estructura ya aprobada |
+| **Haiku** | No toma decisiones de arquitectura. Solo mueve, renombra o formatea sobre una estructura ya definida |
+
+Si eres Sonnet o Haiku y la tarea exige crear un módulo nuevo, cambiar una
+capa, añadir un servicio transversal o instalar una dependencia: **para y
+escala a Opus.** Cualquier otra cosa dentro de la estructura, adelante sin
+preguntar.
 
 ## Capas (Clean Architecture)
 
@@ -111,7 +124,7 @@ Ninguna función a más de tres niveles de profundidad. Toda pantalla tiene bot�
 volver, título, acción principal y acción secundaria.
 
 El mapa completo de pantallas está en el
-[Documento 10](../../../docs/master-prompt/10-mapa-de-pantallas.md).
+[Documento 10](docs/master-prompt/10-mapa-de-pantallas.md).
 **Ninguna pantalla se desarrolla si no está en ese documento.**
 
 ## Textos y configuración

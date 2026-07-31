@@ -1,26 +1,31 @@
 ---
 name: qfaith-notificaciones
 description: >-
-  Sistema de notificaciones, recordatorios y tareas en segundo plano de QFaith:
-  tipos y prioridades, privacidad en la pantalla bloqueada, tono permitido y
-  prohibido, horario de silencio, límites de frecuencia y detección de fatiga,
-  notificaciones locales frente a remotas, payload sin contenido privado,
-  tokens push, zonas horarias y horario de verano, acciones rápidas,
-  navegación desde una notificación, widgets y comportamiento al cerrar sesión
-  o eliminar la cuenta. Úsala SIEMPRE que programes un recordatorio, escribas
+  Notificaciones, recordatorios y tareas en segundo plano de QFaith: privacidad
+  en la pantalla bloqueada, tono permitido y prohibido, prioridades, locales
+  frente a remotas, horario de silencio, límites de frecuencia, tokens push,
+  idempotencia y widgets. Úsala SIEMPRE que programes un recordatorio, escribas
   el texto de una notificación, toques push, configures tareas en segundo
   plano, integres el calendario del sistema o construyas un widget. Actívala si
   se menciona notificación, recordatorio, push, alerta, badge, widget, tarea en
-  segundo plano o horario de silencio en QFaith.
+  segundo plano, zona horaria o horario de silencio en QFaith.
 ---
 
 # Notificaciones y tareas en segundo plano
 
 Fuente:
-[Documento 13](../../../docs/master-prompt/13-notificaciones-y-tareas-fondo.md).
+[Documento 13](docs/master-prompt/13-notificaciones-y-tareas-fondo.md).
 
 > Las notificaciones ayudan al usuario. **Nunca controlan su comportamiento ni
 > se convierten en una herramienta adictiva.**
+
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Opus aprueba** | Notificaciones de crisis y de seguridad, y la política de payload remoto |
+| **Sonnet implementa** | Servicio de notificaciones, programación local, push, tareas de fondo, widgets, integración de calendario |
+| **Haiku redacta** | Los textos, con `qfaith-textos`. Nunca decide cuándo ni a quién se envía |
 
 ## Privacidad en pantalla bloqueada — la regla que más se incumple
 
@@ -43,22 +48,20 @@ usuario puede habilitarla.
 Amable, breve, respetuoso, no invasivo, esperanzador.
 
 **Nunca:** culpa, amenazas, presión, lenguaje profético, manipulación
-espiritual, urgencia falsa.
+espiritual, urgencia falsa. **Nunca reiniciar rachas ni amenazar con perder
+progreso.**
 
 | ✅ | ❌ |
 | --- | --- |
 | «Tu momento de lectura está disponible.» | «Has fallado otra vez.» |
 | «Puedes continuar hoy donde quedaste.» | «Dios está esperando y tú no has orado.» |
 | «¿Deseas dedicar unos minutos a tu oración?» | «Perderás tu progreso si no entras ahora.» |
-| «Tu plan sigue disponible cuando estés listo.» | «Esta puede ser tu última oportunidad.» |
-
-**Nunca reiniciar rachas ni amenazar con perder progreso.**
 
 ## Prioridades
 
 | Nivel | Uso |
 | --- | --- |
-| **Crítica** | Login sospechoso, dispositivo nuevo, cambio de clave de recuperación, revocación de sesión, fallo grave de respaldo, riesgo inmediato en crisis. **Nunca para hábitos ni promoción.** |
+| **Crítica** | Login sospechoso, dispositivo nuevo, cambio de clave de recuperación, revocación de sesión, fallo grave de respaldo, riesgo inmediato en crisis. **Nunca para hábitos ni promoción** |
 | **Alta** | Evento próximo confirmado, recordatorio pedido expresamente, plan con hora concreta, acción de seguridad pendiente |
 | **Normal** | Devocional, hábito, oración, lectura, sermón |
 | **Baja** | Resumen semanal, contenido nuevo, sugerencias, informativos |
@@ -66,23 +69,22 @@ espiritual, urgencia falsa.
 ## Locales frente a remotas
 
 **Locales** (hábitos, oración, devocional, lectura, sermón, recordatorios
-personales): funcionan sin Internet, mantienen la privacidad y reducen coste.
-**Son la opción por defecto** cuando no hace falta el servidor.
+personales) son la opción **por defecto**: funcionan sin Internet, protegen la
+privacidad y reducen coste.
 
-Reprograma las locales cuando cambie: zona horaria, horario, preferencias,
-estado del hábito, pausa de un plan o cierre de sesión.
+Reprográmalas cuando cambie zona horaria, horario, preferencias, estado del
+hábito, pausa de un plan o cierre de sesión.
 
-**Remotas** (seguridad, iglesia, eventos, restauración, facturación): el payload
-contiene únicamente tipo, identificador opaco, ruta de navegación, marca
-temporal, prioridad y firma. **Nunca contenido privado.**
+**Remotas** (seguridad, iglesia, eventos, restauración, facturación): el
+payload contiene únicamente tipo, identificador opaco, ruta de navegación,
+marca temporal, prioridad y firma. **Nunca contenido privado.**
 
 ## Límites de frecuencia
 
 - Máximo 3 notificaciones espirituales normales al día.
 - Máximo 1 resumen diario.
 - Máximo 1 promocional por semana, solo con consentimiento explícito.
-- Alertas operativas según necesidad; seguridad sin límite artificial ante
-  riesgo real.
+- Seguridad sin límite artificial ante riesgo real.
 
 El usuario puede reducir estos límites, nunca subirlos a un nivel abusivo.
 
@@ -90,22 +92,8 @@ El usuario puede reducir estos límites, nunca subirlos a un nivel abusivo.
 de la app «¿Deseas reducir estos recordatorios?». Nunca aumentar la presión
 automáticamente ni usar reproche.
 
-## Horario de silencio
-
-Hora de inicio, hora de fin, días y excepciones de seguridad. Durante ese
-periodo: sin notificaciones normales, sin sonido, sin vibración; se mantienen
-pendientes para entrega posterior cuando corresponda.
-
-## Promocionales
-
-Desactivadas por defecto. Solo con consentimiento explícito. Desactivables sin
-afectar a las operativas.
-
-**Nunca segmentar por** ansiedad, oraciones, confesiones, crisis, diario,
-estado espiritual, situación familiar ni dificultades económicas.
-
-Nunca mensajes como «Paga para crecer en tu fe» o «Tu relación con Dios merece
-Premium».
+**Horario de silencio:** sin notificaciones normales, sin sonido, sin
+vibración. Solo las críticas de seguridad pueden ser excepción.
 
 ## Navegación desde una notificación
 
@@ -118,52 +106,30 @@ Antes de navegar, en este orden:
 5. **Pedir desbloqueo biométrico si el contenido es privado**
 6. No mostrar nada si el usuario cerró sesión
 
-Si el recurso ya no existe: mensaje genérico.
-
-**Acciones rápidas** (completar, posponer, abrir, marcar leído, confirmar
-asistencia, revisar seguridad) nunca exponen contenido privado sin desbloquear
-la app.
-
-**Posponer:** 10 min · 30 min · 1 h · esta tarde · mañana · fecha
-personalizada.
-
-## Zonas horarias
-
-Todos los horarios se guardan con contexto de zona horaria. Al viajar,
-preguntar si conservar la hora local original o adaptar. Evitar notificaciones
-de madrugada.
-
-Manejar horario de verano, horas inexistentes y horas repetidas.
-
-> **Nunca programes recordatorios con cálculos fijos de segundos** cuando deban
-> respetar la hora local.
-
-## Permisos del sistema
-
-**No pidas el permiso al abrir la app por primera vez.** Flujo correcto:
-
-1. Pantalla interna explicando qué recordatorios puede recibir
-2. Elegir categorías
-3. Solicitar el permiso del sistema
-4. Respetar la decisión
-
-Si lo rechaza: no insistir, permitir activarlo desde configuración, y **seguir
-funcionando** — recordatorios dentro de la app y exportación opcional al
-calendario.
+Si el recurso ya no existe: mensaje genérico. Las acciones rápidas nunca
+exponen contenido privado sin desbloquear la app.
 
 ## Tareas en segundo plano
 
-Permitidas solo para: sincronización incremental, cola pendiente, descarga
-autorizada, actualización de planes, programación de notificaciones, limpieza
-de temporales, verificación de respaldo, renovación segura de sesión.
+Solo para: sincronización incremental, cola pendiente, descarga autorizada,
+actualización de planes, programación de notificaciones, limpieza de
+temporales, verificación de respaldo, renovación segura de sesión.
 
 Deben ser **idempotentes** (`sync_job_id`, `notification_schedule_id`,
-`backup_revision`) y no crear recordatorios, eventos, registros ni archivos
-duplicados.
+`backup_revision`) y no duplicar recordatorios, eventos, registros ni archivos.
 
 Respetar batería: agrupar tareas, no despertar el dispositivo sin necesidad,
 respetar modo ahorro y Wi-Fi únicamente. **Nunca ejecutar IA en segundo plano
 sin acción explícita del usuario.**
+
+## Zonas horarias
+
+Todos los horarios se guardan con contexto de zona horaria. Evitar
+notificaciones de madrugada. Manejar horario de verano, horas inexistentes y
+repetidas.
+
+> **Nunca programes recordatorios con cálculos fijos de segundos** cuando deban
+> respetar la hora local.
 
 ## Tokens push
 
@@ -171,41 +137,14 @@ Asociados al dispositivo, protegidos en servidor, actualizados al cambiar,
 eliminados al cerrar sesión, revocados al eliminar el dispositivo. Nunca para
 seguimiento publicitario. **Nunca en logs abiertos.**
 
-## Widgets
+## Detalle adicional
 
-Pueden mostrar: versículo público, progreso genérico, próximo evento, botón de
-apertura.
+Carga estas referencias solo cuando la tarea lo pida:
 
-**Nunca:** oraciones privadas, diario, estado emocional, conversaciones con IA,
-contenido del Modo Arca. Ocultar lo sensible con el dispositivo bloqueado.
-
-## Calendario del sistema
-
-Integración opcional para eventos, cursos, retiros y reuniones.
-
-**Nunca exportar automáticamente** oraciones, diario, estado espiritual,
-confesiones ni crisis. El usuario elige qué se exporta.
-
-## Cierre de sesión y eliminación de cuenta
-
-**Cerrar sesión:** cancelar notificaciones privadas locales, limpiar widgets,
-revocar el token push, pausar sincronización, limpiar accesos rápidos.
-
-**Eliminar cuenta:** revocar tokens, cancelar remotas y locales, eliminar
-programaciones y preferencias, desvincular calendarios, detener trabajos
-pendientes.
-
-## Analítica
-
-Solo agregados: entregada, abierta, descartada, categoría, tiempo aproximado de
-apertura. **Nunca** contenido, texto de oración, tema del diario, estado
-emocional concreto ni respuesta de IA.
-
-## Pruebas obligatorias
-
-Las 20 del Documento 13, incluyendo: permiso aceptado / rechazado / revocado ·
-zona horaria cambiada · horario de verano · sin Internet · ahorro de batería ·
-cierre de sesión · cuenta eliminada · dispositivo revocado · notificación
-abierta con sesión expirada · recurso eliminado · duplicados · reintentos ·
-pantalla bloqueada · vista previa desactivada · múltiples dispositivos ·
-restauración en teléfono nuevo · datos móviles restringidos · solo Wi-Fi.
+- **[Catálogo por tipo](references/catalogo-por-tipo.md)** — reglas concretas
+  de hábitos, oración, devocional, planes, sermón, iglesia, seguridad,
+  respaldo, suscripción y promocionales.
+- **[Ciclo de vida y pruebas](references/ciclo-de-vida-y-pruebas.md)** —
+  permisos del sistema, widgets, calendario, cierre de sesión, eliminación de
+  cuenta, analítica, las 20 pruebas obligatorias y los 16 criterios de
+  aceptación.

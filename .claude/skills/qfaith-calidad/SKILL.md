@@ -1,36 +1,44 @@
 ---
 name: qfaith-calidad
 description: >-
-  Criterios de calidad, pruebas y entrega de QFaith: alcance exacto del MVP y
-  qué queda fuera, tipos de pruebas obligatorias, flujos end-to-end, pruebas de
-  cifrado y de aislamiento entre usuarios, objetivos de cobertura, prohibiciones
-  de estilo de código, objetivos de rendimiento, accesibilidad, analítica
-  permitida, gestión de errores, CI/CD, entornos y secretos, versionado
-  semántico, OTA, publicación en App Store y Google Play, cumplimiento legal,
-  monetización freemium, y la definición de terminado por tarea, por módulo y
-  del proyecto. Úsala al escribir pruebas, revisar código, configurar CI,
-  preparar una release, decidir si algo está terminado, o al planificar el
-  alcance de una fase. Actívala si se menciona test, cobertura, CI, pipeline,
-  release, publicar, tienda, MVP, rendimiento, accesibilidad, definición de
-  terminado o auditoría en QFaith.
+  Calidad y pruebas de QFaith: alcance del MVP y qué queda fuera, tipos de
+  prueba obligatorios, flujo end-to-end, pruebas de cifrado y de aislamiento
+  entre usuarios, objetivos de cobertura, prohibiciones de estilo de código,
+  rendimiento, gestión de errores, CI/CD, entornos y secretos, y la definición
+  de terminado por tarea, por módulo y del proyecto. Úsala al escribir pruebas,
+  revisar código, configurar CI, decidir si algo está terminado o planificar el
+  alcance de una fase. Actívala si se menciona test, prueba, cobertura, CI,
+  pipeline, lint, MVP, rendimiento, definición de terminado, release, publicar,
+  tienda, App Store, Google Play, legal, precios o suscripción en QFaith.
 ---
 
 # Calidad, pruebas y entrega
 
 Fuente:
-[Documento 14](../../../docs/master-prompt/14-ejecucion-pruebas-publicacion.md).
+[Documento 14](docs/master-prompt/14-ejecucion-pruebas-publicacion.md).
+
+## Quién decide qué
+
+| | |
+| --- | --- |
+| **Opus** | Auditoría de fase, aprobación de salida de cada fase, revisión de cifrado / auth / recuperación / pagos / crisis, decisiones de riesgo |
+| **Sonnet** | Escribe la mayoría de las pruebas, corrige errores, configura CI, optimiza rendimiento |
+| **Haiku** | Pruebas simples, datos ficticios, documentación, validaciones repetitivas. **No aprueba** seguridad, cifrado, recuperación, pagos, crisis ni arquitectura |
+
+> Ninguna fase se declara terminada sin cumplir **todos** sus criterios, y la
+> aprobación de fase es de Opus.
 
 ## Alcance del MVP
 
-Los 25 puntos del MVP están en el Documento 14. En resumen: auth + recuperación
-+ onboarding, Inicio, Pulso Espiritual, hábitos, oración, memorial, diario,
-Biblia offline con licencia válida, notas/subrayados/marcadores/favoritos,
-planes de lectura, IA con límites, Biblioteca de Vida, notas de sermones,
-perfil y configuración, biometría y PIN, sincronización cifrada, restauración,
-notificaciones, modo oscuro, español e inglés, offline, eliminación de cuenta,
-freemium.
+Los 25 puntos están en el Documento 14. En resumen: auth + recuperación +
+onboarding, Inicio, Pulso Espiritual, hábitos, oración, memorial, diario,
+Biblia offline con licencia válida, notas / subrayados / marcadores /
+favoritos, planes de lectura, IA con límites, Biblioteca de Vida, notas de
+sermones, perfil y configuración, biometría y PIN, sincronización cifrada,
+restauración, notificaciones, modo oscuro, español e inglés, offline,
+eliminación de cuenta, freemium.
 
-**Fuera del MVP** (no desarrollar antes de estabilizarlo): Modo Familia
+**Fuera del MVP** — no desarrollar antes de estabilizarlo: Modo Familia
 completo, donaciones, cursos avanzados, certificados, chat interno, QChat, ruta
 de discipulado, audio bíblico Premium, marketplace, funciones empresariales,
 integraciones profundas de calendario, panel web avanzado, Modo Peregrino
@@ -71,9 +79,9 @@ dispositivo → eliminar cuenta.
 ### Pruebas de aislamiento
 
 Con **al menos dos usuarios de prueba**: ninguno puede leer ni modificar
-registros del otro; una iglesia no accede al diario de un miembro; un mentor no
-lee datos no compartidos; un administrador técnico no descifra contenido
-privado; las URLs de Storage no dan acceso público; los identificadores
+registros del otro · una iglesia no accede al diario de un miembro · un mentor
+no lee datos no compartidos · un administrador técnico no descifra contenido
+privado · las URLs de Storage no dan acceso público · los identificadores
 adivinados no conceden acceso.
 
 ## Cobertura
@@ -103,11 +111,8 @@ innecesaria · supresión de errores de TypeScript sin justificación.
 
 ## Revisión
 
-Todo cambio importante pasa por: revisión funcional → arquitectura → seguridad
-cuando corresponda → pruebas → verificación visual → accesibilidad.
-
-**Cifrado, autenticación, recuperación, pagos y crisis requieren revisión de
-Opus.**
+Todo cambio importante: revisión funcional → arquitectura → seguridad cuando
+corresponda → pruebas → verificación visual → accesibilidad.
 
 ## Rendimiento
 
@@ -115,10 +120,10 @@ Opus.**
 | --- | --- |
 | Inicio frío | < 2,5 s (dispositivo medio) |
 | Inicio caliente | < 1 s |
+| Pantalla de Inicio | < 2 s |
 | Pantallas principales | 60 FPS cuando el dispositivo lo permita |
 | Consultas locales frecuentes | < 100 ms |
 | Apertura de contenido privado | < 500 ms |
-| Pantalla de Inicio | < 2 s |
 
 **Mide antes de optimizar.** No optimices partes no críticas.
 
@@ -145,9 +150,7 @@ sincronización.
 conversaciones con IA, nombres en peticiones, confesiones, Modo Arca, notas
 privadas.
 
-Observabilidad: disponibilidad, errores, latencia, estado de Edge Functions,
-fallos de sync, errores de auth, uso de Storage, colas pendientes, alertas de
-seguridad. **Nunca contenido privado en trazas.**
+**Nunca contenido privado en trazas ni reportes.**
 
 ## CI/CD
 
@@ -167,51 +170,6 @@ claves, Storage, proveedor de IA y analítica.
 variables protegidas de CI/CD o Secure Enclave/Keystore. **Nunca en Git, código
 fuente, capturas, logs ni archivos de ejemplo.**
 
-## Versionado y OTA
-
-Versionado semántico. Cada versión incluye notas, migraciones, riesgos, plan de
-reversión y compatibilidad mínima.
-
-OTA solo para cambios permitidos por las plataformas. **Nunca** para cambiar
-comportamiento sensible sin revisión, introducir código nativo incompatible,
-evadir la revisión de tiendas ni modificar pagos sin autorización.
-
-## Monetización
-
-Freemium. **La versión gratuita debe ser útil y digna.**
-
-> **Nunca conviertas la fe, la oración o la seguridad básica en privilegios de
-> pago.**
-
-Gratis incluye como mínimo: cuenta, hábitos, oraciones, memorial, diario
-básico, Biblia legal, notas y favoritos, planes gratuitos, IA con límite
-razonable, sincronización cifrada básica, biometría, modo oscuro,
-notificaciones, iglesia básica.
-
-**No bloquear la recuperación de datos por falta de suscripción.** No eliminar
-datos privados al expirar una suscripción.
-
-Pagos por los sistemas de cada plataforma cuando sean obligatorios. Nunca
-almacenar datos de tarjeta. Validar compras en servidor. Precios fuera del
-código.
-
-## Legal
-
-Antes del lanzamiento: política de privacidad, términos, cookies (web),
-consentimiento de analítica, política de eliminación, información de
-suscripciones, tratamiento de menores, acuerdos con proveedores, registro de
-actividades, procedimiento de incidentes.
-
-Cumplir GDPR, legislación española y europea, reglas de App Store y Google
-Play, protección de menores y normas de pagos.
-
-**Requiere revisión legal profesional antes del lanzamiento comercial** — es
-uno de los casos en que hay que parar y pedir decisión humana.
-
-**Licencias bíblicas:** no usar traducciones protegidas sin autorización.
-Registrar titular, tipo de licencia, territorios, límites de visualización,
-permiso offline, permiso de audio, atribución y vigencia.
-
 ## Definición de terminado
 
 **Tarea:** el código existe · compila · cumple el requisito · tiene pruebas ·
@@ -229,5 +187,15 @@ sus criterios de aceptación.
 
 No dejes funciones simuladas en producción. No marques una tarea como terminada
 si depende de código falso. No elimines seguridad para avanzar. No sustituyas
-funciones fallidas por TODO permanentes. No uses datos reales en pruebas. No
-declares una fase terminada sin cumplir todos sus criterios.
+funciones fallidas por TODO permanentes. No uses datos reales en pruebas.
+
+## Detalle adicional
+
+Carga estas referencias solo cuando la tarea lo pida:
+
+- **[Publicación y legal](references/publicacion-y-legal.md)** — App Store,
+  Google Play, permisos del sistema, cumplimiento GDPR, licencias bíblicas,
+  seguridad operativa y respuesta a incidentes.
+- **[Monetización y versiones](references/monetizacion-y-versiones.md)** —
+  freemium, qué va en gratis y en Premium, pagos, precios, versionado semántico
+  y actualizaciones OTA.
