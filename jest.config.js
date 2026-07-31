@@ -3,6 +3,9 @@
 module.exports = {
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  // Solo los archivos `.test.ts` son suites. Dentro de `__tests__` también
+  // viven dobles y utilidades compartidas, que no contienen pruebas.
+  testMatch: ['<rootDir>/src/**/*.test.{ts,tsx}'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@app/(.*)$': '<rootDir>/src/app/$1',

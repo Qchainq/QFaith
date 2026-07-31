@@ -1,5 +1,8 @@
 // Pruebas de cifrado exigidas por el Documento 14. Cada bloque corresponde a
 // una comprobación literal de esa lista.
+import { mnemonicToEntropy } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
+
 import { aBytes, aBase64, desdeBase64 } from '../codificacion';
 import {
   abrirSobreRecuperacion,
@@ -339,10 +342,15 @@ describe('frase de recuperación', () => {
     const sobre = await crearSobreRecuperacion({ claveMaestra, frase, ajustesKdf: KDF_RAPIDO });
     const serializado = JSON.stringify(sobre);
 
+    // Ni la clave maestra, ni la frase, ni la entropía de la que deriva.
+    //
+    // No se comprueba palabra por palabra: el diccionario BIP39 contiene
+    // términos de tres letras que aparecen por azar dentro de una cadena
+    // base64, lo que hacía que la comprobación fallara de forma
+    // intermitente sin que hubiera nada mal en el código.
     expect(serializado).not.toContain(aBase64(claveMaestra));
-    frase.split(' ').forEach((palabra) => {
-      expect(serializado.includes(palabra)).toBe(false);
-    });
+    expect(serializado).not.toContain(frase);
+    expect(serializado).not.toContain(aBase64(mnemonicToEntropy(frase, wordlist)));
   });
 
   it('una frase distinta no abre el sobre', async () => {
