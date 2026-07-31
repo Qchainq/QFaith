@@ -9,7 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { inicializarI18n } from '@shared/i18n';
 import { ProveedorTema } from '@shared/theme/ProveedorTema';
 
-import { NavegacionRaiz } from './NavegacionRaiz';
+import { Arranque } from './Arranque';
 
 const i18n = inicializarI18n();
 
@@ -40,7 +40,7 @@ export default function App() {
         <QueryClientProvider client={clienteConsultas}>
           <ProveedorTema>
             <StatusBar style="auto" />
-            <NavegacionRaiz />
+            <Arranque />
           </ProveedorTema>
         </QueryClientProvider>
       </I18nextProvider>
