@@ -2,6 +2,8 @@
 // Fase 1: crear, cifrar, sincronizar y restaurar un registro privado entre
 // dos dispositivos.
 import { crearAlmacenEnMemoria } from '@shared/database/almacenEnMemoria';
+import { crearAlmacenSqlite } from '@shared/database/almacenSqlite';
+import { crearEjecutorNodeSqlite } from '@shared/testing/ejecutorNodeSqlite';
 import type { AlmacenLocal } from '@shared/database/tipos';
 import {
   cifrar,
@@ -452,5 +454,63 @@ describe('criterio de salida de la Fase 1', () => {
     expect(() =>
       descifrar({ sobre: descargado!.sobre, clave: intruso.clave, vinculo: vinculoDe(id) }),
     ).toThrow(expect.objectContaining({ codigo: 'CLAVE_NO_CORRESPONDE' }));
+  });
+});
+
+describe('criterio de salida sobre SQLite real', () => {
+  // La misma prueba anterior, pero con la persistencia que corre en el
+  // dispositivo. Comprueba que el motor no dependía de detalles del almacén
+  // en memoria contra el que se desarrolló.
+  it('crea, cifra, sincroniza y restaura entre dos dispositivos con base en disco', async () => {
+    const servidor = crearServidorEnMemoria();
+    const mat = materialCompartido();
+    const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+    const ejecutorOriginal = crearEjecutorNodeSqlite();
+    const almacenOriginal = await crearAlmacenSqlite(ejecutorOriginal);
+    const motorOriginal = crearMotorSincronizacion({
+      almacen: almacenOriginal,
+      remoto: servidor,
+      usuarioId: USUARIO,
+      dispositivoId: 'movil-original',
+      ahora: relojIncremental(),
+    });
+
+    await motorOriginal.registrarCambioLocal({
+      id,
+      tipoEntidad: TIPO,
+      sobre: cifrar({
+        contenido: CONTENIDO,
+        clave: mat.clave,
+        claveHash: mat.claveHash,
+        vinculo: vinculoDe(id),
+      }),
+      metadatos: { entry_type: 'gratitude' },
+    });
+    expect((await motorOriginal.sincronizar()).enviados).toBe(1);
+
+    // Dispositivo nuevo: base vacía, mismas claves tras restaurar la frase.
+    const ejecutorNuevo = crearEjecutorNodeSqlite();
+    const almacenNuevo = await crearAlmacenSqlite(ejecutorNuevo);
+    const motorNuevo = crearMotorSincronizacion({
+      almacen: almacenNuevo,
+      remoto: servidor,
+      usuarioId: USUARIO,
+      dispositivoId: 'movil-nuevo',
+      ahora: relojIncremental(),
+    });
+
+    expect(await almacenNuevo.listar(TIPO)).toHaveLength(0);
+    await motorNuevo.sincronizar();
+
+    const restaurado = await almacenNuevo.obtener(TIPO, id);
+    expect(restaurado?.estado).toBe('sincronizado');
+    expect(restaurado?.metadatos['entry_type']).toBe('gratitude');
+    expect(descifrar({ sobre: restaurado!.sobre, clave: mat.clave, vinculo: vinculoDe(id) })).toBe(
+      CONTENIDO,
+    );
+
+    await ejecutorOriginal.cerrar();
+    await ejecutorNuevo.cerrar();
   });
 });

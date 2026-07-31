@@ -23,6 +23,10 @@ module.exports = {
     '!src/**/__tests__/**',
     '!src/**/index.ts',
     '!src/shared/testing/**',
+    // Adaptador de plataforma sin lógica: solo traduce entre el puerto y la
+    // API de expo-sqlite, y no puede ejecutarse fuera de un dispositivo. El
+    // SQL que envuelve sí se prueba, contra un motor SQLite real.
+    '!src/shared/database/ejecutorExpo.ts',
   ],
   coverageThreshold: {
     global: {
