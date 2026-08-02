@@ -32,10 +32,13 @@ const clientesCreados: QueryClient[] = [];
 function crearClientePruebas(): QueryClient {
   const cliente = new QueryClient({
     defaultOptions: {
-      // `gcTime: Infinity` evita que cada consulta programe su propio
-      // temporizador de recolección; la caché se tira entera al terminar.
-      queries: { retry: false, gcTime: Infinity, networkMode: 'offlineFirst' },
-      mutations: { retry: false, networkMode: 'offlineFirst' },
+      // `gcTime: 0` en ambos. El de las **mutaciones** es el que importa: por
+      // defecto son cinco minutos, y ese temporizador mantiene vivo el proceso
+      // de Jest hasta que lo mata a la fuerza. Cuesta encontrarlo porque el
+      // aviso habla de «fugas» y apunta a la última prueba que corrió, no a la
+      // mutación que lo programó.
+      queries: { retry: false, gcTime: 0, networkMode: 'offlineFirst' },
+      mutations: { retry: false, gcTime: 0, networkMode: 'offlineFirst' },
     },
   });
   clientesCreados.push(cliente);
