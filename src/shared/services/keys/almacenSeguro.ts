@@ -10,6 +10,11 @@ import * as AlmacenSeguro from 'expo-secure-store';
 import { ErrorApp } from '@shared/errores/erroresApp';
 
 const CLAVE_MAESTRA = 'qfaith.clave_maestra';
+// Junto a la clave se guarda de quién es. Un dispositivo solo aloja la clave
+// de una cuenta a la vez, y sin este dato no habría forma de saber si la que
+// hay dentro corresponde a quien acaba de entrar: se abriría la sesión con el
+// material de la persona anterior.
+const DUENIO_CLAVE = 'qfaith.duenio_clave';
 
 /**
  * Opciones de almacenamiento.
@@ -56,9 +61,13 @@ export async function pedirDesbloqueoBiometrico(motivo: string): Promise<boolean
   return resultado.success;
 }
 
-export async function guardarClaveMaestra(claveMaestraBase64: string): Promise<void> {
+export async function guardarClaveMaestra(parametros: {
+  readonly usuarioId: string;
+  readonly claveMaestraBase64: string;
+}): Promise<void> {
   try {
-    await AlmacenSeguro.setItemAsync(CLAVE_MAESTRA, claveMaestraBase64, OPCIONES);
+    await AlmacenSeguro.setItemAsync(CLAVE_MAESTRA, parametros.claveMaestraBase64, OPCIONES);
+    await AlmacenSeguro.setItemAsync(DUENIO_CLAVE, parametros.usuarioId, OPCIONES);
   } catch (causa) {
     throw new ErrorApp(
       {
@@ -72,10 +81,23 @@ export async function guardarClaveMaestra(claveMaestraBase64: string): Promise<v
   }
 }
 
-export async function leerClaveMaestra(): Promise<string | null> {
+/**
+ * Devuelve la clave maestra **solo si es de este usuario**.
+ *
+ * Si el dispositivo guarda la clave de otra cuenta, devuelve null: quien
+ * acaba de entrar tendrá que restaurar con su frase. Devolverla igualmente
+ * cifraría su contenido con el material de otra persona, y ese contenido
+ * sería ilegible al restaurar en cualquier otro dispositivo.
+ */
+export async function leerClaveMaestra(usuarioId: string): Promise<string | null> {
+  const duenio = await AlmacenSeguro.getItemAsync(DUENIO_CLAVE, OPCIONES);
+  if (duenio !== usuarioId) {
+    return null;
+  }
   return AlmacenSeguro.getItemAsync(CLAVE_MAESTRA, OPCIONES);
 }
 
 export async function borrarClaveMaestra(): Promise<void> {
   await AlmacenSeguro.deleteItemAsync(CLAVE_MAESTRA, OPCIONES);
+  await AlmacenSeguro.deleteItemAsync(DUENIO_CLAVE, OPCIONES);
 }

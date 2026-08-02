@@ -12,7 +12,12 @@
 // dominio (diario, oración, memorial…) revelaría al servidor qué módulos usa
 // la persona si fuera una columna indexable. Dentro de un campo de texto que
 // nadie consulta, no se puede filtrar por él.
-import type { ParametrosKdf, SobreRecuperacion } from '@shared/services/crypto/tipos';
+import {
+  DOMINIOS_CIFRADO,
+  type DominioCifrado,
+  type ParametrosKdf,
+  type SobreRecuperacion,
+} from '@shared/services/crypto/tipos';
 import type { SobreClavePersistido } from '@shared/services/keys/servicioClaves';
 
 import type { ClienteRest } from './rest';
@@ -65,9 +70,15 @@ function deserializar(fila: FilaSobreClave): SobreClavePersistido | null {
   if (typeof envoltorio.d !== 'string' || typeof envoltorio.n !== 'string') {
     return null;
   }
+  // El dominio forma parte de los datos autenticados del envoltorio: uno
+  // desconocido no abriría nada y haría fallar la restauración entera. Se
+  // comprueba aquí en lugar de confiar en el aserto de tipo.
+  if (!(DOMINIOS_CIFRADO as readonly string[]).includes(envoltorio.d)) {
+    return null;
+  }
   return {
     keyId: fila.key_id,
-    dominio: envoltorio.d as SobreClavePersistido['dominio'],
+    dominio: envoltorio.d as DominioCifrado,
     envoltorioBase64: envoltorio.k,
     nonceBase64: envoltorio.n,
     keyType: 'contenido',

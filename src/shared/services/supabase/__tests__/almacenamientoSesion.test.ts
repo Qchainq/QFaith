@@ -69,6 +69,18 @@ describe('almacenamiento seguro de la sesión', () => {
     await expect(almacenamientoSesionSegura.getItem(CLAVE)).resolves.toBeNull();
   });
 
+  it('borra los trozos aunque se haya perdido el recuento', async () => {
+    // Un guardado interrumpido puede dejar los trozos sin su recuento. Si el
+    // borrado se fía solo del recuento, ahí se queda material de sesión
+    // legible después de cerrar sesión.
+    await almacenamientoSesionSegura.setItem(CLAVE, 'z'.repeat(5000));
+    almacenInterno.delete(`${CLAVE}.n`);
+
+    await almacenamientoSesionSegura.removeItem(CLAVE);
+
+    expect(almacenInterno.size).toBe(0);
+  });
+
   it('guarda con la opción que impide que la sesión viaje en una copia del sistema', async () => {
     await almacenamientoSesionSegura.setItem(CLAVE, 'sesion');
 

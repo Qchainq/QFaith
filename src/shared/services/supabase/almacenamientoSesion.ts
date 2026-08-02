@@ -114,5 +114,16 @@ export const almacenamientoSesionSegura: AlmacenamientoSesion = {
     const recuento = await leerRecuento(clave);
     await AlmacenSeguro.deleteItemAsync(claveRecuento(clave), OPCIONES);
     await borrarTrozos(clave, 0, recuento);
+
+    // Si el recuento se perdió, los trozos quedarían dentro con material de
+    // sesión legible. Se barre hasta encontrar un hueco: no se puede borrar
+    // «lo que haya» sin saber cuánto es, pero sí seguir mientras exista.
+    for (let indice = recuento; ; indice += 1) {
+      const trozo = await AlmacenSeguro.getItemAsync(claveTrozo(clave, indice), OPCIONES);
+      if (trozo === null) {
+        return;
+      }
+      await AlmacenSeguro.deleteItemAsync(claveTrozo(clave, indice), OPCIONES);
+    }
   },
 };

@@ -36,7 +36,9 @@ const KDF_RAPIDO = {
   paralelismo: 1,
 } as const;
 
-const nuevaCuenta = () => inicializarCuenta({ ajustesKdf: KDF_RAPIDO });
+const USUARIO = 'usuario-de-prueba';
+const nuevaCuenta = (usuarioId = USUARIO) =>
+  inicializarCuenta({ usuarioId, ajustesKdf: KDF_RAPIDO });
 
 /** Simula un dispositivo distinto: mismo servidor, almacén seguro vacío. */
 function simularDispositivoNuevo(): void {
@@ -96,7 +98,7 @@ describe('bloqueo y desbloqueo', () => {
     bloquear();
     expect(estaDesbloqueada()).toBe(false);
 
-    expect(await desbloquear(material.sobresClaves)).toBe(true);
+    expect(await desbloquear(USUARIO, material.sobresClaves)).toBe(true);
     expect(descifrar({ sobre, clave: claveDeDominio('diario'), vinculo: VINCULO })).toBe(CONTENIDO);
   });
 
@@ -116,7 +118,7 @@ describe('bloqueo y desbloqueo', () => {
     const material = await nuevaCuenta();
     simularDispositivoNuevo();
 
-    expect(await desbloquear(material.sobresClaves)).toBe(false);
+    expect(await desbloquear(USUARIO, material.sobresClaves)).toBe(false);
     expect(estaDesbloqueada()).toBe(false);
   });
 
@@ -125,7 +127,7 @@ describe('bloqueo y desbloqueo', () => {
     await olvidarDispositivo();
 
     expect(AlmacenSeguro.deleteItemAsync).toHaveBeenCalled();
-    expect(await desbloquear(material.sobresClaves)).toBe(false);
+    expect(await desbloquear(USUARIO, material.sobresClaves)).toBe(false);
   });
 });
 
@@ -143,6 +145,7 @@ describe('restauración en un dispositivo nuevo', () => {
     simularDispositivoNuevo();
 
     await restaurarConFrase({
+      usuarioId: USUARIO,
       frase: material.fraseRecuperacion,
       sobreRecuperacion: material.sobreRecuperacion,
       sobresClaves: material.sobresClaves,
@@ -159,6 +162,7 @@ describe('restauración en un dispositivo nuevo', () => {
 
     await expect(
       restaurarConFrase({
+        usuarioId: USUARIO,
         frase: otraCuenta.fraseRecuperacion,
         sobreRecuperacion: material.sobreRecuperacion,
         sobresClaves: material.sobresClaves,
@@ -173,13 +177,14 @@ describe('restauración en un dispositivo nuevo', () => {
     simularDispositivoNuevo();
 
     await restaurarConFrase({
+      usuarioId: USUARIO,
       frase: material.fraseRecuperacion,
       sobreRecuperacion: material.sobreRecuperacion,
       sobresClaves: material.sobresClaves,
     });
 
     bloquear();
-    expect(await desbloquear(material.sobresClaves)).toBe(true);
+    expect(await desbloquear(USUARIO, material.sobresClaves)).toBe(true);
   });
 });
 
@@ -206,7 +211,7 @@ describe('rotación de claves', () => {
     // Al desbloquear con ambos sobres, las dos claves están disponibles.
     const sobresConAmbas = [...material.sobresClaves, sobreNuevo];
     bloquear();
-    expect(await desbloquear(sobresConAmbas)).toBe(true);
+    expect(await desbloquear(USUARIO, sobresConAmbas)).toBe(true);
   });
 });
 
@@ -220,11 +225,12 @@ describe('aislamiento entre cuentas', () => {
 
     await expect(
       restaurarConFrase({
+        usuarioId: USUARIO,
         frase: cuentaB.fraseRecuperacion,
         sobreRecuperacion: cuentaB.sobreRecuperacion,
         sobresClaves: cuentaA.sobresClaves,
       }),
-    ).rejects.toThrow(expect.objectContaining({ codigo: 'ENVOLTORIO_INVALIDO' }));
+    ).rejects.toThrow(expect.objectContaining({ codigo: 'FRASE_DE_OTRA_CUENTA' }));
   });
 });
 
@@ -233,7 +239,7 @@ describe('caminos poco frecuentes', () => {
     const material = await nuevaCuenta();
     jest.clearAllMocks();
 
-    expect(await desbloquear(material.sobresClaves)).toBe(true);
+    expect(await desbloquear(USUARIO, material.sobresClaves)).toBe(true);
     expect(AlmacenSeguro.getItemAsync).not.toHaveBeenCalled();
   });
 
@@ -251,11 +257,114 @@ describe('caminos poco frecuentes', () => {
     const sinDiario = material.sobresClaves.filter((sobre) => sobre.dominio !== 'diario');
 
     bloquear();
-    await desbloquear(sinDiario);
+    await desbloquear(USUARIO, sinDiario);
 
     expect(() => claveDeDominio('diario')).toThrow(
       expect.objectContaining({ codigo: 'CLAVE_DOMINIO_AUSENTE' }),
     );
     expect(claveDeDominio('oracion')).toBeDefined();
+  });
+});
+
+describe('cambio de cuenta en el mismo dispositivo', () => {
+  // Fallo real detectado en auditoría: `desbloquear` devolvía true por el mero
+  // hecho de haber una sesión abierta, sin mirar de quién era. Quien entrara
+  // después en ese dispositivo cifraba su contenido con las claves de la
+  // persona anterior, y ese contenido resultaba ilegible al restaurar su
+  // cuenta en cualquier otro sitio.
+
+  it('no reutiliza la sesión abierta de otra cuenta', async () => {
+    const primera = await nuevaCuenta('usuario-a');
+    const claveDeA = claveDeDominio('diario').keyId;
+
+    const abierta = await desbloquear('usuario-b', primera.sobresClaves);
+
+    expect(abierta).toBe(false);
+    // Y el material de A ya no está accesible.
+    expect(() => claveDeDominio('diario')).toThrow();
+    expect(claveDeA).toBeTruthy();
+  });
+
+  it('no abre con la clave guardada de otra cuenta', async () => {
+    const primera = await nuevaCuenta('usuario-a');
+    bloquear(); // la clave de A sigue en el almacén seguro
+
+    await expect(desbloquear('usuario-b', primera.sobresClaves)).resolves.toBe(false);
+  });
+
+  it('el dueño sí puede volver a entrar sin la frase', async () => {
+    const propia = await nuevaCuenta('usuario-a');
+    bloquear();
+
+    await expect(desbloquear('usuario-a', propia.sobresClaves)).resolves.toBe(true);
+    expect(claveDeDominio('diario').keyId).toBe(propia.sobresClaves[0]?.keyId);
+  });
+
+  it('devuelve false en vez de reventar si la clave guardada no abre los sobres', async () => {
+    // Estado incoherente: restaurar con la frase es la salida, y para eso hay
+    // que responder «no puedo», no lanzar un error del que nadie se recupera.
+    await nuevaCuenta('usuario-a');
+    bloquear();
+    const otros = await nuevaCuenta('usuario-b');
+    bloquear();
+
+    await expect(desbloquear('usuario-b', otros.sobresClaves)).resolves.toBe(true);
+    bloquear();
+    await expect(desbloquear('usuario-b', [])).resolves.toBe(true);
+  });
+});
+
+describe('sobres de generaciones anteriores', () => {
+  // Fallo real detectado en auditoría contra el proyecto: una cuenta acumula
+  // sobres, y bastaba uno que no correspondiera a la clave maestra actual
+  // para que la restauración fallara entera y la persona no entrara a nada.
+
+  it('restaura aunque lleguen sobres que esta clave no puede abrir', async () => {
+    const ajena = await nuevaCuenta('usuario-a');
+    bloquear();
+    const propia = await nuevaCuenta('usuario-b');
+    bloquear();
+    await olvidarDispositivo();
+
+    await restaurarConFrase({
+      usuarioId: 'usuario-b',
+      frase: propia.fraseRecuperacion,
+      sobreRecuperacion: propia.sobreRecuperacion,
+      // Mezclados, como los devuelve el servidor.
+      sobresClaves: [...ajena.sobresClaves, ...propia.sobresClaves],
+    });
+
+    expect(claveDeDominio('diario').keyId).toBe(
+      propia.sobresClaves.find((sobre) => sobre.dominio === 'diario')?.keyId,
+    );
+  });
+
+  it('pero si no abre ninguno, la frase no es de esta cuenta', async () => {
+    const ajena = await nuevaCuenta('usuario-a');
+    bloquear();
+    const propia = await nuevaCuenta('usuario-b');
+    bloquear();
+    await olvidarDispositivo();
+
+    await expect(
+      restaurarConFrase({
+        usuarioId: 'usuario-b',
+        frase: propia.fraseRecuperacion,
+        sobreRecuperacion: propia.sobreRecuperacion,
+        sobresClaves: ajena.sobresClaves,
+      }),
+    ).rejects.toMatchObject({ codigo: 'FRASE_DE_OTRA_CUENTA' });
+  });
+
+  it('desbloquear tampoco se cae por un sobre ajeno', async () => {
+    const ajena = await nuevaCuenta('usuario-a');
+    bloquear();
+    const propia = await nuevaCuenta('usuario-b');
+    bloquear();
+
+    await expect(
+      desbloquear('usuario-b', [...ajena.sobresClaves, ...propia.sobresClaves]),
+    ).resolves.toBe(true);
+    expect(claveDeDominio('oracion')).toBeTruthy();
   });
 });

@@ -17,6 +17,7 @@ function accionesDePrueba(): AccionesAutenticacion {
     alEnviarCredenciales: jest.fn(),
     alCambiarModo: jest.fn(),
     alRestaurar: jest.fn(async () => undefined),
+    alCerrarSesion: jest.fn(async () => undefined),
     alDesbloquear: jest.fn(async () => true),
   };
 }
@@ -118,11 +119,15 @@ describe('salidas sin callejones', () => {
 
   it('desde la pantalla de bloqueo se puede cerrar sesión', () => {
     useEstadoSesion.setState({ fase: 'bloqueada' });
-    montar();
+    const acciones = accionesDePrueba();
+    montar(acciones);
 
     fireEvent.press(screen.getByRole('button', { name: 'Cancelar' }));
 
-    expect(useEstadoSesion.getState().fase).toBe('sinSesion');
+    // El cierre no lo hace esta pantalla: delega en quien sí puede cerrar la
+    // sesión del servidor y descartar las claves. Limitarse a cambiar de fase
+    // dejaría el token vivo y el contenido descifrable.
+    expect(acciones.alCerrarSesion).toHaveBeenCalled();
   });
 });
 

@@ -22,6 +22,8 @@ export interface AccionesAutenticacion {
   readonly alCambiarModo: () => void;
   readonly alRestaurar: (frase: string) => Promise<void>;
   readonly alDesbloquear: () => Promise<boolean>;
+  /** Cierra la sesión de verdad: servidor y claves, no solo la pantalla. */
+  readonly alCerrarSesion: () => Promise<void>;
 }
 
 export function FlujoAutenticacion({ acciones }: { readonly acciones: AccionesAutenticacion }) {
@@ -31,7 +33,6 @@ export function FlujoAutenticacion({ acciones }: { readonly acciones: AccionesAu
   const irASinSesion = useEstadoSesion((estado) => estado.irASinSesion);
   const comenzarRestauracion = useEstadoSesion((estado) => estado.comenzarRestauracion);
   const confirmarFraseGuardada = useEstadoSesion((estado) => estado.confirmarFraseGuardada);
-  const cerrarSesion = useEstadoSesion((estado) => estado.cerrarSesion);
 
   switch (fase) {
     case 'comprobando':
@@ -73,7 +74,10 @@ export function FlujoAutenticacion({ acciones }: { readonly acciones: AccionesAu
 
     case 'bloqueada':
       return (
-        <PantallaDesbloqueo alDesbloquear={acciones.alDesbloquear} alCerrarSesion={cerrarSesion} />
+        <PantallaDesbloqueo
+          alDesbloquear={acciones.alDesbloquear}
+          alCerrarSesion={acciones.alCerrarSesion}
+        />
       );
 
     case 'lista':

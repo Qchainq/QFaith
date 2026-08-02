@@ -38,7 +38,14 @@ interface EstadoSesion {
   irAOnboarding(): void;
   irASinSesion(): void;
   comenzarAltaDeCuenta(): void;
-  mostrarFrase(frase: string): void;
+  /**
+   * Fija el usuario y muestra la frase en **una sola actualización**.
+   *
+   * Antes había que abrir la sesión para dejar el usuario en el estado, y eso
+   * hacía pasar la fase por `lista` durante un instante: el contenido privado
+   * llegaba a montarse antes de que la persona hubiera anotado su frase.
+   */
+  prepararFrase(usuario: UsuarioSesion, frase: string): void;
   confirmarFraseGuardada(): void;
   comenzarRestauracion(): void;
   abrirSesion(usuario: UsuarioSesion): void;
@@ -55,7 +62,8 @@ export const useEstadoSesion = create<EstadoSesion>((set) => ({
   irASinSesion: () => set({ fase: 'sinSesion' }),
   comenzarAltaDeCuenta: () => set({ fase: 'preparandoCuenta' }),
 
-  mostrarFrase: (frase) => set({ fase: 'mostrandoFrase', fraseRecuperacionPendiente: frase }),
+  prepararFrase: (usuario, frase) =>
+    set({ fase: 'mostrandoFrase', usuario, fraseRecuperacionPendiente: frase }),
 
   // En cuanto el usuario confirma que la anotó, la frase deja de estar en
   // memoria. No se guarda en ningún sitio ni se puede volver a consultar.

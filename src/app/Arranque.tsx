@@ -17,6 +17,7 @@ import {
   entrarConCuenta,
   reanudarSesion,
   restaurarCuenta,
+  salir,
   type DependenciasAcceso,
   type SiguientePaso,
 } from '@modules/autenticacion/use-cases/accesoACuenta';
@@ -38,7 +39,8 @@ export function Arranque() {
   const irASinSesion = useEstadoSesion((estado) => estado.irASinSesion);
   const comenzarAltaDeCuenta = useEstadoSesion((estado) => estado.comenzarAltaDeCuenta);
   const comenzarRestauracion = useEstadoSesion((estado) => estado.comenzarRestauracion);
-  const mostrarFrase = useEstadoSesion((estado) => estado.mostrarFrase);
+  const prepararFrase = useEstadoSesion((estado) => estado.prepararFrase);
+  const olvidarSesion = useEstadoSesion((estado) => estado.cerrarSesion);
   const abrirSesion = useEstadoSesion((estado) => estado.abrirSesion);
 
   const [modo, setModo] = useState<ModoAcceso>('registro');
@@ -57,9 +59,9 @@ export function Arranque() {
           return;
         case 'mostrarFrase':
           // La sesión no se abre hasta que confirma que la anotó: es la única
-          // vez que la frase existe fuera de su cabeza.
-          abrirSesion(paso.usuario);
-          mostrarFrase(paso.frase);
+          // vez que la frase existe fuera de su cabeza. Se hace en una sola
+          // actualización para que la fase no pase por `lista` ni un instante.
+          prepararFrase(paso.usuario, paso.frase);
           return;
         case 'restaurarConFrase':
           comenzarRestauracion();
@@ -72,7 +74,7 @@ export function Arranque() {
           irASinSesion();
       }
     },
-    [abrirSesion, comenzarRestauracion, irASinSesion, mostrarFrase],
+    [abrirSesion, comenzarRestauracion, irASinSesion, prepararFrase],
   );
 
   const mostrarError = useCallback((causa: unknown): void => {
@@ -160,6 +162,19 @@ export function Arranque() {
     return abierto;
   }, [abrirSesion]);
 
+  const cerrarSesion = useCallback(async (): Promise<void> => {
+    try {
+      // Cierra la sesión en el servidor y descarta las claves de memoria. Sin
+      // esto, «cerrar sesión» solo cambiaba de pantalla: el token seguía
+      // siendo válido y el contenido privado, descifrable.
+      await salir();
+    } catch {
+      // Si el servidor no responde, la salida local se hace igualmente: dejar
+      // a alguien dentro porque no hay red sería peor.
+    }
+    olvidarSesion();
+  }, [olvidarSesion]);
+
   const acciones = useMemo<AccionesAutenticacion>(
     () => ({
       modo,
@@ -172,8 +187,9 @@ export function Arranque() {
       },
       alRestaurar: restaurar,
       alDesbloquear: desbloquear,
+      alCerrarSesion: cerrarSesion,
     }),
-    [modo, cargando, errorGeneral, enviarCredenciales, restaurar, desbloquear],
+    [modo, cargando, errorGeneral, enviarCredenciales, restaurar, desbloquear, cerrarSesion],
   );
 
   if (fase === 'lista') {

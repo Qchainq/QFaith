@@ -21,6 +21,7 @@ const mockAuth = {
 };
 
 const mockClaves = {
+  bloquear: jest.fn(),
   inicializarCuenta: jest.fn(),
   desbloquear: jest.fn(),
   restaurarConFrase: jest.fn(),
@@ -46,6 +47,7 @@ jest.mock('@shared/services/auth/servicioAutenticacion', () => ({
 }));
 
 jest.mock('@shared/services/keys/servicioClaves', () => ({
+  bloquear: (...args: never[]) => mockClaves.bloquear(...args),
   inicializarCuenta: (...args: never[]) => mockClaves.inicializarCuenta(...args),
   desbloquear: (...args: never[]) => mockClaves.desbloquear(...args),
   restaurarConFrase: (...args: never[]) => mockClaves.restaurarConFrase(...args),
@@ -267,11 +269,14 @@ describe('reanudar al abrir la aplicación', () => {
 });
 
 describe('salida', () => {
-  it('cerrar sesión no borra la clave del dispositivo', async () => {
+  it('cerrar sesión descarta las claves de memoria pero no las del dispositivo', async () => {
     await salir();
 
     expect(mockAuth.cerrarSesion).toHaveBeenCalled();
-    // Volver a entrar no debería obligar a escribir las 24 palabras.
+    // Dejar el material vivo en memoria significaría que el contenido privado
+    // sigue descifrable en un dispositivo del que su dueño acaba de salir.
+    expect(mockClaves.bloquear).toHaveBeenCalled();
+    // Pero volver a entrar no debería obligar a escribir las 24 palabras.
     expect(mockClaves.olvidarDispositivo).not.toHaveBeenCalled();
   });
 

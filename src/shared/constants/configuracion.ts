@@ -64,7 +64,3 @@ function leerConfiguracion(): Configuracion {
 }
 
 export const configuracion: Configuracion = leerConfiguracion();
-
-export const estaUsandoCredencialesDeMarcador =
-  configuracion.supabase.url === URL_MARCADOR ||
-  configuracion.supabase.claveAnonima === CLAVE_MARCADOR;

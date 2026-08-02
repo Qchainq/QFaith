@@ -22,6 +22,7 @@ import {
   type Credenciales,
 } from '@shared/services/auth/servicioAutenticacion';
 import {
+  bloquear,
   desbloquear,
   inicializarCuenta,
   olvidarDispositivo,
@@ -102,7 +103,7 @@ export async function crearCuenta(
   }
 
   const rest = clienteDe(dependencias);
-  const material = await inicializarCuenta();
+  const material = await inicializarCuenta({ usuarioId: alta.usuario.id });
 
   try {
     await subirMaterialCuenta({
@@ -139,7 +140,7 @@ export async function entrarConCuenta(
   const rest = clienteDe(dependencias);
 
   const material = await descargarMaterialCuenta({ rest });
-  const abierta = await desbloquear(material.sobresClaves);
+  const abierta = await desbloquear(acceso.usuario.id, material.sobresClaves);
 
   await registrarDispositivo(dependencias, acceso.usuario.id);
 
@@ -164,6 +165,7 @@ export async function restaurarCuenta(
   }
 
   await restaurarConFrase({
+    usuarioId: usuario.id,
     frase,
     sobreRecuperacion: material.sobreRecuperacion,
     sobresClaves: material.sobresClaves,
@@ -185,7 +187,7 @@ export async function reanudarSesion(dependencias: DependenciasAcceso): Promise<
   }
 
   const material = await descargarMaterialCuenta({ rest: clienteDe(dependencias) });
-  const abierta = await desbloquear(material.sobresClaves);
+  const abierta = await desbloquear(usuario.id, material.sobresClaves);
 
   return abierta ? { tipo: 'listo', usuario } : { tipo: 'restaurarConFrase', usuario };
 }
@@ -193,10 +195,15 @@ export async function reanudarSesion(dependencias: DependenciasAcceso): Promise<
 /**
  * Cierra la sesión sin borrar las claves de este dispositivo.
  *
- * Volver a entrar no debería obligar a escribir las 24 palabras. Para borrar
- * también las claves está `olvidarEsteDispositivo`.
+ * Volver a entrar no debería obligar a escribir las 24 palabras, así que la
+ * clave se queda en el almacén seguro. Lo que sí se descarta es el material
+ * **en memoria**: dejarlo vivo significaría que el contenido privado sigue
+ * descifrable en un dispositivo del que su dueño acaba de salir.
+ *
+ * Para borrar también la clave guardada está `olvidarEsteDispositivo`.
  */
 export async function salir(): Promise<void> {
+  bloquear();
   await cerrarSesionRemota();
 }
 

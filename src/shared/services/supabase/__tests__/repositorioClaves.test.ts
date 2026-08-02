@@ -193,6 +193,23 @@ describe('descarga del material', () => {
     expect(material.sobresClaves).toHaveLength(0);
   });
 
+  it('descarta un dominio desconocido: no abriría el envoltorio', async () => {
+    // El dominio forma parte de los datos autenticados. Uno inventado no
+    // desenvuelve nada y, si se dejara pasar, haría fallar la restauración
+    // entera en lugar de perder solo esa clave.
+    const { rest } = crearRest([
+      {
+        estado: 200,
+        filas: [filaSobre({ encrypted_key: JSON.stringify({ d: 'inventado', n: 'n', k: 'k' }) })],
+      },
+      { estado: 200, filas: [filaRecuperacion] },
+    ]);
+
+    const material = await descargarMaterialCuenta({ rest });
+
+    expect(material.sobresClaves).toHaveLength(0);
+  });
+
   it('propaga el fallo del servidor', async () => {
     const { rest } = crearRest([
       { estado: 500, filas: [] },

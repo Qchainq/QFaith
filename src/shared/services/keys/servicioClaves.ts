@@ -47,6 +47,8 @@ export interface MaterialCuentaNueva {
 }
 
 interface SesionClaves {
+  /** De quién es esta sesión. Sin esto no se puede detectar un cambio de cuenta. */
+  readonly usuarioId: string;
   readonly claveMaestra: Uint8Array;
   readonly derivadas: ClavesDerivadas;
   readonly clavesPorDominio: Map<DominioCifrado, ClaveContenido>;
@@ -61,8 +63,13 @@ function errorClaves(codigo: string, claveMensaje: string, causa?: unknown): Err
   );
 }
 
-function abrirSesion(claveMaestra: Uint8Array, claves: readonly ClaveContenido[]): SesionClaves {
+function abrirSesion(
+  usuarioId: string,
+  claveMaestra: Uint8Array,
+  claves: readonly ClaveContenido[],
+): SesionClaves {
   return {
+    usuarioId,
     claveMaestra,
     derivadas: derivarClaves(claveMaestra),
     clavesPorDominio: new Map(claves.map((clave) => [clave.dominio, clave])),
@@ -88,7 +95,8 @@ function persistirSobre(derivadas: ClavesDerivadas, clave: ClaveContenido): Sobr
  * Devuelve la frase de recuperación para mostrarla una única vez. A partir
  * de ese momento nadie, tampoco nosotros, puede volver a obtenerla.
  */
-export async function inicializarCuenta(opciones?: {
+export async function inicializarCuenta(opciones: {
+  readonly usuarioId: string;
   /**
    * Solo para pruebas y para endurecer los parámetros en el futuro. En
    * producción se omite y se usan los valores por defecto del núcleo.
@@ -105,11 +113,14 @@ export async function inicializarCuenta(opciones?: {
   const sobreRecuperacion = await crearSobreRecuperacion({
     claveMaestra,
     frase: fraseRecuperacion,
-    ...(opciones?.ajustesKdf === undefined ? {} : { ajustesKdf: opciones.ajustesKdf }),
+    ...(opciones.ajustesKdf === undefined ? {} : { ajustesKdf: opciones.ajustesKdf }),
   });
 
-  await guardarClaveMaestra(aBase64(claveMaestra));
-  sesion = abrirSesion(claveMaestra, claves);
+  await guardarClaveMaestra({
+    usuarioId: opciones.usuarioId,
+    claveMaestraBase64: aBase64(claveMaestra),
+  });
+  sesion = abrirSesion(opciones.usuarioId, claveMaestra, claves);
 
   return { fraseRecuperacion, sobreRecuperacion, sobresClaves };
 }
@@ -117,36 +128,97 @@ export async function inicializarCuenta(opciones?: {
 /**
  * Desbloquea la sesión con la clave que ya está en este dispositivo.
  *
- * Devuelve `false` si el dispositivo no tiene clave, que es el caso de una
- * instalación nueva: ahí hay que restaurar con la frase.
+ * Devuelve `false` cuando este dispositivo no puede abrir el contenido de
+ * este usuario, que es el caso de una instalación nueva y también el de un
+ * dispositivo que guarda la clave de **otra** cuenta. En ambos hay que
+ * restaurar con la frase.
+ *
+ * La comprobación del usuario no es una formalidad. Sin ella, quien entrara
+ * en un dispositivo donde otra persona dejó su sesión abierta cifraría su
+ * contenido con las claves de esa otra persona, y ese contenido sería
+ * ilegible al restaurar la cuenta en cualquier otro sitio.
  */
-export async function desbloquear(sobresClaves: readonly SobreClavePersistido[]): Promise<boolean> {
+export async function desbloquear(
+  usuarioId: string,
+  sobresClaves: readonly SobreClavePersistido[],
+): Promise<boolean> {
   if (sesion !== null) {
-    return true;
+    if (sesion.usuarioId === usuarioId) {
+      return true;
+    }
+    // Cambio de cuenta: el material de la anterior se descarta de memoria.
+    bloquear();
   }
-  const guardada = await leerClaveMaestra();
+
+  const guardada = await leerClaveMaestra(usuarioId);
   if (guardada === null) {
     return false;
   }
 
   const claveMaestra = desdeBase64(guardada);
   const derivadas = derivarClaves(claveMaestra);
-  sesion = abrirSesion(claveMaestra, desenvolverSobres(derivadas, sobresClaves));
+  const claves = desenvolverSobres(derivadas, sobresClaves);
+
+  if (!abreAlgunSobre(sobresClaves, claves)) {
+    // La clave guardada no abre nada de esta cuenta: el dispositivo quedó en
+    // un estado incoherente. Restaurar con la frase lo arregla, y es mejor
+    // camino que dejar a la persona con un error del que no puede salir.
+    limpiar(claveMaestra);
+    return false;
+  }
+
+  sesion = abrirSesion(usuarioId, claveMaestra, claves);
   return true;
 }
 
+/**
+ * Desenvuelve los sobres que esta clave maestra puede abrir.
+ *
+ * Los que no abren se descartan en lugar de tumbar la operación entera. Una
+ * cuenta acumula sobres a lo largo del tiempo —rotaciones de clave, material
+ * de una generación anterior— y basta con uno que no corresponda para dejar a
+ * la persona sin poder entrar a nada. Perder una clave de dominio hace
+ * ilegible ese módulo; perder todas las demás por su culpa deja la cuenta
+ * inservible.
+ *
+ * Que **ninguno** abra es distinto: ahí la clave maestra no es la de esta
+ * cuenta, y eso sí tiene que fallar (lo comprueba quien llama).
+ */
 function desenvolverSobres(
   derivadas: ClavesDerivadas,
   sobres: readonly SobreClavePersistido[],
 ): ClaveContenido[] {
-  return sobres.map((sobre) =>
-    desenvolverClaveContenido(derivadas.claveEnvoltorio, {
-      envoltorioBase64: sobre.envoltorioBase64,
-      nonceBase64: sobre.nonceBase64,
-      keyId: sobre.keyId,
-      dominio: sobre.dominio,
-    }),
-  );
+  const claves: ClaveContenido[] = [];
+  for (const sobre of sobres) {
+    try {
+      claves.push(
+        desenvolverClaveContenido(derivadas.claveEnvoltorio, {
+          envoltorioBase64: sobre.envoltorioBase64,
+          nonceBase64: sobre.nonceBase64,
+          keyId: sobre.keyId,
+          dominio: sobre.dominio,
+        }),
+      );
+    } catch {
+      // Nunca se registra cuál falló: el identificador de clave y el dominio
+      // dirían qué módulos usa la persona (invariante 2).
+      continue;
+    }
+  }
+  return claves;
+}
+
+/**
+ * ¿La clave maestra corresponde a esta cuenta?
+ *
+ * Si había sobres y ninguno abrió, no corresponde. Sin sobres no se puede
+ * afirmar nada, y una cuenta recién creada está en ese caso.
+ */
+function abreAlgunSobre(
+  sobres: readonly SobreClavePersistido[],
+  abiertos: readonly ClaveContenido[],
+): boolean {
+  return sobres.length === 0 || abiertos.length > 0;
 }
 
 /**
@@ -156,6 +228,7 @@ function desenvolverSobres(
  * dispositivo sin pasar en claro por el servidor.
  */
 export async function restaurarConFrase(parametros: {
+  readonly usuarioId: string;
   readonly frase: string;
   readonly sobreRecuperacion: SobreRecuperacion;
   readonly sobresClaves: readonly SobreClavePersistido[];
@@ -166,12 +239,20 @@ export async function restaurarConFrase(parametros: {
   });
   const derivadas = derivarClaves(claveMaestra);
 
-  // Si los sobres no abren, la frase corresponde a otra cuenta: mejor fallar
-  // aquí que dejar una sesión a medias.
+  // Si no abre ni uno, la frase corresponde a otra cuenta: mejor fallar aquí
+  // que dejar una sesión a medias. Que abran solo algunos es normal —una
+  // cuenta acumula sobres de generaciones anteriores— y no impide entrar.
   const claves = desenvolverSobres(derivadas, parametros.sobresClaves);
+  if (!abreAlgunSobre(parametros.sobresClaves, claves)) {
+    limpiar(claveMaestra);
+    throw errorClaves('FRASE_DE_OTRA_CUENTA', 'errores.cifrado.recuperacionFallida');
+  }
 
-  await guardarClaveMaestra(aBase64(claveMaestra));
-  sesion = abrirSesion(claveMaestra, claves);
+  await guardarClaveMaestra({
+    usuarioId: parametros.usuarioId,
+    claveMaestraBase64: aBase64(claveMaestra),
+  });
+  sesion = abrirSesion(parametros.usuarioId, claveMaestra, claves);
 }
 
 /** Cierra la sesión y borra el material de memoria. */

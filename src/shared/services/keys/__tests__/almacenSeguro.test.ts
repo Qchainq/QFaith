@@ -12,6 +12,8 @@ import {
   pedirDesbloqueoBiometrico,
 } from '../almacenSeguro';
 
+const USUARIO = 'usuario-de-prueba';
+
 const CLAVE_FICTICIA = 'Y2xhdmUtZGUtcHJ1ZWJhLW5vLXJlYWw=';
 
 beforeEach(() => {
@@ -20,12 +22,12 @@ beforeEach(() => {
 
 describe('almacenamiento de la clave maestra', () => {
   it('guarda y recupera la clave', async () => {
-    await guardarClaveMaestra(CLAVE_FICTICIA);
-    expect(await leerClaveMaestra()).toBe(CLAVE_FICTICIA);
+    await guardarClaveMaestra({ usuarioId: USUARIO, claveMaestraBase64: CLAVE_FICTICIA });
+    expect(await leerClaveMaestra(USUARIO)).toBe(CLAVE_FICTICIA);
   });
 
   it('la marca para que no salga de este dispositivo en una copia del sistema', async () => {
-    await guardarClaveMaestra(CLAVE_FICTICIA);
+    await guardarClaveMaestra({ usuarioId: USUARIO, claveMaestraBase64: CLAVE_FICTICIA });
 
     expect(AlmacenSeguro.setItemAsync).toHaveBeenCalledWith(
       'qfaith.clave_maestra',
@@ -35,14 +37,14 @@ describe('almacenamiento de la clave maestra', () => {
   });
 
   it('devuelve null en un dispositivo que todavía no tiene clave', async () => {
-    expect(await leerClaveMaestra()).toBeNull();
+    expect(await leerClaveMaestra(USUARIO)).toBeNull();
   });
 
   it('borrarla deja el dispositivo sin clave', async () => {
-    await guardarClaveMaestra(CLAVE_FICTICIA);
+    await guardarClaveMaestra({ usuarioId: USUARIO, claveMaestraBase64: CLAVE_FICTICIA });
     await borrarClaveMaestra();
 
-    expect(await leerClaveMaestra()).toBeNull();
+    expect(await leerClaveMaestra(USUARIO)).toBeNull();
   });
 
   it('si el almacén seguro falla, el error es reintentable y no expone la clave', async () => {
@@ -50,7 +52,9 @@ describe('almacenamiento de la clave maestra', () => {
       .mocked(AlmacenSeguro.setItemAsync)
       .mockRejectedValueOnce(new Error('keychain no disponible'));
 
-    await expect(guardarClaveMaestra(CLAVE_FICTICIA)).rejects.toThrow(
+    await expect(
+      guardarClaveMaestra({ usuarioId: USUARIO, claveMaestraBase64: CLAVE_FICTICIA }),
+    ).rejects.toThrow(
       expect.objectContaining({ codigo: 'ALMACEN_SEGURO_NO_DISPONIBLE', puedeReintentarse: true }),
     );
 
@@ -58,7 +62,7 @@ describe('almacenamiento de la clave maestra', () => {
       jest
         .mocked(AlmacenSeguro.setItemAsync)
         .mockRejectedValueOnce(new Error('keychain no disponible'));
-      await guardarClaveMaestra(CLAVE_FICTICIA);
+      await guardarClaveMaestra({ usuarioId: USUARIO, claveMaestraBase64: CLAVE_FICTICIA });
     } catch (error) {
       const registro = JSON.stringify((error as { aRegistroSeguro(): unknown }).aRegistroSeguro());
       expect(registro).not.toContain(CLAVE_FICTICIA);

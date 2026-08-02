@@ -135,7 +135,7 @@ describeIntegracion('dos dispositivos contra el proyecto real', () => {
 
   it('crea, cifra, sincroniza y restaura un registro entre dos dispositivos', async () => {
     // ── Dispositivo 1: cuenta nueva y un registro privado ──────────────────
-    const material = await inicializarCuenta({ ajustesKdf: KDF_RAPIDO });
+    const material = await inicializarCuenta({ usuarioId, ajustesKdf: KDF_RAPIDO });
     const claveDiario = claveDeDominio('diario');
 
     const uno = crearDispositivo('dispositivo-1');
@@ -184,6 +184,7 @@ describeIntegracion('dos dispositivos contra el proyecto real', () => {
     bloquear();
     await olvidarDispositivo();
     await restaurarConFrase({
+      usuarioId,
       frase: material.fraseRecuperacion,
       sobreRecuperacion: material.sobreRecuperacion,
       sobresClaves: material.sobresClaves,
@@ -210,7 +211,7 @@ describeIntegracion('dos dispositivos contra el proyecto real', () => {
   });
 
   it('un cambio simultáneo en los dos dispositivos acaba en conflicto, no en pérdida', async () => {
-    const material = await inicializarCuenta({ ajustesKdf: KDF_RAPIDO });
+    const material = await inicializarCuenta({ usuarioId, ajustesKdf: KDF_RAPIDO });
     const clave = claveDeDominio('diario');
     const hash = clavesDerivadas().claveHash;
 
@@ -276,7 +277,7 @@ describeIntegracion('dos dispositivos contra el proyecto real', () => {
   });
 
   it('el borrado es lógico y llega al otro dispositivo', async () => {
-    await inicializarCuenta({ ajustesKdf: KDF_RAPIDO });
+    await inicializarCuenta({ usuarioId, ajustesKdf: KDF_RAPIDO });
     const clave = claveDeDominio('diario');
     const hash = clavesDerivadas().claveHash;
 
@@ -331,7 +332,7 @@ describeIntegracion('material de la cuenta contra el proyecto real', () => {
     // Con los parámetros reales de Argon2id: el servidor rechaza cualquier
     // cosa por debajo del mínimo de OWASP, así que aquí no valen los rápidos.
     const rest = crearClienteRest({ proveerToken: async () => token, url, claveAnonima });
-    const material = await inicializarCuenta();
+    const material = await inicializarCuenta({ usuarioId });
     const claveOriginal = claveDeDominio('diario');
 
     await subirMaterialCuenta({
@@ -350,6 +351,7 @@ describeIntegracion('material de la cuenta contra el proyecto real', () => {
     await olvidarDispositivo();
     if (descargado.sobreRecuperacion === null) return;
     await restaurarConFrase({
+      usuarioId,
       frase: material.fraseRecuperacion,
       sobreRecuperacion: descargado.sobreRecuperacion,
       sobresClaves: descargado.sobresClaves,
