@@ -26,6 +26,8 @@ import { pedirDesbloqueoBiometrico } from '@shared/services/keys/almacenSeguro';
 import { useEstadoSesion } from '@shared/state/estadoSesion';
 import i18n from '@shared/i18n';
 
+import { ProveedorSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
+
 import { FlujoAutenticacion, type AccionesAutenticacion } from './FlujoAutenticacion';
 import { NavegacionRaiz } from './NavegacionRaiz';
 
@@ -35,6 +37,8 @@ const DEPENDENCIAS: DependenciasAcceso = {
 
 export function Arranque() {
   const fase = useEstadoSesion((estado) => estado.fase);
+  const usuario = useEstadoSesion((estado) => estado.usuario);
+  const dispositivoId = useEstadoSesion((estado) => estado.dispositivoId);
   const irAOnboarding = useEstadoSesion((estado) => estado.irAOnboarding);
   const irASinSesion = useEstadoSesion((estado) => estado.irASinSesion);
   const comenzarAltaDeCuenta = useEstadoSesion((estado) => estado.comenzarAltaDeCuenta);
@@ -55,13 +59,13 @@ export function Arranque() {
     (paso: SiguientePaso): void => {
       switch (paso.tipo) {
         case 'listo':
-          abrirSesion(paso.usuario);
+          abrirSesion(paso.usuario, paso.dispositivoId);
           return;
         case 'mostrarFrase':
           // La sesión no se abre hasta que confirma que la anotó: es la única
           // vez que la frase existe fuera de su cabeza. Se hace en una sola
           // actualización para que la fase no pase por `lista` ni un instante.
-          prepararFrase(paso.usuario, paso.frase);
+          prepararFrase(paso.usuario, paso.frase, paso.dispositivoId);
           return;
         case 'restaurarConFrase':
           comenzarRestauracion();
@@ -193,7 +197,17 @@ export function Arranque() {
   );
 
   if (fase === 'lista') {
-    return <NavegacionRaiz />;
+    // Sin usuario o sin dispositivo dado de alta no se puede sincronizar, y
+    // montar el contenido igualmente escribiría en una base que nadie sube.
+    // Es un estado que no debería darse; si se da, se vuelve al acceso.
+    if (usuario === null || dispositivoId === null) {
+      return <FlujoAutenticacion acciones={acciones} />;
+    }
+    return (
+      <ProveedorSincronizacion usuarioId={usuario.id} dispositivoId={dispositivoId}>
+        <NavegacionRaiz />
+      </ProveedorSincronizacion>
+    );
   }
 
   return <FlujoAutenticacion acciones={acciones} />;

@@ -1,4 +1,14 @@
 // Rutas tipadas. Ninguna pantalla existe si no está en el Documento 10.
+
+/**
+ * Pila del inicio. El Diario es un módulo secundario y se alcanza desde aquí,
+ * no desde una pestaña propia: las pestañas son cinco y están fijadas.
+ */
+export type InicioParamList = {
+  Portada: undefined;
+  Diario: undefined;
+};
+
 export type PestanasParamList = {
   Inicio: undefined;
   Biblia: undefined;

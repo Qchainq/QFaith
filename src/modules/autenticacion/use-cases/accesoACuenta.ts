@@ -48,8 +48,18 @@ import type { UsuarioSesion } from '@shared/state/estadoSesion';
  * consultar.
  */
 export type SiguientePaso =
-  | { readonly tipo: 'listo'; readonly usuario: UsuarioSesion }
-  | { readonly tipo: 'mostrarFrase'; readonly usuario: UsuarioSesion; readonly frase: string }
+  | {
+      readonly tipo: 'listo';
+      readonly usuario: UsuarioSesion;
+      /** UUID del dispositivo, que la sincronización necesita para atribuir cambios. */
+      readonly dispositivoId: string;
+    }
+  | {
+      readonly tipo: 'mostrarFrase';
+      readonly usuario: UsuarioSesion;
+      readonly frase: string;
+      readonly dispositivoId: string;
+    }
   | { readonly tipo: 'restaurarConFrase'; readonly usuario: UsuarioSesion }
   | { readonly tipo: 'confirmarCorreo' }
   | { readonly tipo: 'sinSesion' };
@@ -120,8 +130,13 @@ export async function crearCuenta(
     throw causa;
   }
 
-  await registrarDispositivo(dependencias, alta.usuario.id);
-  return { tipo: 'mostrarFrase', usuario: alta.usuario, frase: material.fraseRecuperacion };
+  const dispositivoId = await registrarDispositivo(dependencias, alta.usuario.id);
+  return {
+    tipo: 'mostrarFrase',
+    usuario: alta.usuario,
+    frase: material.fraseRecuperacion,
+    dispositivoId,
+  };
 }
 
 /**
@@ -142,10 +157,10 @@ export async function entrarConCuenta(
   const material = await descargarMaterialCuenta({ rest });
   const abierta = await desbloquear(acceso.usuario.id, material.sobresClaves);
 
-  await registrarDispositivo(dependencias, acceso.usuario.id);
+  const dispositivoId = await registrarDispositivo(dependencias, acceso.usuario.id);
 
   return abierta
-    ? { tipo: 'listo', usuario: acceso.usuario }
+    ? { tipo: 'listo', usuario: acceso.usuario, dispositivoId }
     : { tipo: 'restaurarConFrase', usuario: acceso.usuario };
 }
 
@@ -171,7 +186,8 @@ export async function restaurarCuenta(
     sobresClaves: material.sobresClaves,
   });
 
-  return { tipo: 'listo', usuario };
+  const dispositivoId = await registrarDispositivo(dependencias, usuario.id);
+  return { tipo: 'listo', usuario, dispositivoId };
 }
 
 /**
@@ -188,8 +204,14 @@ export async function reanudarSesion(dependencias: DependenciasAcceso): Promise<
 
   const material = await descargarMaterialCuenta({ rest: clienteDe(dependencias) });
   const abierta = await desbloquear(usuario.id, material.sobresClaves);
+  if (!abierta) {
+    return { tipo: 'restaurarConFrase', usuario };
+  }
 
-  return abierta ? { tipo: 'listo', usuario } : { tipo: 'restaurarConFrase', usuario };
+  // Volver a darlo de alta es idempotente y además refresca `last_seen_at`,
+  // que es lo que permite al usuario reconocer sus dispositivos activos.
+  const dispositivoId = await registrarDispositivo(dependencias, usuario.id);
+  return { tipo: 'listo', usuario, dispositivoId };
 }
 
 /**

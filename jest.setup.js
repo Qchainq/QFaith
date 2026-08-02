@@ -24,6 +24,32 @@ jest.mock('expo-local-authentication', () => ({
   authenticateAsync: jest.fn(async () => ({ success: true })),
 }));
 
+// `expo-sqlite` necesita el módulo nativo. En pruebas se apoya en el SQLite
+// que trae Node, que es el mismo motor: así montar el proveedor de
+// sincronización ejercita el SQL de verdad en lugar de devolver respuestas
+// preparadas.
+jest.mock('expo-sqlite', () => {
+  return {
+    // `node:sqlite` se carga solo si una prueba abre de verdad una base. Al
+    // hacerlo en la fábrica del doble, cualquier archivo que importara la
+    // cadena de la sincronización lo cargaba sin usarlo.
+    openDatabaseAsync: async () => {
+      const { DatabaseSync } = require('node:sqlite');
+      const base = new DatabaseSync(':memory:');
+      return {
+        execAsync: async (sql) => {
+          // `journal_mode = WAL` no aplica a una base en memoria.
+          base.exec(sql.replace(/pragma journal_mode = WAL;?/i, ''));
+        },
+        runAsync: async (sql, parametros = []) => base.prepare(sql).run(...parametros),
+        getAllAsync: async (sql, parametros = []) => base.prepare(sql).all(...parametros),
+        getFirstAsync: async (sql, parametros = []) => base.prepare(sql).get(...parametros) ?? null,
+        closeAsync: async () => base.close(),
+      };
+    },
+  };
+});
+
 jest.mock('expo-localization', () => ({
   getLocales: () => [{ languageCode: 'es', languageTag: 'es-ES' }],
   getCalendars: () => [{ timeZone: 'Europe/Madrid' }],

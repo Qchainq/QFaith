@@ -94,6 +94,7 @@ describe('crear cuenta', () => {
       tipo: 'mostrarFrase',
       usuario: USUARIO,
       frase: MATERIAL.fraseRecuperacion,
+      dispositivoId: 'uuid-del-dispositivo',
     });
     expect(mockRepositorioClaves.subirMaterialCuenta).toHaveBeenCalledWith(
       expect.objectContaining({ usuarioId: USUARIO.id }),
@@ -156,6 +157,7 @@ describe('entrar con una cuenta existente', () => {
     await expect(entrarConCuenta(DEPENDENCIAS, CREDENCIALES)).resolves.toEqual({
       tipo: 'listo',
       usuario: USUARIO,
+      dispositivoId: 'uuid-del-dispositivo',
     });
   });
 
@@ -202,6 +204,7 @@ describe('restaurar', () => {
     await expect(restaurarCuenta(DEPENDENCIAS, 'las veinticuatro palabras')).resolves.toEqual({
       tipo: 'listo',
       usuario: USUARIO,
+      dispositivoId: 'uuid-del-dispositivo',
     });
     expect(mockClaves.restaurarConFrase).toHaveBeenCalledWith(
       expect.objectContaining({ frase: 'las veinticuatro palabras' }),
@@ -251,6 +254,7 @@ describe('reanudar al abrir la aplicación', () => {
     await expect(reanudarSesion(DEPENDENCIAS)).resolves.toEqual({
       tipo: 'listo',
       usuario: USUARIO,
+      dispositivoId: 'uuid-del-dispositivo',
     });
   });
 

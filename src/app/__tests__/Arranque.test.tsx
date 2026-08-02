@@ -35,6 +35,9 @@ beforeEach(() => {
   useEstadoSesion.setState({
     fase: 'comprobando',
     usuario: null,
+    // Sin esto se filtraba de una prueba a otra y el arranque montaba la
+    // sincronización cuando no debía.
+    dispositivoId: null,
     fraseRecuperacionPendiente: null,
   });
   mockAcceso.reanudarSesion.mockResolvedValue({ tipo: 'sinSesion' });
@@ -55,7 +58,11 @@ describe('primer arranque', () => {
   });
 
   it('con sesión y claves en el dispositivo entra directo', async () => {
-    mockAcceso.reanudarSesion.mockResolvedValue({ tipo: 'listo', usuario: USUARIO });
+    mockAcceso.reanudarSesion.mockResolvedValue({
+      tipo: 'listo',
+      usuario: USUARIO,
+      dispositivoId: 'dispositivo-1',
+    });
     renderizar(<Arranque />);
 
     await waitFor(() => expect(useEstadoSesion.getState().fase).toBe('lista'));
@@ -91,6 +98,7 @@ describe('alta de cuenta', () => {
       tipo: 'mostrarFrase',
       usuario: USUARIO,
       frase: 'una frase de veinticuatro palabras',
+      dispositivoId: 'dispositivo-1',
     });
     useEstadoSesion.setState({ fase: 'sinSesion' });
     renderizar(<Arranque />);
@@ -186,7 +194,11 @@ describe('desbloqueo', () => {
 
 describe('restauración', () => {
   it('deja la sesión lista cuando la frase es correcta', async () => {
-    mockAcceso.restaurarCuenta.mockResolvedValue({ tipo: 'listo', usuario: USUARIO });
+    mockAcceso.restaurarCuenta.mockResolvedValue({
+      tipo: 'listo',
+      usuario: USUARIO,
+      dispositivoId: 'dispositivo-1',
+    });
     useEstadoSesion.setState({ fase: 'restaurando', usuario: USUARIO });
     renderizar(<Arranque />);
 

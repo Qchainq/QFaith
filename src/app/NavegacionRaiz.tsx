@@ -3,18 +3,41 @@
 // establecida la estructura que deben respetar.
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
 import { PantallaBiblia } from '@modules/biblia/screens/PantallaBiblia';
+import { DiarioContenedor } from '@modules/diario/screens/DiarioContenedor';
 import { PantallaIa } from '@modules/ia/screens/PantallaIa';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PantallaPerfil } from '@modules/perfil/screens/PantallaPerfil';
 import { useTema } from '@shared/theme/ProveedorTema';
-import type { PestanasParamList } from '@shared/navigation/tipos';
+import type { InicioParamList, PestanasParamList } from '@shared/navigation/tipos';
 
 const Pestanas = createBottomTabNavigator<PestanasParamList>();
+const PilaInicio = createNativeStackNavigator<InicioParamList>();
+
+/**
+ * Pila de la pestaña Inicio. Los módulos secundarios cuelgan de aquí, nunca a
+ * más de tres niveles de profundidad (Documento 10).
+ */
+function NavegacionInicio() {
+  const { t } = useTranslation();
+  return (
+    <PilaInicio.Navigator>
+      <PilaInicio.Screen name="Portada" options={{ headerShown: false }}>
+        {({ navigation }) => <PantallaInicio alAbrirDiario={() => navigation.navigate('Diario')} />}
+      </PilaInicio.Screen>
+      <PilaInicio.Screen
+        name="Diario"
+        component={DiarioContenedor}
+        options={{ title: t('diario.titulo'), headerShown: false }}
+      />
+    </PilaInicio.Navigator>
+  );
+}
 
 export function NavegacionRaiz() {
   const tema = useTema();
@@ -50,7 +73,7 @@ export function NavegacionRaiz() {
       >
         <Pestanas.Screen
           name="Inicio"
-          component={PantallaInicio}
+          component={NavegacionInicio}
           options={{ title: t('navegacion.inicio') }}
         />
         <Pestanas.Screen

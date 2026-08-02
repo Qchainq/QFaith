@@ -32,6 +32,14 @@ export interface UsuarioSesion {
 interface EstadoSesion {
   readonly fase: FaseSesion;
   readonly usuario: UsuarioSesion | null;
+  /**
+   * UUID que el servidor asignó a este dispositivo.
+   *
+   * Vive aquí porque lo necesita la sincronización para atribuir cada cambio,
+   * y no se puede inventar en el cliente: la columna que lo guarda es una
+   * clave ajena a `devices`.
+   */
+  readonly dispositivoId: string | null;
   /** Solo mientras se muestra al usuario durante el alta; después se olvida. */
   readonly fraseRecuperacionPendiente: string | null;
 
@@ -45,10 +53,10 @@ interface EstadoSesion {
    * hacía pasar la fase por `lista` durante un instante: el contenido privado
    * llegaba a montarse antes de que la persona hubiera anotado su frase.
    */
-  prepararFrase(usuario: UsuarioSesion, frase: string): void;
+  prepararFrase(usuario: UsuarioSesion, frase: string, dispositivoId: string | null): void;
   confirmarFraseGuardada(): void;
   comenzarRestauracion(): void;
-  abrirSesion(usuario: UsuarioSesion): void;
+  abrirSesion(usuario: UsuarioSesion, dispositivoId?: string | null): void;
   bloquear(): void;
   cerrarSesion(): void;
 }
@@ -56,22 +64,36 @@ interface EstadoSesion {
 export const useEstadoSesion = create<EstadoSesion>((set) => ({
   fase: 'comprobando',
   usuario: null,
+  dispositivoId: null,
   fraseRecuperacionPendiente: null,
 
   irAOnboarding: () => set({ fase: 'onboarding' }),
   irASinSesion: () => set({ fase: 'sinSesion' }),
   comenzarAltaDeCuenta: () => set({ fase: 'preparandoCuenta' }),
 
-  prepararFrase: (usuario, frase) =>
-    set({ fase: 'mostrandoFrase', usuario, fraseRecuperacionPendiente: frase }),
+  prepararFrase: (usuario, frase, dispositivoId) =>
+    set({ fase: 'mostrandoFrase', usuario, dispositivoId, fraseRecuperacionPendiente: frase }),
 
   // En cuanto el usuario confirma que la anotó, la frase deja de estar en
   // memoria. No se guarda en ningún sitio ni se puede volver a consultar.
   confirmarFraseGuardada: () => set({ fraseRecuperacionPendiente: null, fase: 'lista' }),
 
   comenzarRestauracion: () => set({ fase: 'restaurando' }),
-  abrirSesion: (usuario) => set({ fase: 'lista', usuario }),
+  abrirSesion: (usuario, dispositivoId) =>
+    set((estado) => ({
+      fase: 'lista',
+      usuario,
+      // El desbloqueo biométrico reabre la sesión sin volver a dar de alta el
+      // dispositivo: ahí se conserva el que ya había.
+      dispositivoId: dispositivoId === undefined ? estado.dispositivoId : dispositivoId,
+    })),
   bloquear: () => set({ fase: 'bloqueada' }),
 
-  cerrarSesion: () => set({ fase: 'sinSesion', usuario: null, fraseRecuperacionPendiente: null }),
+  cerrarSesion: () =>
+    set({
+      fase: 'sinSesion',
+      usuario: null,
+      dispositivoId: null,
+      fraseRecuperacionPendiente: null,
+    }),
 }));

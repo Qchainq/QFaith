@@ -3,6 +3,7 @@
 // Monta los mismos proveedores que la aplicación real, para que una pantalla
 // se pruebe en las condiciones en que va a ejecutarse y no en un entorno
 // artificial. No se incluye en la aplicación ni cuenta para cobertura.
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, type RenderOptions } from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
@@ -19,11 +20,46 @@ const METRICAS: Metrics = {
   insets: { top: 47, left: 0, right: 0, bottom: 34 },
 };
 
+/**
+ * Cliente de consultas por prueba.
+ *
+ * Sin reintentos y sin caché entre pruebas: un reintento convertiría un fallo
+ * en una espera, y una caché compartida haría que el orden de las pruebas
+ * cambiara el resultado.
+ */
+const clientesCreados: QueryClient[] = [];
+
+function crearClientePruebas(): QueryClient {
+  const cliente = new QueryClient({
+    defaultOptions: {
+      // `gcTime: Infinity` evita que cada consulta programe su propio
+      // temporizador de recolección; la caché se tira entera al terminar.
+      queries: { retry: false, gcTime: Infinity, networkMode: 'offlineFirst' },
+      mutations: { retry: false, networkMode: 'offlineFirst' },
+    },
+  });
+  clientesCreados.push(cliente);
+  return cliente;
+}
+
+// React Query deja temporizadores de recolección y suscripciones al foco. Sin
+// cerrarlos, Jest tiene que matar el proceso al terminar, y un aviso así
+// esconde con facilidad una fuga de verdad.
+afterEach(() => {
+  // `cleanup` de la librería de pruebas desmonta los componentes en su propio
+  // `afterEach`, y Jest los ejecuta en orden inverso al de registro: este
+  // corre antes. Por eso solo se vacía la caché; desmontar el cliente con los
+  // componentes todavía montados los dejaría resuscribiéndose.
+  clientesCreados.splice(0).forEach((cliente) => cliente.clear());
+});
+
 function Proveedores({ children }: { readonly children: ReactNode }) {
   return (
     <SafeAreaProvider initialMetrics={METRICAS}>
       <I18nextProvider i18n={i18n}>
-        <ProveedorTema>{children}</ProveedorTema>
+        <QueryClientProvider client={crearClientePruebas()}>
+          <ProveedorTema>{children}</ProveedorTema>
+        </QueryClientProvider>
       </I18nextProvider>
     </SafeAreaProvider>
   );

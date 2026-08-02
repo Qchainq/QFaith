@@ -22,11 +22,12 @@
     "sinPendientes": "Nothing pending today."
   },
   "sincronizacion": {
-    "sincronizando": "Syncing",
+    "sincronizando": "Syncing…",
     "pendiente": "Pending",
     "sinConexion": "Offline",
     "sincronizado": "Synced",
-    "guardadoLocal": "Saved on this device. It will sync once you're back online."
+    "guardadoLocal": "Saved on this device. It will sync once you're back online.",
+    "error": "We couldn't sync right now. Your changes are saved."
   },
   "seguridad": {
     "desbloquear": "Unlock",
@@ -108,5 +109,40 @@
     "yaTengoCuenta": "I already have an account",
     "correoInvalido": "Please enter a valid email.",
     "contrasenaCorta": "Your password needs at least 8 characters."
+  },
+  "diario": {
+    "titulo": "Spiritual journal",
+    "descripcion": "Whatever you write here is encrypted on your device before it leaves.",
+    "nueva": "New entry",
+    "editar": "Edit entry",
+    "guardar": "Save",
+    "eliminar": "Delete",
+    "campoTitulo": "Title",
+    "campoCuerpo": "What do you want to remember about today?",
+    "campoEtiquetas": "Tags",
+    "ayudaEtiquetas": "Separate them with commas. They're encrypted too.",
+    "campoFecha": "Date",
+    "campoTipo": "Entry type",
+    "sinEntradas": "You haven't written anything yet. It'll be here whenever you want.",
+    "cargando": "Opening your journal…",
+    "ilegibles_one": "There is 1 entry this device can't open.",
+    "ilegibles_other": "There are {{count}} entries this device can't open.",
+    "guardadaEnDispositivo": "Saved on this device",
+    "tipos": {
+      "reflection": "Reflection",
+      "testimony": "Testimony",
+      "learning": "Lesson",
+      "dream": "Dream",
+      "gratitude": "Gratitude",
+      "private_confession": "Private confession",
+      "general": "General"
+    },
+    "errores": {
+      "tituloVacio": "Give it a title, even a short one.",
+      "tituloLargo": "That title is too long.",
+      "cuerpoVacio": "Write something before saving.",
+      "demasiadasEtiquetas": "That's too many tags.",
+      "fechaInvalida": "That date isn't valid."
+    }
   }
 }

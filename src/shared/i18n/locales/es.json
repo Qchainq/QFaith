@@ -22,11 +22,12 @@
     "sinPendientes": "No tienes nada pendiente hoy."
   },
   "sincronizacion": {
-    "sincronizando": "Sincronizando",
+    "sincronizando": "Sincronizando…",
     "pendiente": "Pendiente",
     "sinConexion": "Sin conexión",
     "sincronizado": "Sincronizado",
-    "guardadoLocal": "Guardado en este dispositivo. Se sincronizará cuando vuelvas a tener conexión."
+    "guardadoLocal": "Guardado en este dispositivo. Se sincronizará cuando vuelvas a tener conexión.",
+    "error": "No pudimos sincronizar ahora. Tus cambios están guardados."
   },
   "seguridad": {
     "desbloquear": "Desbloquear",
@@ -108,5 +109,40 @@
     "yaTengoCuenta": "Ya tengo cuenta",
     "correoInvalido": "Escribe un correo válido.",
     "contrasenaCorta": "La contraseña necesita al menos 8 caracteres."
+  },
+  "diario": {
+    "titulo": "Diario espiritual",
+    "descripcion": "Lo que escribas aquí se cifra en tu dispositivo antes de salir.",
+    "nueva": "Nueva entrada",
+    "editar": "Editar entrada",
+    "guardar": "Guardar",
+    "eliminar": "Eliminar",
+    "campoTitulo": "Título",
+    "campoCuerpo": "¿Qué quieres recordar de hoy?",
+    "campoEtiquetas": "Etiquetas",
+    "ayudaEtiquetas": "Sepáralas con comas. También viajan cifradas.",
+    "campoFecha": "Fecha",
+    "campoTipo": "Tipo de entrada",
+    "sinEntradas": "Todavía no has escrito nada. Cuando quieras, aquí te espera.",
+    "cargando": "Abriendo tu diario…",
+    "ilegibles_one": "Hay 1 entrada que este dispositivo no puede abrir.",
+    "ilegibles_other": "Hay {{count}} entradas que este dispositivo no puede abrir.",
+    "guardadaEnDispositivo": "Guardado en este dispositivo",
+    "tipos": {
+      "reflection": "Reflexión",
+      "testimony": "Testimonio",
+      "learning": "Aprendizaje",
+      "dream": "Sueño",
+      "gratitude": "Gratitud",
+      "private_confession": "Confesión privada",
+      "general": "General"
+    },
+    "errores": {
+      "tituloVacio": "Ponle un título, aunque sea corto.",
+      "tituloLargo": "El título es demasiado largo.",
+      "cuerpoVacio": "Escribe algo antes de guardar.",
+      "demasiadasEtiquetas": "Son demasiadas etiquetas.",
+      "fechaInvalida": "Esa fecha no es válida."
+    }
   }
 }
