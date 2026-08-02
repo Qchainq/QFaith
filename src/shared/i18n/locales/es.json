@@ -144,5 +144,49 @@
       "demasiadasEtiquetas": "Son demasiadas etiquetas.",
       "fechaInvalida": "Esa fecha no es válida."
     }
+  },
+  "oracion": {
+    "titulo": "Oración",
+    "descripcion": "Tus peticiones se cifran en el dispositivo. Los nombres también.",
+    "nueva": "Nueva petición",
+    "editar": "Editar petición",
+    "guardar": "Guardar",
+    "eliminar": "Eliminar",
+    "campoTitulo": "¿Por qué quieres orar?",
+    "campoDetalle": "Detalles",
+    "campoPersonas": "Personas",
+    "ayudaPersonas": "Sepáralas con comas. No salen del dispositivo sin cifrar.",
+    "campoCategoria": "Categoría",
+    "sinCategoria": "Sin categoría",
+    "marcarRespondida": "Marcar como respondida",
+    "archivar": "Archivar",
+    "reactivar": "Volver a activar",
+    "avances": "Avances",
+    "nuevoAvance": "Anotar un avance",
+    "sinPeticiones": "Aquí irán tus peticiones. Escribe la primera cuando quieras.",
+    "cargando": "Abriendo tus peticiones…",
+    "ilegibles_one": "Hay 1 petición que este dispositivo no puede abrir.",
+    "ilegibles_other": "Hay {{count}} peticiones que este dispositivo no puede abrir.",
+    "estados": {
+      "active": "Activa",
+      "answered": "Respondida",
+      "archived": "Archivada"
+    },
+    "categorias": {
+      "personal": "Personal",
+      "familia": "Familia",
+      "iglesia": "Iglesia",
+      "trabajo": "Trabajo",
+      "salud": "Salud",
+      "finanzas": "Finanzas",
+      "amigos": "Amigos",
+      "ministerio": "Ministerio"
+    },
+    "errores": {
+      "tituloVacio": "Escribe por qué quieres orar.",
+      "tituloLargo": "Es demasiado largo para un título.",
+      "demasiadasPersonas": "Son demasiadas personas para una sola petición.",
+      "avanceVacio": "Escribe el avance antes de guardarlo."
+    }
   }
 }

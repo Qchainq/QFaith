@@ -44,6 +44,24 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
     tabla: 'journal_entries',
     columnasMetadatos: ['entry_type', 'entry_date', 'is_favorite', 'is_ark_protected'],
   },
+  prayers: {
+    tabla: 'prayers',
+    columnasMetadatos: [
+      'status',
+      'visibility',
+      'category_code',
+      'reminder_enabled',
+      'next_reminder_at',
+      'answered_at',
+      'archived_at',
+    ],
+  },
+  prayer_updates: {
+    tabla: 'prayer_updates',
+    // La petición a la que pertenece es lo único que el servidor necesita
+    // saber: el texto del avance va dentro del sobre.
+    columnasMetadatos: ['prayer_id'],
+  },
 };
 
 const COLUMNAS_COMUNES = [

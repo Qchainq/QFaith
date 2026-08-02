@@ -11,14 +11,14 @@ añadirse ninguna.**
 | Ruta | Para qué |
 | --- | --- |
 | `migrations/000*.sql` | Fuente. Se aplican en orden. |
-| `fase-1-completo.sql` | Generado. Los cuatro archivos concatenados, para pegar en el editor SQL de Supabase. Regenerar con `npm run sql:combinar`. |
+| `esquema-completo.sql` | Generado. Todas las migraciones concatenadas, para pegar en el editor SQL de Supabase. Regenerar con `npm run sql:combinar`. |
 | `tests/00_sustituto_auth.sql` | Sustituto local del esquema `auth`. Solo para PostgreSQL local: **nunca se aplica a un proyecto real.** |
 | `tests/0[1-9]_*.sql` | Baterías de aislamiento. |
 | `tests/ejecutar-pruebas.sh` | Recrea una base limpia, aplica las migraciones y corre las baterías. |
 
 ## Aplicar el esquema
 
-En el editor SQL del proyecto, pegar `fase-1-completo.sql` y ejecutarlo **una
+En el editor SQL del proyecto, pegar `esquema-completo.sql` y ejecutarlo **una
 sola vez**: los `create type` no llevan `if not exists`, así que una segunda
 ejecución falla por tipo duplicado.
 

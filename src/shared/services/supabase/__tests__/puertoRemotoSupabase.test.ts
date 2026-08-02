@@ -37,6 +37,12 @@ function crearTransporte(respuestas: RespuestaPreparada[]) {
 
     const siguiente = respuestas.shift();
     if (siguiente === undefined) {
+      // La descarga consulta todas las tablas registradas. Las que la prueba
+      // no prepara responden vacío; cualquier otra petición sin respuesta sí
+      // es un error, para que un envío inesperado no pase desapercibido.
+      if (String(url).includes('sync_revision=gt.')) {
+        return { status: 200, text: async () => '[]' } as Response;
+      }
       throw new Error(`Petición inesperada: ${init?.method} ${String(url)}`);
     }
     return {

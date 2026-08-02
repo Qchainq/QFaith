@@ -39,7 +39,10 @@ declare
     -- Una auditoría que el auditado puede editar no sirve de nada.
     ['authenticated', 'audit_events', 'INSERT'],
     ['authenticated', 'audit_events', 'UPDATE'],
-    ['authenticated', 'audit_events', 'DELETE']
+    ['authenticated', 'audit_events', 'DELETE'],
+    -- La oración se archiva o se marca respondida; nunca se borra de golpe.
+    ['authenticated', 'prayers', 'DELETE'],
+    ['authenticated', 'prayer_updates', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -88,7 +91,9 @@ declare
     ['devices', 'SELECT'], ['devices', 'INSERT'], ['devices', 'UPDATE'], ['devices', 'DELETE'],
     ['user_key_envelopes', 'SELECT'], ['user_key_envelopes', 'INSERT'],
     ['user_key_envelopes', 'DELETE'],
-    ['sync_conflicts', 'SELECT'], ['sync_conflicts', 'INSERT'], ['sync_conflicts', 'DELETE']
+    ['sync_conflicts', 'SELECT'], ['sync_conflicts', 'INSERT'], ['sync_conflicts', 'DELETE'],
+    ['prayers', 'SELECT'], ['prayers', 'INSERT'], ['prayers', 'UPDATE'],
+    ['prayer_updates', 'SELECT'], ['prayer_updates', 'INSERT'], ['prayer_updates', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

@@ -8,7 +8,39 @@ import { PantallaIa } from '@modules/ia/screens/PantallaIa';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PantallaPerfil } from '@modules/perfil/screens/PantallaPerfil';
+import { ProveedorSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
+import { crearAlmacenEnMemoria } from '@shared/database/almacenEnMemoria';
+import { crearMotorSincronizacion } from '@shared/services/sync/motorSincronizacion';
+import { crearServidorEnMemoria } from '@shared/services/sync/__tests__/servidorEnMemoria';
 import { renderizar, usarIdioma } from '@shared/testing/renderizar';
+
+/**
+ * Las pestañas que ya tienen módulo necesitan la sincronización montada. Se
+ * inyecta una en memoria: aquí se comprueba que cada pantalla monta y se
+ * traduce, no que la base local funcione, que tiene sus propias pruebas.
+ */
+function conSincronizacion(nodo: React.ReactElement) {
+  const almacen = crearAlmacenEnMemoria();
+  const sincronizacion = {
+    almacen,
+    usuarioId: 'usuario-1',
+    motor: crearMotorSincronizacion({
+      almacen,
+      remoto: crearServidorEnMemoria(),
+      usuarioId: 'usuario-1',
+      dispositivoId: 'dispositivo-1',
+    }),
+  };
+  return (
+    <ProveedorSincronizacion
+      usuarioId="usuario-1"
+      dispositivoId="dispositivo-1"
+      construir={async () => sincronizacion}
+    >
+      {nodo}
+    </ProveedorSincronizacion>
+  );
+}
 
 const PANTALLAS = [
   { Componente: PantallaInicio, titulo: 'Inicio', tituloEn: 'Home' },
@@ -23,30 +55,35 @@ afterAll(async () => {
 });
 
 describe('pestañas principales', () => {
-  it('cada una monta y muestra su título como cabecera', () => {
-    PANTALLAS.forEach(({ Componente, titulo }) => {
-      const { unmount } = renderizar(<Componente />);
-      expect(screen.getByRole('header', { name: titulo })).toBeTruthy();
+  // La sincronización se monta de forma asíncrona, así que se espera a que
+  // cada pantalla aparezca en lugar de mirar el primer fotograma.
+  it('cada una monta y muestra su título como cabecera', async () => {
+    for (const { Componente, titulo } of PANTALLAS) {
+      const { unmount } = renderizar(conSincronizacion(<Componente />));
+      expect(await screen.findByRole('header', { name: titulo })).toBeTruthy();
       unmount();
-    });
+    }
   });
 
-  it('ninguna deja a la vista una clave de traducción sin resolver', () => {
-    PANTALLAS.forEach(({ Componente }) => {
-      const { unmount, toJSON } = renderizar(<Componente />);
-      // Una clave sin traducir aparecería tal cual, con su punto separador.
-      expect(JSON.stringify(toJSON())).not.toMatch(/"(navegacion|vacios|comun)\.\w+"/);
+  it('ninguna deja a la vista una clave de traducción sin resolver', async () => {
+    for (const { Componente, titulo } of PANTALLAS) {
+      const { unmount } = renderizar(conSincronizacion(<Componente />));
+      await screen.findByRole('header', { name: titulo });
+      // Una clave sin traducir se vería tal cual, con su punto separador. Se
+      // busca entre el texto visible en lugar de serializar el árbol: el árbol
+      // incluye ahora el proveedor, que tiene referencias circulares.
+      expect(screen.queryByText(/^(navegacion|vacios|comun|oracion)\.\w+/)).toBeNull();
       unmount();
-    });
+    }
   });
 
   it('se traducen al cambiar de idioma', async () => {
     await usarIdioma('en');
 
-    PANTALLAS.forEach(({ Componente, tituloEn }) => {
-      const { unmount } = renderizar(<Componente />);
-      expect(screen.getByRole('header', { name: tituloEn })).toBeTruthy();
+    for (const { Componente, tituloEn } of PANTALLAS) {
+      const { unmount } = renderizar(conSincronizacion(<Componente />));
+      expect(await screen.findByRole('header', { name: tituloEn })).toBeTruthy();
       unmount();
-    });
+    }
   });
 });

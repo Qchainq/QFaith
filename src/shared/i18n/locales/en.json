@@ -144,5 +144,49 @@
       "demasiadasEtiquetas": "That's too many tags.",
       "fechaInvalida": "That date isn't valid."
     }
+  },
+  "oracion": {
+    "titulo": "Prayer",
+    "descripcion": "Your requests are encrypted on your device. So are the names.",
+    "nueva": "New request",
+    "editar": "Edit request",
+    "guardar": "Save",
+    "eliminar": "Delete",
+    "campoTitulo": "What do you want to pray about?",
+    "campoDetalle": "Details",
+    "campoPersonas": "People",
+    "ayudaPersonas": "Separate them with commas. They never leave your device unencrypted.",
+    "campoCategoria": "Category",
+    "sinCategoria": "No category",
+    "marcarRespondida": "Mark as answered",
+    "archivar": "Archive",
+    "reactivar": "Make active again",
+    "avances": "Updates",
+    "nuevoAvance": "Add an update",
+    "sinPeticiones": "Your requests will live here. Write the first one whenever you want.",
+    "cargando": "Opening your requests…",
+    "ilegibles_one": "There is 1 request this device can't open.",
+    "ilegibles_other": "There are {{count}} requests this device can't open.",
+    "estados": {
+      "active": "Active",
+      "answered": "Answered",
+      "archived": "Archived"
+    },
+    "categorias": {
+      "personal": "Personal",
+      "familia": "Family",
+      "iglesia": "Church",
+      "trabajo": "Work",
+      "salud": "Health",
+      "finanzas": "Finances",
+      "amigos": "Friends",
+      "ministerio": "Ministry"
+    },
+    "errores": {
+      "tituloVacio": "Write what you want to pray about.",
+      "tituloLargo": "That's too long for a title.",
+      "demasiadasPersonas": "That's too many people for one request.",
+      "avanceVacio": "Write the update before saving it."
+    }
   }
 }
