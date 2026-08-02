@@ -68,6 +68,13 @@
     },
     "sincronizacion": {
       "conflicto": "Este elemento cambió en otro dispositivo. Elige qué versión conservar."
+    },
+    "cuenta": {
+      "credencialesInvalidas": "El correo o la contraseña no coinciden.",
+      "correoYaRegistrado": "Ya existe una cuenta con este correo. Inicia sesión.",
+      "contrasenaDebil": "Elige una contraseña más larga o menos común.",
+      "correoSinConfirmar": "Confirma tu correo desde el mensaje que te enviamos y vuelve a entrar.",
+      "demasiadosIntentos": "Demasiados intentos seguidos. Prueba de nuevo en unos minutos."
     }
   },
   "vacios": {

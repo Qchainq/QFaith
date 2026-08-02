@@ -68,6 +68,13 @@
     },
     "sincronizacion": {
       "conflicto": "This item changed on another device. Choose which version to keep."
+    },
+    "cuenta": {
+      "credencialesInvalidas": "That email and password don't match.",
+      "correoYaRegistrado": "An account already exists with this email. Sign in instead.",
+      "contrasenaDebil": "Choose a longer or less common password.",
+      "correoSinConfirmar": "Confirm your email from the message we sent, then sign in again.",
+      "demasiadosIntentos": "Too many attempts in a row. Try again in a few minutes."
     }
   },
   "vacios": {

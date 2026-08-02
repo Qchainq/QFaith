@@ -6,6 +6,9 @@ module.exports = {
   // Solo los archivos `.test.ts` son suites. Dentro de `__tests__` también
   // viven dobles y utilidades compartidas, que no contienen pruebas.
   testMatch: ['<rootDir>/src/**/*.test.{ts,tsx}'],
+  // Las pruebas de integración hablan con el proyecto real: se lanzan aparte,
+  // con `npm run test:integracion`. Ver jest.integracion.config.js.
+  testPathIgnorePatterns: ['/node_modules/', '\\.integracion\\.test\\.ts$'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@app/(.*)$': '<rootDir>/src/app/$1',
@@ -21,6 +24,10 @@ module.exports = {
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/__tests__/**',
+    // Único archivo que importa el SDK de Supabase. Solo construye el cliente
+    // y no puede ejercitarse sin red; lo que sí tiene lógica —el troceado de
+    // la sesión y el puerto remoto— se prueba por separado.
+    '!src/shared/services/supabase/clienteSupabase.ts',
     '!src/**/index.ts',
     '!src/shared/testing/**',
     // Adaptador de plataforma sin lógica: solo traduce entre el puerto y la
