@@ -30,6 +30,7 @@ import {
 import { crearMotorSincronizacion } from '@shared/services/sync/motorSincronizacion';
 
 import { crearPuertoRemotoSupabase } from '../puertoRemotoSupabase';
+import { descargarMaterialCuenta, subirMaterialCuenta } from '../repositorioClaves';
 import { asegurarDispositivo } from '../repositorioDispositivos';
 import { crearClienteRest } from '../rest';
 
@@ -307,5 +308,79 @@ describeIntegracion('dos dispositivos contra el proyecto real', () => {
     const filas = (await bruto.json()) as { deleted_at: string | null }[];
     expect(filas).toHaveLength(1);
     expect(filas[0]?.deleted_at).not.toBeNull();
+  });
+});
+
+describeIntegracion('material de la cuenta contra el proyecto real', () => {
+  jest.setTimeout(180_000);
+
+  let token: string;
+  let usuarioId: string;
+
+  beforeAll(async () => {
+    const sesion = await iniciarSesion();
+    token = sesion.token;
+    usuarioId = sesion.usuarioId;
+  });
+
+  afterAll(async () => {
+    await olvidarDispositivo();
+  });
+
+  it('sube y recupera el material, y la frase abre las claves en otro dispositivo', async () => {
+    // Con los parámetros reales de Argon2id: el servidor rechaza cualquier
+    // cosa por debajo del mínimo de OWASP, así que aquí no valen los rápidos.
+    const rest = crearClienteRest({ proveerToken: async () => token, url, claveAnonima });
+    const material = await inicializarCuenta();
+    const claveOriginal = claveDeDominio('diario');
+
+    await subirMaterialCuenta({
+      rest,
+      usuarioId,
+      sobresClaves: material.sobresClaves,
+      sobreRecuperacion: material.sobreRecuperacion,
+    });
+
+    const descargado = await descargarMaterialCuenta({ rest });
+    expect(descargado.sobreRecuperacion).not.toBeNull();
+    expect(descargado.sobresClaves.length).toBeGreaterThanOrEqual(material.sobresClaves.length);
+
+    // Dispositivo nuevo: nada en el almacén seguro, solo la frase.
+    bloquear();
+    await olvidarDispositivo();
+    if (descargado.sobreRecuperacion === null) return;
+    await restaurarConFrase({
+      frase: material.fraseRecuperacion,
+      sobreRecuperacion: descargado.sobreRecuperacion,
+      sobresClaves: descargado.sobresClaves,
+    });
+
+    // La clave de contenido recuperada es exactamente la misma.
+    expect(claveDeDominio('diario').keyId).toBe(claveOriginal.keyId);
+  });
+
+  it('el servidor rechaza unos parámetros de derivación debilitados', async () => {
+    const rest = crearClienteRest({ proveerToken: async () => token, url, claveAnonima });
+
+    // Un cliente manipulado no puede rebajar la protección del sobre de nadie.
+    await expect(
+      subirMaterialCuenta({
+        rest,
+        usuarioId,
+        sobresClaves: [],
+        sobreRecuperacion: {
+          envoltorioBase64: 'sobre',
+          nonceBase64: 'nonce',
+          version: 1,
+          parametrosKdf: {
+            algoritmo: 'argon2id',
+            memoriaKiB: 8,
+            iteraciones: 1,
+            paralelismo: 1,
+            salBase64: 'YWJjZA==',
+          },
+        },
+      }),
+    ).rejects.toThrow();
   });
 });
