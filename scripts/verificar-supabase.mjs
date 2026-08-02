@@ -310,6 +310,53 @@ async function faseAutenticada(cuentas) {
     !JSON.stringify(entradasBitacora).includes('criptograma-de-A'),
   );
 
+  // A siembra una fila en el resto de tablas personales.
+  //
+  // Sin esto, comprobar que B ve cero filas en una tabla vacía no demuestra
+  // nada: pasaría igual con RLS desactivado. Antes de mirar lo que ve B hay
+  // que confirmar que hay algo que ver.
+  await Promise.all([
+    peticion('/rest/v1/devices', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: {
+        user_id: a.id,
+        device_public_id: 'dispositivo-de-prueba-a',
+        platform: 'ios',
+      },
+      cabeceras: { Prefer: 'resolution=merge-duplicates' },
+    }),
+    peticion('/rest/v1/user_key_envelopes', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: {
+        user_id: a.id,
+        key_id: '11111111-1111-4111-8111-111111111111',
+        key_type: 'contenido',
+        encrypted_key: 'clave-envuelta-de-A',
+        encryption_method: 'xchacha20poly1305',
+      },
+      cabeceras: { Prefer: 'resolution=merge-duplicates' },
+    }),
+    peticion('/rest/v1/recovery_configurations', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: {
+        user_id: a.id,
+        encrypted_recovery_envelope: 'sobre-de-recuperacion-de-A',
+        recovery_nonce: 'nonce-de-recuperacion-de-A',
+        kdf_algorithm: 'argon2id',
+        kdf_parameters: {
+          memoriaKiB: 19456,
+          iteraciones: 2,
+          paralelismo: 1,
+          salBase64: 'c2FsLWRlLXBydWViYS1kZS1BLTE2',
+        },
+      },
+      cabeceras: { Prefer: 'resolution=merge-duplicates' },
+    }),
+  ]);
+
   // B no alcanza nada de A.
   for (const tabla of [
     'journal_entries',
@@ -319,6 +366,15 @@ async function faseAutenticada(cuentas) {
     'recovery_configurations',
     'sync_change_log',
   ]) {
+    // La comprobación solo tiene valor si A sí ve algo ahí.
+    const vistoPorA = await peticion(`/rest/v1/${tabla}?select=*`, { token: a.token });
+    const filasDeA = Array.isArray(vistoPorA.datos) ? vistoPorA.datos.length : -1;
+    comprobar(
+      `A tiene contenido en ${tabla}, así que la prueba de aislamiento no es vacía`,
+      filasDeA >= 1,
+      `${filasDeA} filas`,
+    );
+
     const vistoPorB = await peticion(`/rest/v1/${tabla}?select=*`, { token: b.token });
     const filas = Array.isArray(vistoPorB.datos) ? vistoPorB.datos.length : -1;
     comprobar(`B no ve ninguna fila de A en ${tabla}`, filas === 0, `${filas} filas`);

@@ -56,6 +56,10 @@ Corre en dos fases:
   trigger, que la bitácora no contiene criptogramas, que el borrado físico
   está prohibido y que los parámetros de Argon2id no se pueden rebajar.
 
+Antes de mirar lo que ve el usuario B, el script siembra contenido de A en
+cada tabla y comprueba que A sí lo ve. Sin eso, «B ve cero filas» en una tabla
+vacía pasaría igual con RLS desactivado y la comprobación no valdría nada.
+
 Para la segunda fase, o bien dos cuentas ya creadas:
 
 ```sh
