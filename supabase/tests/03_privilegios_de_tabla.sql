@@ -42,7 +42,9 @@ declare
     ['authenticated', 'audit_events', 'DELETE'],
     -- La oración se archiva o se marca respondida; nunca se borra de golpe.
     ['authenticated', 'prayers', 'DELETE'],
-    ['authenticated', 'prayer_updates', 'DELETE']
+    ['authenticated', 'prayer_updates', 'DELETE'],
+    ['authenticated', 'habits', 'DELETE'],
+    ['authenticated', 'habit_logs', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -93,7 +95,9 @@ declare
     ['user_key_envelopes', 'DELETE'],
     ['sync_conflicts', 'SELECT'], ['sync_conflicts', 'INSERT'], ['sync_conflicts', 'DELETE'],
     ['prayers', 'SELECT'], ['prayers', 'INSERT'], ['prayers', 'UPDATE'],
-    ['prayer_updates', 'SELECT'], ['prayer_updates', 'INSERT'], ['prayer_updates', 'UPDATE']
+    ['prayer_updates', 'SELECT'], ['prayer_updates', 'INSERT'], ['prayer_updates', 'UPDATE'],
+    ['habits', 'SELECT'], ['habits', 'INSERT'], ['habits', 'UPDATE'],
+    ['habit_logs', 'SELECT'], ['habit_logs', 'INSERT'], ['habit_logs', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

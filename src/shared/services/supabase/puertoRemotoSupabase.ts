@@ -15,7 +15,7 @@
 //   · La idempotencia. Reenviar un cambio cuya respuesta se perdió no debe
 //     duplicar nada ni marcar un conflicto falso. Antes de dar por perdida
 //     una escritura se comprueba si en realidad ya había llegado.
-import type { OperacionSincronizacion } from '@shared/database/tipos';
+import type { Metadatos, OperacionSincronizacion, ValorMetadato } from '@shared/database/tipos';
 import type { SobreCifrado } from '@shared/services/crypto/tipos';
 import type {
   CambioEntrante,
@@ -62,6 +62,24 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
     // saber: el texto del avance va dentro del sobre.
     columnasMetadatos: ['prayer_id'],
   },
+  habits: {
+    tabla: 'habits',
+    columnasMetadatos: [
+      'category_code',
+      'frequency',
+      'schedule_config',
+      'start_date',
+      'end_date',
+      'reminder_enabled',
+      'reminder_time',
+      'is_active',
+      'sort_order',
+    ],
+  },
+  habit_logs: {
+    tabla: 'habit_logs',
+    columnasMetadatos: ['habit_id', 'completion_date', 'completed', 'completed_at'],
+  },
 };
 
 const COLUMNAS_COMUNES = [
@@ -77,8 +95,6 @@ const COLUMNAS_COMUNES = [
   'nonce',
   'content_hash',
 ] as const;
-
-type ValorMetadato = string | number | boolean | null;
 
 interface FilaRemota {
   readonly id: string;
@@ -114,7 +130,7 @@ function sobreDe(fila: FilaRemota): SobreCifrado {
   };
 }
 
-function metadatosDe(fila: FilaRemota, mapeo: MapeoEntidad): Record<string, ValorMetadato> {
+function metadatosDe(fila: FilaRemota, mapeo: MapeoEntidad): Metadatos {
   const metadatos: Record<string, ValorMetadato> = {};
   for (const columna of mapeo.columnasMetadatos) {
     const valor = fila[columna];

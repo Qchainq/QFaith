@@ -188,5 +188,48 @@
       "demasiadasPersonas": "Son demasiadas personas para una sola petición.",
       "avanceVacio": "Escribe el avance antes de guardarlo."
     }
+  },
+  "habitos": {
+    "titulo": "Hábitos",
+    "descripcion": "Constancia, a tu ritmo. Aquí solo se anota lo que sí haces.",
+    "nuevo": "Nuevo hábito",
+    "editar": "Editar hábito",
+    "guardar": "Guardar",
+    "eliminar": "Eliminar",
+    "campoTitulo": "¿Qué quieres cultivar?",
+    "campoDescripcion": "Descripción",
+    "campoCategoria": "Categoría",
+    "sinCategoria": "Sin categoría",
+    "campoFrecuencia": "Frecuencia",
+    "hechoHoy": "Hecho hoy",
+    "marcarHoy": "Marcar hoy",
+    "resumen_one": "{{count}} día en los últimos {{ventana}}",
+    "resumen_other": "{{count}} días en los últimos {{ventana}}",
+    "pausado": "En pausa",
+    "sinHabitos": "Aquí irán tus hábitos. Empieza por uno pequeño.",
+    "cargando": "Abriendo tus hábitos…",
+    "ilegibles_one": "Hay 1 hábito que este dispositivo no puede abrir.",
+    "ilegibles_other": "Hay {{count}} hábitos que este dispositivo no puede abrir.",
+    "frecuencias": {
+      "daily": "Cada día",
+      "weekly": "Cada semana",
+      "monthly": "Cada mes",
+      "custom": "A mi manera"
+    },
+    "categorias": {
+      "oracion": "Oración",
+      "lectura": "Lectura",
+      "gratitud": "Gratitud",
+      "servicio": "Servicio",
+      "ayuno": "Ayuno",
+      "comunidad": "Comunidad",
+      "descanso": "Descanso",
+      "otro": "Otro"
+    },
+    "errores": {
+      "tituloVacio": "Escribe qué quieres cultivar.",
+      "tituloLargo": "Es demasiado largo para un título.",
+      "fechaInvalida": "Esa fecha no es válida."
+    }
   }
 }

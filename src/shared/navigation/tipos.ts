@@ -7,6 +7,7 @@
 export type InicioParamList = {
   Portada: undefined;
   Diario: undefined;
+  Habitos: undefined;
 };
 
 export type PestanasParamList = {

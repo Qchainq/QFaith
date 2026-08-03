@@ -188,5 +188,48 @@
       "demasiadasPersonas": "That's too many people for one request.",
       "avanceVacio": "Write the update before saving it."
     }
+  },
+  "habitos": {
+    "titulo": "Habits",
+    "descripcion": "Steadiness, at your own pace. Only what you do gets recorded here.",
+    "nuevo": "New habit",
+    "editar": "Edit habit",
+    "guardar": "Save",
+    "eliminar": "Delete",
+    "campoTitulo": "What do you want to cultivate?",
+    "campoDescripcion": "Description",
+    "campoCategoria": "Category",
+    "sinCategoria": "No category",
+    "campoFrecuencia": "Frequency",
+    "hechoHoy": "Done today",
+    "marcarHoy": "Mark today",
+    "resumen_one": "{{count}} day in the last {{ventana}}",
+    "resumen_other": "{{count}} days in the last {{ventana}}",
+    "pausado": "Paused",
+    "sinHabitos": "Your habits will live here. Start with a small one.",
+    "cargando": "Opening your habits…",
+    "ilegibles_one": "There is 1 habit this device can't open.",
+    "ilegibles_other": "There are {{count}} habits this device can't open.",
+    "frecuencias": {
+      "daily": "Every day",
+      "weekly": "Every week",
+      "monthly": "Every month",
+      "custom": "My own way"
+    },
+    "categorias": {
+      "oracion": "Prayer",
+      "lectura": "Reading",
+      "gratitud": "Gratitude",
+      "servicio": "Service",
+      "ayuno": "Fasting",
+      "comunidad": "Community",
+      "descanso": "Rest",
+      "otro": "Other"
+    },
+    "errores": {
+      "tituloVacio": "Write what you want to cultivate.",
+      "tituloLargo": "That's too long for a title.",
+      "fechaInvalida": "That date isn't valid."
+    }
   }
 }

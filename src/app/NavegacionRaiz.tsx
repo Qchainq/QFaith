@@ -9,6 +9,7 @@ import { StyleSheet } from 'react-native';
 
 import { PantallaBiblia } from '@modules/biblia/screens/PantallaBiblia';
 import { DiarioContenedor } from '@modules/diario/screens/DiarioContenedor';
+import { HabitosContenedor } from '@modules/habitos/screens/HabitosContenedor';
 import { PantallaIa } from '@modules/ia/screens/PantallaIa';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
@@ -28,12 +29,22 @@ function NavegacionInicio() {
   return (
     <PilaInicio.Navigator>
       <PilaInicio.Screen name="Portada" options={{ headerShown: false }}>
-        {({ navigation }) => <PantallaInicio alAbrirDiario={() => navigation.navigate('Diario')} />}
+        {({ navigation }) => (
+          <PantallaInicio
+            alAbrirDiario={() => navigation.navigate('Diario')}
+            alAbrirHabitos={() => navigation.navigate('Habitos')}
+          />
+        )}
       </PilaInicio.Screen>
       <PilaInicio.Screen
         name="Diario"
         component={DiarioContenedor}
         options={{ title: t('diario.titulo'), headerShown: false }}
+      />
+      <PilaInicio.Screen
+        name="Habitos"
+        component={HabitosContenedor}
+        options={{ title: t('habitos.titulo'), headerShown: false }}
       />
     </PilaInicio.Navigator>
   );

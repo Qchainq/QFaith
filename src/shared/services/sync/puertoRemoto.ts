@@ -4,7 +4,7 @@
 // Supabase directamente. Así la lógica se puede probar sin red y el
 // proveedor se puede cambiar sin tocarla.
 import type { SobreCifrado } from '@shared/services/crypto/tipos';
-import type { OperacionSincronizacion } from '@shared/database/tipos';
+import type { Metadatos, OperacionSincronizacion } from '@shared/database/tipos';
 
 /** Cambio que el dispositivo quiere subir. */
 export interface CambioSaliente {
@@ -12,7 +12,7 @@ export interface CambioSaliente {
   readonly tipoEntidad: string;
   readonly operacion: OperacionSincronizacion;
   readonly sobre: SobreCifrado;
-  readonly metadatos: Readonly<Record<string, string | number | boolean | null>>;
+  readonly metadatos: Metadatos;
   /**
    * Versión sobre la que se basó este cambio. El servidor la compara con la
    * que tiene: si no coinciden, otro dispositivo escribió primero.
@@ -33,7 +33,7 @@ export type ResultadoCambio =
       readonly id: string;
       readonly versionRemota: number;
       readonly sobreRemoto: SobreCifrado;
-      readonly metadatosRemotos: Readonly<Record<string, string | number | boolean | null>>;
+      readonly metadatosRemotos: Metadatos;
     }
   | {
       readonly estado: 'rechazado';
@@ -50,7 +50,7 @@ export interface CambioEntrante {
   readonly revision: number;
   readonly version: number;
   readonly sobre: SobreCifrado | null;
-  readonly metadatos: Readonly<Record<string, string | number | boolean | null>>;
+  readonly metadatos: Metadatos;
   readonly eliminadoEn: string | null;
 }
 

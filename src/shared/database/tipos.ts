@@ -6,6 +6,23 @@
 // cifrada»).
 import type { SobreCifrado } from '@shared/services/crypto/tipos';
 
+/**
+ * Valor que puede llevar un metadato.
+ *
+ * Admite objetos y listas porque algunas columnas del esquema son `jsonb`
+ * —la configuración de repetición de un hábito, por ejemplo—. Sigue siendo
+ * **todo lo que el servidor puede leer**: nada sensible entra aquí.
+ */
+export type ValorMetadato =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly ValorMetadato[]
+  | { readonly [clave: string]: ValorMetadato };
+
+export type Metadatos = Readonly<Record<string, ValorMetadato>>;
+
 /** Los seis estados del Documento 7. */
 export const ESTADOS_SINCRONIZACION = [
   'nuevo',
@@ -27,7 +44,7 @@ export interface RegistroLocal {
   readonly tipoEntidad: string;
   readonly sobre: SobreCifrado;
   /** Metadatos no sensibles que el servidor sí necesita para indexar. */
-  readonly metadatos: Readonly<Record<string, string | number | boolean | null>>;
+  readonly metadatos: Metadatos;
   readonly version: number;
   /** Última revisión conocida del servidor para este registro. */
   readonly revisionRemota: number;

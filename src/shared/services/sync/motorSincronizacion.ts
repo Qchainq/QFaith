@@ -11,7 +11,12 @@
 //    el usuario. Nunca se sobrescribe en silencio.
 // 4. Las operaciones son idempotentes: repetir una sincronización no
 //    duplica registros ni pierde cambios.
-import type { AlmacenLocal, RegistroLocal, OperacionSincronizacion } from '@shared/database/tipos';
+import type {
+  AlmacenLocal,
+  Metadatos,
+  OperacionSincronizacion,
+  RegistroLocal,
+} from '@shared/database/tipos';
 import { generarUuid } from '@shared/services/crypto/aleatoriedad';
 import type { SobreCifrado } from '@shared/services/crypto/tipos';
 
@@ -54,7 +59,7 @@ export function crearMotorSincronizacion(opciones: OpcionesMotor) {
     readonly id?: string;
     readonly tipoEntidad: string;
     readonly sobre: SobreCifrado;
-    readonly metadatos?: Readonly<Record<string, string | number | boolean | null>>;
+    readonly metadatos?: Metadatos;
   }): Promise<RegistroLocal> {
     const id = parametros.id ?? generarUuid();
     const existente = await almacen.obtener(parametros.tipoEntidad, id);
@@ -157,7 +162,7 @@ export function crearMotorSincronizacion(opciones: OpcionesMotor) {
     readonly revision: number;
     readonly version: number;
     readonly sobre: SobreCifrado | null;
-    readonly metadatos: Readonly<Record<string, string | number | boolean | null>>;
+    readonly metadatos: Metadatos;
     readonly eliminadoEn: string | null;
   }): Promise<'aplicado' | 'conflicto' | 'ignorado'> {
     const local = await almacen.obtener(cambio.tipoEntidad, cambio.id);

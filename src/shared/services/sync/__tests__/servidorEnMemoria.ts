@@ -5,7 +5,7 @@
 // `supabase/tests`. Sirve para ejercitar el motor de sincronización y el
 // escenario de dos dispositivos sin depender de la red.
 import type { SobreCifrado } from '@shared/services/crypto/tipos';
-import type { OperacionSincronizacion } from '@shared/database/tipos';
+import type { Metadatos, OperacionSincronizacion } from '@shared/database/tipos';
 
 import type {
   CambioEntrante,
@@ -18,7 +18,7 @@ interface FilaServidor {
   readonly id: string;
   readonly tipoEntidad: string;
   sobre: SobreCifrado;
-  metadatos: Readonly<Record<string, string | number | boolean | null>>;
+  metadatos: Metadatos;
   version: number;
   revision: number;
   eliminadoEn: string | null;
