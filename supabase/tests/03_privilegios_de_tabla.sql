@@ -54,7 +54,8 @@ declare
     ['authenticated', 'bible_books', 'INSERT'],
     ['authenticated', 'bible_books', 'UPDATE'],
     ['authenticated', 'bible_translations', 'INSERT'],
-    ['authenticated', 'bible_translations', 'UPDATE']
+    ['authenticated', 'bible_translations', 'UPDATE'],
+    ['authenticated', 'life_library_items', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -109,7 +110,9 @@ declare
     ['habits', 'SELECT'], ['habits', 'INSERT'], ['habits', 'UPDATE'],
     ['habit_logs', 'SELECT'], ['habit_logs', 'INSERT'], ['habit_logs', 'UPDATE'],
     ['bible_translations', 'SELECT'], ['bible_books', 'SELECT'], ['bible_verses', 'SELECT'],
-    ['bible_notes', 'SELECT'], ['bible_notes', 'INSERT'], ['bible_notes', 'UPDATE']
+    ['bible_notes', 'SELECT'], ['bible_notes', 'INSERT'], ['bible_notes', 'UPDATE'],
+    ['life_library_items', 'SELECT'], ['life_library_items', 'INSERT'],
+    ['life_library_items', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

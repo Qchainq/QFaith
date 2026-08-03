@@ -255,5 +255,35 @@
     "errores": {
       "notaVacia": "Escribe la nota antes de guardarla."
     }
+  },
+  "biblioteca": {
+    "titulo": "Biblioteca de vida",
+    "descripcion": "Tu recorrido, organizado. Aquí no se guarda una copia: cada ficha lleva a su original.",
+    "organizar": "Organizar ahora",
+    "organizando": "Organizando…",
+    "cargando": "Abriendo tu biblioteca…",
+    "sinElementos": "Cuando escribas en el diario o guardes una oración, aparecerán aquí.",
+    "todos": "Todos",
+    "ilegibles_one": "Hay 1 ficha que este dispositivo no puede abrir.",
+    "ilegibles_other": "Hay {{count}} fichas que este dispositivo no puede abrir.",
+    "clasificacionLocal": "La clasificación se hace en tu dispositivo. El servidor no sabe de qué trata nada de esto.",
+    "origenes": {
+      "diario": "Diario",
+      "oracion": "Oración",
+      "habito": "Hábito",
+      "notaBiblica": "Nota bíblica"
+    },
+    "temas": {
+      "perdon": "Perdón",
+      "fe": "Fe",
+      "esperanza": "Esperanza",
+      "familia": "Familia",
+      "servicio": "Servicio",
+      "ansiedad": "Ansiedad",
+      "gozo": "Gozo",
+      "amor": "Amor",
+      "liderazgo": "Liderazgo",
+      "evangelismo": "Evangelismo"
+    }
   }
 }

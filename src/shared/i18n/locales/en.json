@@ -255,5 +255,35 @@
     "errores": {
       "notaVacia": "Write the note before saving it."
     }
+  },
+  "biblioteca": {
+    "titulo": "Life library",
+    "descripcion": "Your journey, organised. Nothing is copied here: each card points to its original.",
+    "organizar": "Organise now",
+    "organizando": "Organising…",
+    "cargando": "Opening your library…",
+    "sinElementos": "Once you write in your journal or save a prayer, it'll show up here.",
+    "todos": "All",
+    "ilegibles_one": "There is 1 card this device can't open.",
+    "ilegibles_other": "There are {{count}} cards this device can't open.",
+    "clasificacionLocal": "Sorting happens on your device. The server doesn't know what any of this is about.",
+    "origenes": {
+      "diario": "Journal",
+      "oracion": "Prayer",
+      "habito": "Habit",
+      "notaBiblica": "Bible note"
+    },
+    "temas": {
+      "perdon": "Forgiveness",
+      "fe": "Faith",
+      "esperanza": "Hope",
+      "familia": "Family",
+      "servicio": "Service",
+      "ansiedad": "Anxiety",
+      "gozo": "Joy",
+      "amor": "Love",
+      "liderazgo": "Leadership",
+      "evangelismo": "Evangelism"
+    }
   }
 }

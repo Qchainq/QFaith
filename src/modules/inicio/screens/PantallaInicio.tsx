@@ -14,9 +14,14 @@ import { useTema } from '@shared/theme/ProveedorTema';
 export interface PropsPantallaInicio {
   readonly alAbrirDiario?: () => void;
   readonly alAbrirHabitos?: () => void;
+  readonly alAbrirBiblioteca?: () => void;
 }
 
-export function PantallaInicio({ alAbrirDiario, alAbrirHabitos }: PropsPantallaInicio = {}) {
+export function PantallaInicio({
+  alAbrirDiario,
+  alAbrirHabitos,
+  alAbrirBiblioteca,
+}: PropsPantallaInicio = {}) {
   const { t } = useTranslation();
   const tema = useTema();
 
@@ -35,6 +40,16 @@ export function PantallaInicio({ alAbrirDiario, alAbrirHabitos }: PropsPantallaI
       {alAbrirHabitos === undefined ? null : (
         <View style={{ marginTop: tema.espaciado.sm }}>
           <Boton variante="secundario" etiqueta={t('habitos.titulo')} onPress={alAbrirHabitos} />
+        </View>
+      )}
+
+      {alAbrirBiblioteca === undefined ? null : (
+        <View style={{ marginTop: tema.espaciado.sm }}>
+          <Boton
+            variante="secundario"
+            etiqueta={t('biblioteca.titulo')}
+            onPress={alAbrirBiblioteca}
+          />
         </View>
       )}
     </PantallaBase>

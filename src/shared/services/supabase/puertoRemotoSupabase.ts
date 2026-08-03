@@ -80,6 +80,11 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
     tabla: 'habit_logs',
     columnasMetadatos: ['habit_id', 'completion_date', 'completed', 'completed_at'],
   },
+  life_library_items: {
+    tabla: 'life_library_items',
+    // Solo la referencia al registro de origen. De qué trata va cifrado.
+    columnasMetadatos: ['source_type', 'source_id', 'occurred_at', 'is_favorite'],
+  },
   bible_notes: {
     tabla: 'bible_notes',
     // La referencia queda en claro para poder mostrar la nota junto a su
