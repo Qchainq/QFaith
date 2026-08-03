@@ -4,7 +4,7 @@
 import { screen } from '@testing-library/react-native';
 
 import { PantallaBiblia } from '@modules/biblia/screens/PantallaBiblia';
-import { PantallaIa } from '@modules/ia/screens/PantallaIa';
+import { IaContenedor } from '@modules/ia/screens/IaContenedor';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PantallaPerfil } from '@modules/perfil/screens/PantallaPerfil';
@@ -46,7 +46,9 @@ const PANTALLAS = [
   { Componente: PantallaInicio, titulo: 'Inicio', tituloEn: 'Home' },
   { Componente: PantallaBiblia, titulo: 'Biblia', tituloEn: 'Bible' },
   { Componente: PantallaOracion, titulo: 'Oración', tituloEn: 'Prayer' },
-  { Componente: PantallaIa, titulo: 'IA', tituloEn: 'AI' },
+  // La pestaña se llama «IA», pero la cabecera de la pantalla dice
+  // «Acompañante»: el nombre corto es para la barra, no para quien entra.
+  { Componente: IaContenedor, titulo: 'Acompañante', tituloEn: 'Companion' },
   { Componente: PantallaPerfil, titulo: 'Perfil', tituloEn: 'Profile' },
 ] as const;
 
@@ -72,7 +74,7 @@ describe('pestañas principales', () => {
       // Una clave sin traducir se vería tal cual, con su punto separador. Se
       // busca entre el texto visible en lugar de serializar el árbol: el árbol
       // incluye ahora el proveedor, que tiene referencias circulares.
-      expect(screen.queryByText(/^(navegacion|vacios|comun|oracion)\.\w+/)).toBeNull();
+      expect(screen.queryByText(/^(navegacion|vacios|comun|oracion|ia)\.\w+/)).toBeNull();
       unmount();
     }
   });

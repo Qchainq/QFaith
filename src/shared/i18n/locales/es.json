@@ -285,5 +285,33 @@
       "liderazgo": "Liderazgo",
       "evangelismo": "Evangelismo"
     }
+  },
+  "ia": {
+    "titulo": "Acompañante",
+    "descripcion": "Un acompañante, no una autoridad. Nunca habla en nombre de Dios ni sustituye a tu iglesia.",
+    "campoMensaje": "¿De qué quieres hablar?",
+    "enviar": "Enviar",
+    "pensando": "Pensando…",
+    "nuevaConversacion": "Nueva conversación",
+    "sinConversaciones": "Aquí aparecerán tus conversaciones. Son privadas y se cifran.",
+    "cargando": "Abriendo tus conversaciones…",
+    "borrarMemoria": "Borrar toda la memoria",
+    "memoriaBorrada": "Se borró todo. No queda copia.",
+    "autorizarEnvio": "Permitir enviar esta conversación",
+    "avisoEnvio": "Para responderte hay que enviar esta conversación al proveedor. No se envía nada más: ni tu diario, ni tus oraciones, ni tus notas.",
+    "crisis": "Lo que cuentas importa y no deberías pasarlo solo. Habla ahora mismo con alguien: llama a un servicio de emergencias de tu país, o escribe o llama a una persona de confianza que pueda acompañarte hoy. Si hay peligro inmediato, busca ayuda médica ya. Puedo quedarme aquí contigo, pero no puedo sustituir a una persona a tu lado, y aquí no hay nadie leyendo esta conversación.",
+    "respaldo": "Prefiero no responder a eso. Puedo acompañarte a mirar lo que dice la Biblia y a pensarlo, pero esa decisión es tuya y de las personas que te conocen.",
+    "sinConexion": "Necesito conexión para responder. El resto de la aplicación sigue funcionando.",
+    "errores": {
+      "sinAutorizacion": "Hace falta tu permiso para enviar esta conversación.",
+      "mensajeVacio": "Escribe algo antes de enviar."
+    },
+    "avisoCrisis": "Esto necesita a una persona, no a una aplicación.",
+    "confirmarBorrado": "¿Borrar todas las conversaciones? No se puede deshacer.",
+    "borrando": "Borrando…",
+    "cancelar": "Cancelar",
+    "tu": "Tú",
+    "asistente": "Acompañante",
+    "sinMensajes": "Escribe lo que quieras. Nadie más lo lee."
   }
 }

@@ -80,6 +80,16 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
     tabla: 'habit_logs',
     columnasMetadatos: ['habit_id', 'completion_date', 'completed', 'completed_at'],
   },
+  ai_conversations: {
+    tabla: 'ai_conversations',
+    columnasMetadatos: ['conversation_type', 'provider_reference_hash'],
+  },
+  ai_messages: {
+    tabla: 'ai_messages',
+    // `safety_category` marca que hubo Modo Crisis, nada más. No describe el
+    // contenido ni clasifica a la persona.
+    columnasMetadatos: ['conversation_id', 'role', 'safety_category'],
+  },
   life_library_items: {
     tabla: 'life_library_items',
     // Solo la referencia al registro de origen. De qué trata va cifrado.

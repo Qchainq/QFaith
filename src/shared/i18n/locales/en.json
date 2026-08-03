@@ -285,5 +285,33 @@
       "liderazgo": "Leadership",
       "evangelismo": "Evangelism"
     }
+  },
+  "ia": {
+    "titulo": "Companion",
+    "descripcion": "A companion, not an authority. It never speaks for God or replaces your church.",
+    "campoMensaje": "What would you like to talk about?",
+    "enviar": "Send",
+    "pensando": "Thinking…",
+    "nuevaConversacion": "New conversation",
+    "sinConversaciones": "Your conversations will show up here. They're private and encrypted.",
+    "cargando": "Opening your conversations…",
+    "borrarMemoria": "Erase all memory",
+    "memoriaBorrada": "Everything was erased. No copy remains.",
+    "autorizarEnvio": "Allow sending this conversation",
+    "avisoEnvio": "To reply, this conversation has to be sent to the provider. Nothing else is sent: not your journal, not your prayers, not your notes.",
+    "crisis": "What you're sharing matters, and you shouldn't carry it alone. Please talk to someone right now: call an emergency service in your country, or call or message someone you trust who can be with you today. If there's immediate danger, get medical help now. I can stay here with you, but I can't replace a person by your side, and nobody is reading this conversation.",
+    "respaldo": "I'd rather not answer that. I can walk with you through what the Bible says and help you think it over, but that decision is yours and belongs with the people who know you.",
+    "sinConexion": "I need a connection to reply. The rest of the app keeps working.",
+    "errores": {
+      "sinAutorizacion": "We need your permission to send this conversation.",
+      "mensajeVacio": "Write something before sending."
+    },
+    "avisoCrisis": "This needs a person, not an app.",
+    "confirmarBorrado": "Delete every conversation? This cannot be undone.",
+    "borrando": "Deleting…",
+    "cancelar": "Cancel",
+    "tu": "You",
+    "asistente": "Companion",
+    "sinMensajes": "Write whatever you want. No one else reads it."
   }
 }

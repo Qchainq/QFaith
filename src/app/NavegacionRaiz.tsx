@@ -11,7 +11,7 @@ import { PantallaBiblia } from '@modules/biblia/screens/PantallaBiblia';
 import { DiarioContenedor } from '@modules/diario/screens/DiarioContenedor';
 import { BibliotecaContenedor } from '@modules/biblioteca-vida/screens/BibliotecaContenedor';
 import { HabitosContenedor } from '@modules/habitos/screens/HabitosContenedor';
-import { PantallaIa } from '@modules/ia/screens/PantallaIa';
+import { IaContenedor } from '@modules/ia/screens/IaContenedor';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PantallaPerfil } from '@modules/perfil/screens/PantallaPerfil';
@@ -104,7 +104,11 @@ export function NavegacionRaiz() {
           component={PantallaOracion}
           options={{ title: t('navegacion.oracion') }}
         />
-        <Pestanas.Screen name="IA" component={PantallaIa} options={{ title: t('navegacion.ia') }} />
+        <Pestanas.Screen
+          name="IA"
+          component={IaContenedor}
+          options={{ title: t('navegacion.ia'), headerShown: false }}
+        />
         <Pestanas.Screen
           name="Perfil"
           component={PantallaPerfil}
