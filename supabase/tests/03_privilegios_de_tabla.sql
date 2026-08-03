@@ -44,7 +44,17 @@ declare
     ['authenticated', 'prayers', 'DELETE'],
     ['authenticated', 'prayer_updates', 'DELETE'],
     ['authenticated', 'habits', 'DELETE'],
-    ['authenticated', 'habit_logs', 'DELETE']
+    ['authenticated', 'habit_logs', 'DELETE'],
+    ['authenticated', 'bible_notes', 'DELETE'],
+    -- El texto bíblico lo carga un proceso administrativo. Un cliente que
+    -- pudiera escribirlo corrompería la Escritura para todo el mundo.
+    ['authenticated', 'bible_verses', 'INSERT'],
+    ['authenticated', 'bible_verses', 'UPDATE'],
+    ['authenticated', 'bible_verses', 'DELETE'],
+    ['authenticated', 'bible_books', 'INSERT'],
+    ['authenticated', 'bible_books', 'UPDATE'],
+    ['authenticated', 'bible_translations', 'INSERT'],
+    ['authenticated', 'bible_translations', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -97,7 +107,9 @@ declare
     ['prayers', 'SELECT'], ['prayers', 'INSERT'], ['prayers', 'UPDATE'],
     ['prayer_updates', 'SELECT'], ['prayer_updates', 'INSERT'], ['prayer_updates', 'UPDATE'],
     ['habits', 'SELECT'], ['habits', 'INSERT'], ['habits', 'UPDATE'],
-    ['habit_logs', 'SELECT'], ['habit_logs', 'INSERT'], ['habit_logs', 'UPDATE']
+    ['habit_logs', 'SELECT'], ['habit_logs', 'INSERT'], ['habit_logs', 'UPDATE'],
+    ['bible_translations', 'SELECT'], ['bible_books', 'SELECT'], ['bible_verses', 'SELECT'],
+    ['bible_notes', 'SELECT'], ['bible_notes', 'INSERT'], ['bible_notes', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

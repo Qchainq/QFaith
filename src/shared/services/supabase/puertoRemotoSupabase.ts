@@ -80,6 +80,18 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
     tabla: 'habit_logs',
     columnasMetadatos: ['habit_id', 'completion_date', 'completed', 'completed_at'],
   },
+  bible_notes: {
+    tabla: 'bible_notes',
+    // La referencia queda en claro para poder mostrar la nota junto a su
+    // pasaje sin descargar y descifrar todas las notas de la persona.
+    columnasMetadatos: [
+      'translation_id',
+      'book_code',
+      'chapter_number',
+      'verse_start',
+      'verse_end',
+    ],
+  },
 };
 
 const COLUMNAS_COMUNES = [

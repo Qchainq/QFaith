@@ -231,5 +231,29 @@
       "tituloLargo": "Es demasiado largo para un título.",
       "fechaInvalida": "Esa fecha no es válida."
     }
+  },
+  "biblia": {
+    "titulo": "Biblia",
+    "elegirTraduccion": "Elige una traducción",
+    "sinTraducciones": "Todavía no hay traducciones disponibles.",
+    "cargandoLibros": "Abriendo la Biblia…",
+    "cargandoCapitulo": "Cargando el capítulo…",
+    "sinConexion": "Este capítulo no está descargado y ahora no hay conexión.",
+    "capitulo": "Capítulo {{numero}}",
+    "capituloAnterior": "Capítulo anterior",
+    "capituloSiguiente": "Capítulo siguiente",
+    "volverALibros": "Ver los libros",
+    "antiguoTestamento": "Antiguo Testamento",
+    "nuevoTestamento": "Nuevo Testamento",
+    "misNotas": "Mis notas",
+    "nuevaNota": "Escribir una nota",
+    "campoNota": "Tu nota sobre este pasaje",
+    "guardarNota": "Guardar nota",
+    "eliminarNota": "Eliminar nota",
+    "sinNotas": "Todavía no has escrito nada sobre este capítulo.",
+    "notaPrivada": "Tus notas se cifran. El texto bíblico no es tuyo y no se guarda con ellas.",
+    "errores": {
+      "notaVacia": "Escribe la nota antes de guardarla."
+    }
   }
 }

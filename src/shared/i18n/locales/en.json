@@ -231,5 +231,29 @@
       "tituloLargo": "That's too long for a title.",
       "fechaInvalida": "That date isn't valid."
     }
+  },
+  "biblia": {
+    "titulo": "Bible",
+    "elegirTraduccion": "Choose a translation",
+    "sinTraducciones": "No translations available yet.",
+    "cargandoLibros": "Opening the Bible…",
+    "cargandoCapitulo": "Loading the chapter…",
+    "sinConexion": "This chapter isn't downloaded and you're offline right now.",
+    "capitulo": "Chapter {{numero}}",
+    "capituloAnterior": "Previous chapter",
+    "capituloSiguiente": "Next chapter",
+    "volverALibros": "See the books",
+    "antiguoTestamento": "Old Testament",
+    "nuevoTestamento": "New Testament",
+    "misNotas": "My notes",
+    "nuevaNota": "Write a note",
+    "campoNota": "Your note about this passage",
+    "guardarNota": "Save note",
+    "eliminarNota": "Delete note",
+    "sinNotas": "You haven't written anything about this chapter yet.",
+    "notaPrivada": "Your notes are encrypted. The Bible text isn't yours and isn't stored with them.",
+    "errores": {
+      "notaVacia": "Write the note before saving it."
+    }
   }
 }
