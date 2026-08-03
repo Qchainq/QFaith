@@ -369,6 +369,119 @@ async function faseAutenticada(cuentas) {
     }),
   ]);
 
+  // A siembra también las tablas de Fase 2.
+  //
+  // Sin esto, el aislamiento de nueve tablas con contenido privado —oraciones,
+  // hábitos, notas bíblicas, conversaciones con la IA y el memorial— nunca se
+  // habría comprobado contra un JWT emitido por Supabase. Que la política sea
+  // idéntica sobre el papel no basta: un `force row level security` que se
+  // olvide, o un `grant` de más, solo se ve ejecutándolo.
+  const peticionA = await peticion('/rest/v1/prayers', {
+    token: a.token,
+    metodo: 'POST',
+    cuerpo: { user_id: a.id, status: 'active', visibility: 'private', ...sobre('A') },
+    cabeceras: { Prefer: 'return=representation' },
+  });
+  const idPeticionA = Array.isArray(peticionA.datos) ? peticionA.datos[0]?.id : undefined;
+  comprobar(
+    'A puede crear una petición de oración',
+    peticionA.estado < 300,
+    `HTTP ${peticionA.estado}`,
+  );
+
+  const habitoA = await peticion('/rest/v1/habits', {
+    token: a.token,
+    metodo: 'POST',
+    cuerpo: {
+      user_id: a.id,
+      frequency: 'daily',
+      start_date: '2026-07-01',
+      // El título va dentro del sobre, no en una columna propia: ver la nota
+      // de cabecera de la migración 0007.
+      ...sobre('A'),
+    },
+    cabeceras: { Prefer: 'return=representation' },
+  });
+  const idHabitoA = Array.isArray(habitoA.datos) ? habitoA.datos[0]?.id : undefined;
+  comprobar('A puede crear un hábito', habitoA.estado < 300, `HTTP ${habitoA.estado}`);
+
+  const conversacionA = await peticion('/rest/v1/ai_conversations', {
+    token: a.token,
+    metodo: 'POST',
+    cuerpo: { user_id: a.id, conversation_type: 'general', ...sobre('A') },
+    cabeceras: { Prefer: 'return=representation' },
+  });
+  const idConversacionA = Array.isArray(conversacionA.datos)
+    ? conversacionA.datos[0]?.id
+    : undefined;
+  comprobar(
+    'A puede abrir una conversación con el asistente',
+    conversacionA.estado < 300,
+    `HTTP ${conversacionA.estado}`,
+  );
+
+  await Promise.all([
+    idPeticionA === undefined
+      ? Promise.resolve()
+      : peticion('/rest/v1/prayer_updates', {
+          token: a.token,
+          metodo: 'POST',
+          cuerpo: { user_id: a.id, prayer_id: idPeticionA, ...sobre('A') },
+        }),
+    idHabitoA === undefined
+      ? Promise.resolve()
+      : peticion('/rest/v1/habit_logs', {
+          token: a.token,
+          metodo: 'POST',
+          // Siempre hay sobre, aunque la nota del día esté vacía: así el
+          // motor trata todas las filas igual (migración 0007).
+          cuerpo: {
+            user_id: a.id,
+            habit_id: idHabitoA,
+            completion_date: '2026-07-31',
+            ...sobre('A'),
+          },
+        }),
+    idConversacionA === undefined
+      ? Promise.resolve()
+      : peticion('/rest/v1/ai_messages', {
+          token: a.token,
+          metodo: 'POST',
+          cuerpo: {
+            user_id: a.id,
+            conversation_id: idConversacionA,
+            role: 'usuario',
+            ...sobre('A'),
+          },
+        }),
+    peticion('/rest/v1/memorials', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: {
+        user_id: a.id,
+        ...(idPeticionA === undefined ? {} : { prayer_id: idPeticionA }),
+        occurred_on: '2026-07-31',
+        ...sobre('A'),
+      },
+    }),
+    peticion('/rest/v1/life_library_items', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: {
+        user_id: a.id,
+        source_type: 'diario',
+        source_id: idEntradaA ?? crypto.randomUUID(),
+        ...sobre('A'),
+      },
+      cabeceras: { Prefer: 'resolution=merge-duplicates' },
+    }),
+    peticion('/rest/v1/bible_notes', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: { user_id: a.id, book_code: 'SAL', chapter_number: 23, ...sobre('A') },
+    }),
+  ]);
+
   // B no alcanza nada de A.
   for (const tabla of [
     'journal_entries',
@@ -377,6 +490,15 @@ async function faseAutenticada(cuentas) {
     'user_key_envelopes',
     'recovery_configurations',
     'sync_change_log',
+    'prayers',
+    'prayer_updates',
+    'habits',
+    'habit_logs',
+    'bible_notes',
+    'life_library_items',
+    'ai_conversations',
+    'ai_messages',
+    'memorials',
   ]) {
     // La comprobación solo tiene valor si A sí ve algo ahí.
     const vistoPorA = await peticion(`/rest/v1/${tabla}?select=*`, { token: a.token });

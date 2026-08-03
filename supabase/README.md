@@ -82,9 +82,15 @@ Corre en dos fases:
   acceso anónimo es justo el descuido que esa comprobación existe para
   detectar.
 - **Autenticada** — solo si hay dos cuentas de prueba. Comprueba el
-  aislamiento real entre dos usuarios, el sellado de revisiones por el
-  trigger, que la bitácora no contiene criptogramas, que el borrado físico
-  está prohibido y que los parámetros de Argon2id no se pueden rebajar.
+  aislamiento real entre dos usuarios sobre las quince tablas personales
+  —incluidas oraciones, hábitos, notas bíblicas, conversaciones con la IA y
+  el memorial—, el sellado de revisiones por el trigger, que la bitácora no
+  contiene criptogramas, que el borrado físico está prohibido y que los
+  parámetros de Argon2id no se pueden rebajar.
+
+  Que la política sea idéntica sobre el papel no basta: un `force row level
+  security` que se olvide, o un `grant` de más, solo se ve ejecutándolo
+  contra un JWT emitido por Supabase.
 
 Antes de mirar lo que ve el usuario B, el script siembra contenido de A en
 cada tabla y comprueba que A sí lo ve. Sin eso, «B ve cero filas» en una tabla
