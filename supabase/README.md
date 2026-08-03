@@ -92,6 +92,14 @@ Corre en dos fases:
   security` que se olvide, o un `grant` de más, solo se ve ejecutándolo
   contra un JWT emitido por Supabase.
 
+- **Iglesia** — con la clave de administración. Da de alta una iglesia de
+  prueba, hace a A miembro y a B pastor, y comprueba lo más importante que
+  promete el proyecto: **el pastor de tu iglesia no puede leer tu diario.**
+  Nueve tablas de contenido privado, cero filas, con A viendo las suyas en
+  todas para que la prueba no sea vacía. También que el pastor no puede
+  sustituir la clave pública de compartición de A, que sería la forma de
+  hacer que lo que A comparta con otro acabe llegándole a él.
+
 Antes de mirar lo que ve el usuario B, el script siembra contenido de A en
 cada tabla y comprueba que A sí lo ve. Sin eso, «B ve cero filas» en una tabla
 vacía pasaría igual con RLS desactivado y la comprobación no valdría nada.

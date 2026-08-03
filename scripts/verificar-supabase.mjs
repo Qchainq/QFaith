@@ -76,6 +76,15 @@ const TABLAS = [
   'ai_conversations',
   'ai_messages',
   'memorials',
+  'churches',
+  'church_memberships',
+  'church_groups',
+  'group_memberships',
+  'church_events',
+  'event_registrations',
+  'mentor_relationships',
+  'prayer_shares',
+  'user_sharing_keys',
 ];
 
 const comprobaciones = [];
@@ -625,6 +634,145 @@ async function faseAutenticada(cuentas) {
     'el servidor rechaza parámetros de Argon2id por debajo del mínimo',
     kdfDebil.estado >= 400,
     `HTTP ${kdfDebil.estado}`,
+  );
+
+  await faseIglesia(a, b);
+}
+
+/**
+ * La comprobación más importante del proyecto: **el pastor de tu iglesia no
+ * puede leer tu diario**, contra la base real y con JWT reales.
+ *
+ * La batería SQL local ya lo comprueba, pero sobre un sustituto de `auth`. Un
+ * `force row level security` que se olvidara al aplicar la migración, o un
+ * privilegio de más concedido a mano en el panel, solo se ve aquí.
+ *
+ * Hace falta la clave de administración: crear una iglesia no es una
+ * operación de cliente, y darle el rol de pastor a alguien tampoco.
+ */
+async function faseIglesia(a, b) {
+  if (!secreto) {
+    console.log('\n▸ Fase Iglesia omitida: requiere QFAITH_SUPABASE_SECRET\n');
+    return;
+  }
+
+  console.log('\n▸ Fase Iglesia: A es miembro, B es el pastor\n');
+
+  const administrar = (
+    ruta,
+    cuerpo,
+    prefer = 'resolution=merge-duplicates,return=representation',
+  ) =>
+    peticion(ruta, {
+      token: secreto,
+      metodo: 'POST',
+      cuerpo,
+      cabeceras: { Prefer: prefer, apikey: secreto },
+    });
+
+  const iglesia = await administrar('/rest/v1/churches?on_conflict=slug&select=id', {
+    name: 'Iglesia de verificación',
+    slug: 'qfaith-verificacion',
+    timezone: 'UTC',
+  });
+  const iglesiaId = Array.isArray(iglesia.datos) ? iglesia.datos[0]?.id : undefined;
+  comprobar(
+    'se puede dar de alta una iglesia de prueba',
+    iglesiaId !== undefined,
+    `HTTP ${iglesia.estado}`,
+  );
+  if (iglesiaId === undefined) return;
+
+  await administrar(
+    '/rest/v1/church_memberships?on_conflict=church_id,user_id',
+    {
+      church_id: iglesiaId,
+      user_id: a.id,
+      role: 'member',
+      membership_status: 'active',
+    },
+    'resolution=merge-duplicates',
+  );
+  await administrar(
+    '/rest/v1/church_memberships?on_conflict=church_id,user_id',
+    {
+      church_id: iglesiaId,
+      user_id: b.id,
+      role: 'pastor',
+      membership_status: 'active',
+    },
+    'resolution=merge-duplicates',
+  );
+
+  // La comprobación solo vale si B es de verdad el pastor y ve lo suyo.
+  const membresias = await peticion(
+    `/rest/v1/church_memberships?church_id=eq.${iglesiaId}&select=user_id,role`,
+    { token: b.token },
+  );
+  const filas = Array.isArray(membresias.datos) ? membresias.datos : [];
+  comprobar(
+    'B ve las membresías de su iglesia, así que es pastor de verdad',
+    filas.some((fila) => fila.user_id === b.id && fila.role === 'pastor') &&
+      filas.some((fila) => fila.user_id === a.id),
+    `${filas.length} filas`,
+  );
+
+  // Y no alcanza absolutamente nada de la vida privada de A.
+  for (const tabla of [
+    'journal_entries',
+    'prayers',
+    'memorials',
+    'bible_notes',
+    'life_library_items',
+    'ai_conversations',
+    'ai_messages',
+    'habits',
+    'habit_logs',
+  ]) {
+    const deA = await peticion(`/rest/v1/${tabla}?select=id`, { token: a.token });
+    const cuantasDeA = Array.isArray(deA.datos) ? deA.datos.length : -1;
+    comprobar(
+      `A tiene contenido en ${tabla}, así que la prueba no es vacía`,
+      cuantasDeA >= 1,
+      `${cuantasDeA} filas`,
+    );
+
+    const vistoPorPastor = await peticion(`/rest/v1/${tabla}?select=id`, { token: b.token });
+    const cuantas = Array.isArray(vistoPorPastor.datos) ? vistoPorPastor.datos.length : -1;
+    comprobar(`el pastor NO ve nada de A en ${tabla}`, cuantas === 0, `${cuantas} filas`);
+  }
+
+  // Tampoco puede sustituir la clave pública de compartición de A, que sería
+  // la forma de hacer que lo que A comparta con otro le llegue a él.
+  await peticion('/rest/v1/user_sharing_keys?on_conflict=user_id', {
+    token: a.token,
+    metodo: 'POST',
+    cuerpo: { user_id: a.id, public_key: 'publica-de-A', algorithm: 'x25519' },
+    cabeceras: { Prefer: 'resolution=merge-duplicates' },
+  });
+
+  const suplantacion = await peticion(`/rest/v1/user_sharing_keys?user_id=eq.${a.id}`, {
+    token: b.token,
+    metodo: 'PATCH',
+    cuerpo: { public_key: 'publica-del-pastor' },
+    cabeceras: { Prefer: 'return=representation' },
+  });
+  const cambiadas = Array.isArray(suplantacion.datos) ? suplantacion.datos.length : -1;
+  comprobar(
+    'el pastor no puede sustituir la clave pública de A',
+    cambiadas === 0,
+    `${cambiadas} filas afectadas`,
+  );
+
+  const clave = await peticion(`/rest/v1/user_sharing_keys?user_id=eq.${a.id}&select=public_key`, {
+    token: b.token,
+  });
+  const publica = Array.isArray(clave.datos) ? clave.datos[0]?.public_key : undefined;
+  // Sí puede leerla: es el único modo de poder sellarle algo a alguien.
+  comprobar(
+    'la clave pública de A sigue siendo la suya',
+    publica === 'publica-de-A',
+    String(publica),
   );
 }
 
