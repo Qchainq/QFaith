@@ -2,6 +2,8 @@
 import { useState } from 'react';
 
 import {
+  useAnotarAvance,
+  useAvances,
   useCambiarEstadoPeticion,
   useEliminarPeticion,
   useGuardarPeticion,
@@ -20,6 +22,12 @@ export function OracionContenedor() {
   const guardar = useGuardarPeticion();
   const cambiarEstado = useCambiarEstadoPeticion();
   const eliminar = useEliminarPeticion();
+  const anotar = useAnotarAvance();
+
+  // Los avances cuelgan de una petición ya guardada. Con la lista abierta o
+  // creando una nueva no hay a qué colgarlos, y la consulta queda vacía.
+  const peticionAbierta = vista.nombre === 'editar' ? vista.peticion.id : '';
+  const avances = useAvances(peticionAbierta);
 
   const volver = (): void => setVista({ nombre: 'lista' });
 
@@ -53,6 +61,13 @@ export function OracionContenedor() {
             alEliminar: async (id: string) => {
               await eliminar.mutateAsync(id);
               volver();
+            },
+            avances: avances.data ?? [],
+            anotando: anotar.isPending,
+            alAnotarAvance: async (texto: string) => {
+              // No se vuelve a la lista: anotar un avance es seguir en la
+              // misma petición, no terminar con ella.
+              await anotar.mutateAsync({ peticionId: enEdicion.id, texto });
             },
           })}
     />

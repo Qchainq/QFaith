@@ -7,6 +7,7 @@
 // Todo se escribe primero en local (invariante 4). La subida la hace el motor
 // después y por su cuenta: guardar una entrada nunca espera a la red.
 import type { AlmacenLocal, RegistroLocal } from '@shared/database/tipos';
+import { obtenerVigente } from '@shared/database/lecturaVigente';
 import { generarUuid } from '@shared/services/crypto/aleatoriedad';
 import { cifrar, descifrar } from '@shared/services/crypto/servicioCriptografia';
 import type { ClaveContenido, VinculoRegistro } from '@shared/services/crypto/tipos';
@@ -119,7 +120,7 @@ export function crearRepositorioDiario(dependencias: DependenciasRepositorio) {
   }
 
   async function obtener(id: string): Promise<EntradaDiario | null> {
-    const registro = await almacen.obtener(TIPO_ENTIDAD, id);
+    const registro = await obtenerVigente(almacen, TIPO_ENTIDAD, id);
     return registro === null ? null : aEntrada(registro);
   }
 

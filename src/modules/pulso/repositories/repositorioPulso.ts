@@ -9,6 +9,7 @@
 // añade otra. Sin eso, dos dispositivos sin conexión dejarían dos pulsos del
 // mismo día y ninguno sabría cuál vale.
 import type { AlmacenLocal, RegistroLocal } from '@shared/database/tipos';
+import { obtenerVigente } from '@shared/database/lecturaVigente';
 import { generarUuidDesde } from '@shared/services/crypto/aleatoriedad';
 import { cifrar, descifrar } from '@shared/services/crypto/servicioCriptografia';
 import type { ClaveContenido, VinculoRegistro } from '@shared/services/crypto/tipos';
@@ -96,7 +97,7 @@ export function crearRepositorioPulso(dependencias: DependenciasRepositorioPulso
   }
 
   async function deLaFecha(fecha: string): Promise<Pulso | null> {
-    const registro = await almacen.obtener(TIPO_PULSO, idDelDia(fecha));
+    const registro = await obtenerVigente(almacen, TIPO_PULSO, idDelDia(fecha));
     return registro === null ? null : aPulso(registro);
   }
 

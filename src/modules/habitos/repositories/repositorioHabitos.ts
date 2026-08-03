@@ -6,6 +6,7 @@
 // de crear otro. Sin eso, dos dispositivos sin conexión crearían dos filas
 // del mismo día y el recuento saldría doblado.
 import type { AlmacenLocal, Metadatos, RegistroLocal } from '@shared/database/tipos';
+import { obtenerVigente } from '@shared/database/lecturaVigente';
 import { generarUuid } from '@shared/services/crypto/aleatoriedad';
 import { cifrar, descifrar } from '@shared/services/crypto/servicioCriptografia';
 import type { ClaveContenido, VinculoRegistro } from '@shared/services/crypto/tipos';
@@ -167,7 +168,7 @@ export function crearRepositorioHabitos(dependencias: DependenciasRepositorioHab
   }
 
   async function obtener(id: string): Promise<Habito | null> {
-    const registro = await almacen.obtener(TIPO_HABITO, id);
+    const registro = await obtenerVigente(almacen, TIPO_HABITO, id);
     return registro === null ? null : aHabito(registro);
   }
 

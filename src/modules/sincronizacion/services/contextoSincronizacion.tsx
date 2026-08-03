@@ -20,6 +20,8 @@ import {
 } from '@shared/services/sync/motorSincronizacion';
 import { configuracion } from '@shared/constants/configuracion';
 
+import { sincronizarConEstado } from '../use-cases/sincronizarConEstado';
+
 export interface Sincronizacion {
   readonly motor: MotorSincronizacion;
   readonly almacen: AlmacenLocal;
@@ -39,6 +41,14 @@ export interface PropsProveedorSincronizacion {
   }) => Promise<Sincronizacion>;
   /** Qué mostrar mientras la base local se abre. */
   readonly mientrasCarga?: ReactNode;
+  /**
+   * Sincronizar sola, al montar y cada intervalo.
+   *
+   * Se puede apagar en las pruebas de módulo: allí lo que se comprueba es la
+   * pantalla, y un temporizador de fondo dejaría trabajo pendiente al
+   * terminar cada caso.
+   */
+  readonly sincronizarEnSegundoPlano?: boolean;
 }
 
 async function construirPorDefecto(parametros: {
@@ -69,6 +79,7 @@ export function ProveedorSincronizacion({
   children,
   construir = construirPorDefecto,
   mientrasCarga = null,
+  sincronizarEnSegundoPlano = true,
 }: PropsProveedorSincronizacion) {
   const [sincronizacion, setSincronizacion] = useState<Sincronizacion | null>(null);
 
@@ -89,6 +100,31 @@ export function ProveedorSincronizacion({
       vigente = false;
     };
   }, [usuarioId, dispositivoId, construir]);
+
+  // Nada dispara la sincronización si no se hace aquí: el motor sabía
+  // sincronizar y nadie se lo pedía, así que los cambios se quedaban en el
+  // dispositivo para siempre. Offline-first significa primero local, no solo
+  // local.
+  //
+  // Se lanza al montar y después cada intervalo. Nunca bloquea la interfaz:
+  // `sincronizarConEstado` no lanza y el resultado se cuenta en el estado
+  // global, que es de donde lee el indicador.
+  useEffect(() => {
+    if (sincronizacion === null || !sincronizarEnSegundoPlano) return;
+
+    let vigente = true;
+    const intentar = (): void => {
+      if (vigente) void sincronizarConEstado(sincronizacion.motor);
+    };
+
+    intentar();
+    const temporizador = setInterval(intentar, configuracion.sincronizacion.intervaloMs);
+
+    return () => {
+      vigente = false;
+      clearInterval(temporizador);
+    };
+  }, [sincronizacion, sincronizarEnSegundoPlano]);
 
   if (sincronizacion === null) {
     return <>{mientrasCarga}</>;

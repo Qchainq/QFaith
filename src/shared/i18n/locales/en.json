@@ -192,7 +192,10 @@
       "tituloLargo": "That's too long for a title.",
       "demasiadasPersonas": "That's too many people for one request.",
       "avanceVacio": "Write the update before saving it."
-    }
+    },
+    "campoAvance": "What happened?",
+    "sinAvances": "You haven't written anything about this prayer yet.",
+    "guardarAvance": "Save update"
   },
   "habitos": {
     "titulo": "Habits",

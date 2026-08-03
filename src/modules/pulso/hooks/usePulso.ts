@@ -10,8 +10,12 @@ import { crearRepositorioPulso, type RepositorioPulso } from '../repositories/re
 
 export const clavesConsulta = {
   hoy: (usuarioId: string, fecha: string) => ['pulso', usuarioId, 'dia', fecha] as const,
-  historial: (usuarioId: string) => ['pulso', usuarioId, 'historial'] as const,
 };
+
+// No hay hook de historial a propósito. El repositorio sabe listar los días
+// —hace falta para exportar y para la papelera—, pero la pantalla no los
+// enseña: ver «llevas cuatro días triste» no ayuda a nadie a estar mejor
+// (invariante 12).
 
 export function useRepositorioPulso(): RepositorioPulso {
   const { motor, almacen, usuarioId } = useSincronizacion();
@@ -36,16 +40,6 @@ export function usePulsoDeHoy(hoy: string = fechaDeHoy()) {
   return useQuery({
     queryKey: clavesConsulta.hoy(usuarioId, hoy),
     queryFn: () => repositorio.deLaFecha(hoy),
-  });
-}
-
-export function useHistorialDePulso() {
-  const repositorio = useRepositorioPulso();
-  const { usuarioId } = useSincronizacion();
-
-  return useQuery({
-    queryKey: clavesConsulta.historial(usuarioId),
-    queryFn: () => repositorio.listar(),
   });
 }
 

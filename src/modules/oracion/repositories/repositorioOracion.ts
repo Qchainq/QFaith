@@ -8,6 +8,7 @@
 //   · Los avances viven en su propia tabla. Sobrescribir la petición cada vez
 //     perdería la cronología, que es lo que hace valiosa una respuesta.
 import type { AlmacenLocal, RegistroLocal } from '@shared/database/tipos';
+import { obtenerVigente } from '@shared/database/lecturaVigente';
 import { generarUuid } from '@shared/services/crypto/aleatoriedad';
 import { cifrar, descifrar } from '@shared/services/crypto/servicioCriptografia';
 import type { ClaveContenido, VinculoRegistro } from '@shared/services/crypto/tipos';
@@ -158,7 +159,7 @@ export function crearRepositorioOracion(dependencias: DependenciasRepositorioOra
   }
 
   async function obtener(id: string): Promise<Peticion | null> {
-    const registro = await almacen.obtener(TIPO_PETICION, id);
+    const registro = await obtenerVigente(almacen, TIPO_PETICION, id);
     return registro === null ? null : aPeticion(registro);
   }
 
@@ -202,7 +203,7 @@ export function crearRepositorioOracion(dependencias: DependenciasRepositorioOra
 
   /** Cambia el estado conservando el contenido cifrado tal cual. */
   async function cambiarEstado(id: string, estado: EstadoPeticion): Promise<Peticion | null> {
-    const registro = await almacen.obtener(TIPO_PETICION, id);
+    const registro = await obtenerVigente(almacen, TIPO_PETICION, id);
     const actual = registro === null ? null : aPeticion(registro);
     if (registro === null || actual === null) {
       return null;

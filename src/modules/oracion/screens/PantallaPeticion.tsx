@@ -17,6 +17,7 @@ import { useTema } from '@shared/theme/ProveedorTema';
 import {
   CATEGORIAS_PETICION,
   type BorradorPeticion,
+  type AvancePeticion,
   type CategoriaPeticion,
   type EstadoPeticion,
   type Peticion,
@@ -29,6 +30,15 @@ export interface PropsPantallaPeticion {
   readonly alCancelar: () => void;
   readonly alCambiarEstado?: (estado: EstadoPeticion) => Promise<void>;
   readonly alEliminar?: (id: string) => Promise<void>;
+  /**
+   * Recorrido anotado de la petición.
+   *
+   * Es lo que después da sentido a un memorial: sin los avances, una oración
+   * respondida es un interruptor; con ellos, es una historia.
+   */
+  readonly avances?: readonly AvancePeticion[];
+  readonly alAnotarAvance?: (texto: string) => Promise<void>;
+  readonly anotando?: boolean;
 }
 
 const separarPersonas = (texto: string): string[] =>
@@ -44,6 +54,9 @@ export function PantallaPeticion({
   alCancelar,
   alCambiarEstado,
   alEliminar,
+  avances,
+  alAnotarAvance,
+  anotando = false,
 }: PropsPantallaPeticion) {
   const { t } = useTranslation();
   const tema = useTema();
@@ -53,6 +66,7 @@ export function PantallaPeticion({
   const [personas, setPersonas] = useState((peticion?.personas ?? []).join(', '));
   const [categoria, setCategoria] = useState<CategoriaPeticion | null>(peticion?.categoria ?? null);
   const [error, setError] = useState<string | null>(null);
+  const [avance, setAvance] = useState('');
 
   async function guardar(): Promise<void> {
     setError(null);
@@ -170,6 +184,49 @@ export function PantallaPeticion({
                 onPress={() => void alCambiarEstado('active')}
               />
             )}
+          </View>
+        ) : null}
+
+        {/* Los avances solo existen sobre una petición ya guardada: no hay
+            dónde colgarlos mientras se está creando. */}
+        {peticion !== undefined && alAnotarAvance !== undefined ? (
+          <View style={{ marginTop: tema.espaciado.lg }}>
+            <Texto nivel="subtitulo">{t('oracion.avances')}</Texto>
+
+            {(avances ?? []).length === 0 ? (
+              <Texto nivel="texto" tono="secundario">
+                {t('oracion.sinAvances')}
+              </Texto>
+            ) : (
+              (avances ?? []).map((avance) => (
+                <View key={avance.id} style={{ marginTop: tema.espaciado.sm }}>
+                  <Texto nivel="texto">{avance.texto}</Texto>
+                  <Texto nivel="nota" tono="tenue">
+                    {avance.creadoEn.slice(0, 10)}
+                  </Texto>
+                </View>
+              ))
+            )}
+
+            <View style={{ marginTop: tema.espaciado.sm }}>
+              <CampoTexto
+                etiqueta={t('oracion.campoAvance')}
+                value={avance}
+                onChangeText={setAvance}
+                multiline
+              />
+            </View>
+            <Boton
+              variante="secundario"
+              etiqueta={anotando ? t('comun.guardando') : t('oracion.guardarAvance')}
+              onPress={() => {
+                if (avance.trim().length === 0) return;
+                // El campo se limpia solo cuando el avance quedó guardado.
+                void alAnotarAvance(avance).then(() => setAvance(''));
+              }}
+              cargando={anotando}
+              deshabilitado={avance.trim().length === 0}
+            />
           </View>
         ) : null}
 

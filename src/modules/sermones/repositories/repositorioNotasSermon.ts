@@ -5,6 +5,7 @@
 // repositorio de Iglesia. Que estén separados no es casualidad — es lo que
 // hace imposible que una nota acabe compartiendo política con un sermón.
 import type { AlmacenLocal, RegistroLocal } from '@shared/database/tipos';
+import { obtenerVigente } from '@shared/database/lecturaVigente';
 import { generarUuid } from '@shared/services/crypto/aleatoriedad';
 import { cifrar, descifrar } from '@shared/services/crypto/servicioCriptografia';
 import type { ClaveContenido, VinculoRegistro } from '@shared/services/crypto/tipos';
@@ -113,7 +114,7 @@ export function crearRepositorioSermones(dependencias: DependenciasRepositorioSe
   }
 
   async function obtenerNota(id: string): Promise<NotaSermon | null> {
-    const registro = await almacen.obtener(TIPO_NOTA, id);
+    const registro = await obtenerVigente(almacen, TIPO_NOTA, id);
     return registro === null ? null : aNota(registro);
   }
 
@@ -153,7 +154,7 @@ export function crearRepositorioSermones(dependencias: DependenciasRepositorioSe
   async function guardarAccion(borrador: BorradorAccion): Promise<AccionSermon> {
     const id = borrador.id ?? generarUuid();
     const registroPrevio =
-      borrador.id === undefined ? null : await almacen.obtener(TIPO_ACCION, id);
+      borrador.id === undefined ? null : await obtenerVigente(almacen, TIPO_ACCION, id);
     const existente = registroPrevio === null ? null : aAccion(registroPrevio);
 
     const registro = await motor.registrarCambioLocal({
@@ -176,7 +177,7 @@ export function crearRepositorioSermones(dependencias: DependenciasRepositorioSe
 
   /** Marca o desmarca una acción sin volver a cifrar su texto. */
   async function alternarHecha(id: string, ahora: string): Promise<AccionSermon | null> {
-    const registro = await almacen.obtener(TIPO_ACCION, id);
+    const registro = await obtenerVigente(almacen, TIPO_ACCION, id);
     const actual = registro === null ? null : aAccion(registro);
     if (registro === null || actual === null) return null;
 

@@ -192,7 +192,10 @@
       "tituloLargo": "Es demasiado largo para un título.",
       "demasiadasPersonas": "Son demasiadas personas para una sola petición.",
       "avanceVacio": "Escribe el avance antes de guardarlo."
-    }
+    },
+    "campoAvance": "¿Qué ha pasado?",
+    "sinAvances": "Todavía no has anotado nada sobre esta oración.",
+    "guardarAvance": "Guardar el avance"
   },
   "habitos": {
     "titulo": "Hábitos",

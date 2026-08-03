@@ -59,6 +59,42 @@ describe('alta', () => {
       claveMensaje: 'errores.cuenta.correoYaRegistrado',
     });
   });
+
+  it.each([
+    ['weak_password', 'CONTRASENA_DEBIL', 'errores.cuenta.contrasenaDebil'],
+    ['email_not_confirmed', 'CORREO_SIN_CONFIRMAR', 'errores.cuenta.correoSinConfirmar'],
+  ])('traduce «%s» a un mensaje que dice qué hacer', async (codigo, esperado, clave) => {
+    // Sin traducir, la pantalla enseñaría el texto en inglés del proveedor y
+    // la persona no sabría si el problema es suyo o del servicio.
+    mockAuth.signUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: { code: codigo },
+    });
+
+    await expect(registrar(CREDENCIALES)).rejects.toMatchObject({
+      codigo: esperado,
+      claveMensaje: clave,
+    });
+  });
+
+  it('un error sin código no se queda sin traducir', async () => {
+    mockAuth.signUp.mockResolvedValue({ data: { user: null, session: null }, error: {} });
+
+    await expect(registrar(CREDENCIALES)).rejects.toMatchObject({
+      codigo: 'AUTENTICACION_FALLIDA',
+      claveMensaje: 'errores.autenticacion',
+    });
+  });
+
+  it('un alta que no devuelve usuario falla en vez de seguir sin identidad', async () => {
+    // Sin `user.id` no hay a quién asociar las claves: continuar dejaría
+    // sobres cifrados sin dueño.
+    mockAuth.signUp.mockResolvedValue({ data: { user: null, session: null }, error: null });
+
+    await expect(registrar(CREDENCIALES)).rejects.toMatchObject({
+      codigo: 'ALTA_SIN_USUARIO',
+    });
+  });
 });
 
 describe('inicio de sesión', () => {

@@ -5,6 +5,7 @@
 // oración, el recuerdo de la respuesta sigue en pie. Por eso `peticionId` es
 // una referencia suelta y nada aquí la da por buena.
 import type { AlmacenLocal, RegistroLocal } from '@shared/database/tipos';
+import { obtenerVigente } from '@shared/database/lecturaVigente';
 import { generarUuid } from '@shared/services/crypto/aleatoriedad';
 import { cifrar, descifrar } from '@shared/services/crypto/servicioCriptografia';
 import type { ClaveContenido, VinculoRegistro } from '@shared/services/crypto/tipos';
@@ -94,7 +95,7 @@ export function crearRepositorioMemorial(dependencias: DependenciasRepositorioMe
   }
 
   async function obtener(id: string): Promise<Memorial | null> {
-    const registro = await almacen.obtener(TIPO_MEMORIAL, id);
+    const registro = await obtenerVigente(almacen, TIPO_MEMORIAL, id);
     return registro === null ? null : aMemorial(registro);
   }
 
@@ -135,7 +136,7 @@ export function crearRepositorioMemorial(dependencias: DependenciasRepositorioMe
 
   /** Marca o desmarca como favorito sin volver a cifrar el texto. */
   async function alternarFavorito(id: string): Promise<Memorial | null> {
-    const registro = await almacen.obtener(TIPO_MEMORIAL, id);
+    const registro = await obtenerVigente(almacen, TIPO_MEMORIAL, id);
     const actual = registro === null ? null : aMemorial(registro);
     if (registro === null || actual === null) return null;
 

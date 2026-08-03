@@ -142,3 +142,84 @@ describe('vida de una petición', () => {
     expect(registros[0]?.eliminadoEn).not.toBeNull();
   });
 });
+
+// Avances: el punto 6 del recorrido end-to-end obligatorio (Documento 14).
+//
+// Sin ellos, una oración respondida es un interruptor. Con ellos es una
+// historia, y es lo que después da sentido a un memorial.
+describe('avances de una petición', () => {
+  const abrir = async (titulo: string) => {
+    await escribirPeticion(titulo);
+    fireEvent.press(await screen.findByRole('button', { name: titulo }));
+  };
+
+  it('se anotan y quedan visibles en la propia petición', async () => {
+    montar();
+    await abrir('Por el trabajo de mi hermana');
+
+    fireEvent.changeText(
+      await screen.findByLabelText('¿Qué ha pasado?'),
+      'La han llamado para una segunda entrevista.',
+    );
+    fireEvent.press(screen.getByRole('button', { name: 'Guardar el avance' }));
+
+    expect(await screen.findByText('La han llamado para una segunda entrevista.')).toBeTruthy();
+  });
+
+  it('anotar uno no cierra la petición: se sigue en ella', async () => {
+    montar();
+    await abrir('Sigo aquí');
+
+    fireEvent.changeText(await screen.findByLabelText('¿Qué ha pasado?'), 'Algo pasó');
+    fireEvent.press(screen.getByRole('button', { name: 'Guardar el avance' }));
+    await screen.findByText('Algo pasó');
+
+    // El campo del título sigue en pantalla: no se ha vuelto a la lista.
+    expect(screen.getByLabelText('¿Por qué quieres orar?')).toBeTruthy();
+  });
+
+  it('el campo se limpia solo cuando quedó guardado', async () => {
+    montar();
+    await abrir('Otra');
+
+    const campo = await screen.findByLabelText('¿Qué ha pasado?');
+    fireEvent.changeText(campo, 'Un avance');
+    fireEvent.press(screen.getByRole('button', { name: 'Guardar el avance' }));
+
+    await waitFor(() => expect(screen.getByLabelText('¿Qué ha pasado?').props.value).toBe(''));
+  });
+
+  it('el estado vacío no reprocha no haber anotado nada', async () => {
+    montar();
+    await abrir('Recién creada');
+
+    expect(await screen.findByText('Todavía no has anotado nada sobre esta oración.')).toBeTruthy();
+  });
+
+  it('el servidor no ve el texto del avance', async () => {
+    montar();
+    await abrir('Privada');
+
+    fireEvent.changeText(
+      await screen.findByLabelText('¿Qué ha pasado?'),
+      'Los resultados salieron limpios.',
+    );
+    fireEvent.press(screen.getByRole('button', { name: 'Guardar el avance' }));
+    await screen.findByText('Los resultados salieron limpios.');
+
+    await sincronizacion.motor.sincronizar();
+
+    const crudo = JSON.stringify(servidor.filas());
+    expect(crudo).not.toContain('resultados');
+    // Sí ve de qué petición cuelga: lo necesita para ordenarlos sin descifrar.
+    expect(crudo).toContain('prayer_updates');
+  });
+
+  it('creando una petición nueva no se ofrecen avances', async () => {
+    // No hay a qué colgarlos mientras la petición no existe.
+    montar();
+    fireEvent.press(await screen.findByRole('button', { name: 'Nueva petición' }));
+
+    expect(screen.queryByLabelText('¿Qué ha pasado?')).toBeNull();
+  });
+});
