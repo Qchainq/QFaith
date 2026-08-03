@@ -12,7 +12,8 @@
     "biblia": "Bible",
     "oracion": "Prayer",
     "ia": "AI",
-    "perfil": "Profile"
+    "perfil": "Profile",
+    "memorial": "Memorial"
   },
   "inicio": {
     "saludoManana": "Good morning",
@@ -313,5 +314,34 @@
     "tu": "You",
     "asistente": "Companion",
     "sinMensajes": "Write whatever you want. No one else reads it."
+  },
+  "memorial": {
+    "titulo": "Memorial",
+    "descripcion": "What you have seen God do. Kept here so you can read it again.",
+    "nuevo": "Record an answer",
+    "cargando": "Opening your memorial…",
+    "sinMemoriales": "You haven't written anything here yet. When you want to remember something that happened, this is where it goes.",
+    "ilegibles_one": "There is {{count}} memorial this device cannot read.",
+    "ilegibles_other": "There are {{count}} memorials this device cannot read.",
+    "todos": "All",
+    "favoritos": "Favourites",
+    "sinFecha": "No date",
+    "campoTitulo": "What happened?",
+    "campoRelato": "Tell it in your own words",
+    "campoPersonas": "People (comma separated)",
+    "campoFecha": "What day was it? (YYYY-MM-DD)",
+    "guardar": "Save",
+    "guardando": "Saving…",
+    "cancelar": "Cancel",
+    "marcarFavorito": "Mark as favourite",
+    "quitarFavorito": "Remove from favourites",
+    "eliminar": "Delete",
+    "desdeOracion": "It came from a prayer you marked as answered.",
+    "errores": {
+      "tituloVacio": "Write at least a few words about what happened.",
+      "tituloLargo": "The title is too long.",
+      "demasiadasPersonas": "That's too many people for a single memorial.",
+      "fechaInvalida": "The date must look like YYYY-MM-DD."
+    }
   }
 }

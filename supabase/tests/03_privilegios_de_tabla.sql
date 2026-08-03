@@ -57,7 +57,10 @@ declare
     ['authenticated', 'bible_translations', 'UPDATE'],
     ['authenticated', 'life_library_items', 'DELETE'],
     ['authenticated', 'ai_conversations', 'DELETE'],
-    ['authenticated', 'ai_messages', 'DELETE']
+    ['authenticated', 'ai_messages', 'DELETE'],
+    -- El memorial es lo último que debería poder borrarse de golpe: alguien
+    -- puede retirarlo en un mal día y quererlo de vuelta al siguiente.
+    ['authenticated', 'memorials', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -117,7 +120,8 @@ declare
     ['life_library_items', 'UPDATE'],
     ['ai_conversations', 'SELECT'], ['ai_conversations', 'INSERT'],
     ['ai_conversations', 'UPDATE'],
-    ['ai_messages', 'SELECT'], ['ai_messages', 'INSERT'], ['ai_messages', 'UPDATE']
+    ['ai_messages', 'SELECT'], ['ai_messages', 'INSERT'], ['ai_messages', 'UPDATE'],
+    ['memorials', 'SELECT'], ['memorials', 'INSERT'], ['memorials', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

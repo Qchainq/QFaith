@@ -107,6 +107,12 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
       'verse_end',
     ],
   },
+  memorials: {
+    tabla: 'memorials',
+    // La petición de origen y la fecha del recuerdo son lo único que el
+    // servidor ve: el relato entero va dentro del sobre.
+    columnasMetadatos: ['prayer_id', 'occurred_on', 'is_favorite'],
+  },
 };
 
 const COLUMNAS_COMUNES = [

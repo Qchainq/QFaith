@@ -64,6 +64,18 @@ const TABLAS = [
   'sync_change_log',
   'sync_conflicts',
   'audit_events',
+  // Fase 2. Se comprueban igual: una tabla nueva que se olvide de revocar el
+  // acceso anónimo es exactamente el descuido que esta lista existe para
+  // detectar.
+  'prayers',
+  'prayer_updates',
+  'habits',
+  'habit_logs',
+  'bible_notes',
+  'life_library_items',
+  'ai_conversations',
+  'ai_messages',
+  'memorials',
 ];
 
 const comprobaciones = [];

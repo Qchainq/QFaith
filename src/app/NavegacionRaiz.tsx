@@ -13,6 +13,7 @@ import { BibliotecaContenedor } from '@modules/biblioteca-vida/screens/Bibliotec
 import { HabitosContenedor } from '@modules/habitos/screens/HabitosContenedor';
 import { IaContenedor } from '@modules/ia/screens/IaContenedor';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
+import { MemorialContenedor } from '@modules/memorial/screens/MemorialContenedor';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PantallaPerfil } from '@modules/perfil/screens/PantallaPerfil';
 import { useTema } from '@shared/theme/ProveedorTema';
@@ -35,6 +36,7 @@ function NavegacionInicio() {
             alAbrirDiario={() => navigation.navigate('Diario')}
             alAbrirHabitos={() => navigation.navigate('Habitos')}
             alAbrirBiblioteca={() => navigation.navigate('Biblioteca')}
+            alAbrirMemorial={() => navigation.navigate('Memorial')}
           />
         )}
       </PilaInicio.Screen>
@@ -52,6 +54,11 @@ function NavegacionInicio() {
         name="Biblioteca"
         component={BibliotecaContenedor}
         options={{ title: t('biblioteca.titulo'), headerShown: false }}
+      />
+      <PilaInicio.Screen
+        name="Memorial"
+        component={MemorialContenedor}
+        options={{ title: t('memorial.titulo'), headerShown: false }}
       />
     </PilaInicio.Navigator>
   );

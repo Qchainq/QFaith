@@ -12,7 +12,8 @@
     "biblia": "Biblia",
     "oracion": "Oración",
     "ia": "IA",
-    "perfil": "Perfil"
+    "perfil": "Perfil",
+    "memorial": "Memorial"
   },
   "inicio": {
     "saludoManana": "Buenos días",
@@ -313,5 +314,34 @@
     "tu": "Tú",
     "asistente": "Acompañante",
     "sinMensajes": "Escribe lo que quieras. Nadie más lo lee."
+  },
+  "memorial": {
+    "titulo": "Memorial",
+    "descripcion": "Lo que has visto que Dios hizo. Guardado aquí para poder volver a leerlo.",
+    "nuevo": "Anotar una respuesta",
+    "cargando": "Abriendo tu memorial…",
+    "sinMemoriales": "Todavía no has anotado nada aquí. Cuando quieras recordar algo que pasó, este es su sitio.",
+    "ilegibles_one": "Hay {{count}} memorial que este dispositivo no puede leer.",
+    "ilegibles_other": "Hay {{count}} memoriales que este dispositivo no puede leer.",
+    "todos": "Todos",
+    "favoritos": "Favoritos",
+    "sinFecha": "Sin fecha",
+    "campoTitulo": "¿Qué pasó?",
+    "campoRelato": "Cuéntalo con tus palabras",
+    "campoPersonas": "Personas (separadas por comas)",
+    "campoFecha": "¿Qué día fue? (AAAA-MM-DD)",
+    "guardar": "Guardar",
+    "guardando": "Guardando…",
+    "cancelar": "Cancelar",
+    "marcarFavorito": "Marcar como favorito",
+    "quitarFavorito": "Quitar de favoritos",
+    "eliminar": "Eliminar",
+    "desdeOracion": "Nació de una oración que marcaste respondida.",
+    "errores": {
+      "tituloVacio": "Escribe al menos unas palabras sobre qué pasó.",
+      "tituloLargo": "El título es demasiado largo.",
+      "demasiadasPersonas": "Son demasiadas personas para un solo memorial.",
+      "fechaInvalida": "La fecha debe tener la forma AAAA-MM-DD."
+    }
   }
 }
