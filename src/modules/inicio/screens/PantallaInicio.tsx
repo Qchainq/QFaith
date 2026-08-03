@@ -16,6 +16,7 @@ export interface PropsPantallaInicio {
   readonly alAbrirHabitos?: () => void;
   readonly alAbrirBiblioteca?: () => void;
   readonly alAbrirMemorial?: () => void;
+  readonly alAbrirIglesia?: () => void;
 }
 
 export function PantallaInicio({
@@ -23,6 +24,7 @@ export function PantallaInicio({
   alAbrirHabitos,
   alAbrirBiblioteca,
   alAbrirMemorial,
+  alAbrirIglesia,
 }: PropsPantallaInicio = {}) {
   const { t } = useTranslation();
   const tema = useTema();
@@ -58,6 +60,12 @@ export function PantallaInicio({
       {alAbrirMemorial === undefined ? null : (
         <View style={{ marginTop: tema.espaciado.sm }}>
           <Boton variante="secundario" etiqueta={t('memorial.titulo')} onPress={alAbrirMemorial} />
+        </View>
+      )}
+
+      {alAbrirIglesia === undefined ? null : (
+        <View style={{ marginTop: tema.espaciado.sm }}>
+          <Boton variante="secundario" etiqueta={t('iglesia.titulo')} onPress={alAbrirIglesia} />
         </View>
       )}
     </PantallaBase>

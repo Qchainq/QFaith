@@ -12,6 +12,7 @@ import { DiarioContenedor } from '@modules/diario/screens/DiarioContenedor';
 import { BibliotecaContenedor } from '@modules/biblioteca-vida/screens/BibliotecaContenedor';
 import { HabitosContenedor } from '@modules/habitos/screens/HabitosContenedor';
 import { IaContenedor } from '@modules/ia/screens/IaContenedor';
+import { IglesiaContenedor } from '@modules/iglesia/screens/IglesiaContenedor';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { MemorialContenedor } from '@modules/memorial/screens/MemorialContenedor';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
@@ -37,6 +38,7 @@ function NavegacionInicio() {
             alAbrirHabitos={() => navigation.navigate('Habitos')}
             alAbrirBiblioteca={() => navigation.navigate('Biblioteca')}
             alAbrirMemorial={() => navigation.navigate('Memorial')}
+            alAbrirIglesia={() => navigation.navigate('Iglesia')}
           />
         )}
       </PilaInicio.Screen>
@@ -59,6 +61,11 @@ function NavegacionInicio() {
         name="Memorial"
         component={MemorialContenedor}
         options={{ title: t('memorial.titulo'), headerShown: false }}
+      />
+      <PilaInicio.Screen
+        name="Iglesia"
+        component={IglesiaContenedor}
+        options={{ title: t('iglesia.titulo'), headerShown: false }}
       />
     </PilaInicio.Navigator>
   );

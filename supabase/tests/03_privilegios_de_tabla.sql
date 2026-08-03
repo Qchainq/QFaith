@@ -60,7 +60,24 @@ declare
     ['authenticated', 'ai_messages', 'DELETE'],
     -- El memorial es lo último que debería poder borrarse de golpe: alguien
     -- puede retirarlo en un mal día y quererlo de vuelta al siguiente.
-    ['authenticated', 'memorials', 'DELETE']
+    ['authenticated', 'memorials', 'DELETE'],
+    -- Iglesia: nada se borra de golpe. Las membresías se marcan, los eventos
+    -- se cancelan y las comparticiones se revocan. Un borrado físico dejaría
+    -- al otro lado sin forma de saber que algo cambió.
+    ['authenticated', 'churches', 'DELETE'],
+    -- Crear una iglesia no es una operación de cliente: la da de alta un
+    -- proceso administrativo. Si cualquiera pudiera, el buscador de iglesias
+    -- se llenaría de entradas falsas con nombres de iglesias reales.
+    ['authenticated', 'churches', 'INSERT'],
+    ['authenticated', 'church_memberships', 'DELETE'],
+    ['authenticated', 'church_groups', 'DELETE'],
+    ['authenticated', 'group_memberships', 'DELETE'],
+    ['authenticated', 'church_events', 'DELETE'],
+    ['authenticated', 'event_registrations', 'DELETE'],
+    ['authenticated', 'mentor_relationships', 'DELETE'],
+    ['authenticated', 'prayer_shares', 'DELETE'],
+    -- Borrar la clave pública de alguien le dejaría sin poder recibir nada.
+    ['authenticated', 'user_sharing_keys', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -121,7 +138,21 @@ declare
     ['ai_conversations', 'SELECT'], ['ai_conversations', 'INSERT'],
     ['ai_conversations', 'UPDATE'],
     ['ai_messages', 'SELECT'], ['ai_messages', 'INSERT'], ['ai_messages', 'UPDATE'],
-    ['memorials', 'SELECT'], ['memorials', 'INSERT'], ['memorials', 'UPDATE']
+    ['memorials', 'SELECT'], ['memorials', 'INSERT'], ['memorials', 'UPDATE'],
+    ['churches', 'SELECT'], ['churches', 'UPDATE'],
+    ['church_memberships', 'SELECT'], ['church_memberships', 'INSERT'],
+    ['church_memberships', 'UPDATE'],
+    ['church_groups', 'SELECT'], ['church_groups', 'INSERT'], ['church_groups', 'UPDATE'],
+    ['group_memberships', 'SELECT'], ['group_memberships', 'INSERT'],
+    ['group_memberships', 'UPDATE'],
+    ['church_events', 'SELECT'], ['church_events', 'INSERT'], ['church_events', 'UPDATE'],
+    ['event_registrations', 'SELECT'], ['event_registrations', 'INSERT'],
+    ['event_registrations', 'UPDATE'],
+    ['mentor_relationships', 'SELECT'], ['mentor_relationships', 'INSERT'],
+    ['mentor_relationships', 'UPDATE'],
+    ['prayer_shares', 'SELECT'], ['prayer_shares', 'INSERT'], ['prayer_shares', 'UPDATE'],
+    ['user_sharing_keys', 'SELECT'], ['user_sharing_keys', 'INSERT'],
+    ['user_sharing_keys', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

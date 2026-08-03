@@ -13,7 +13,8 @@
     "oracion": "Prayer",
     "ia": "AI",
     "perfil": "Profile",
-    "memorial": "Memorial"
+    "memorial": "Memorial",
+    "iglesia": "Church"
   },
   "inicio": {
     "saludoManana": "Good morning",
@@ -418,6 +419,78 @@
       "biometriaNoDisponible": "This device has no fingerprint or face recognition.",
       "biometriaSinConfigurar": "Set up fingerprint or face in your phone's settings and come back.",
       "noRevocarEsteDispositivo": "To leave this device, sign out."
+    }
+  },
+  "iglesia": {
+    "titulo": "Church",
+    "cargando": "Opening your church…",
+    "sinIglesia": "You don't belong to a church yet. You can join with a code, or keep using QFaith without one: nothing of yours depends on this.",
+    "buscar": "Search by code",
+    "campoCodigo": "Church code",
+    "unirse": "Ask to join",
+    "solicitudEnviada": "Your request is pending. They'll let you know when it's accepted.",
+    "abandonar": "Leave this church",
+    "abandonarConfirmar": "Leave this church? You can come back whenever you want.",
+    "noEncontrada": "No church has that code.",
+    "garantia": "Your church can never see your journal, your private prayers, your memorial or your conversations. Not the pastor, not an administrator.",
+    "roles": {
+      "visitor": "Visitor",
+      "member": "Member",
+      "mentor": "Mentor",
+      "leader": "Leader",
+      "pastor": "Pastor",
+      "administrator": "Administrator"
+    },
+    "estados": {
+      "pending": "Pending",
+      "active": "Active",
+      "inactive": "Inactive",
+      "left": "Left"
+    },
+    "grupos": {
+      "titulo": "Groups",
+      "sinGrupos": "This church doesn't have groups yet.",
+      "tipos": {
+        "grupo": "Group",
+        "mentoria": "Mentoring",
+        "discipulado": "Discipleship",
+        "escuela": "School",
+        "ministerio": "Ministry"
+      }
+    },
+    "eventos": {
+      "titulo": "Events",
+      "sinEventos": "No events announced.",
+      "inscribirse": "Sign me up",
+      "anular": "I can't make it",
+      "inscrito": "You're signed up"
+    },
+    "mentorias": {
+      "titulo": "Mentoring",
+      "sinMentorias": "You have no active mentoring.",
+      "comoMentor": "You mentor someone",
+      "comoAcompanado": "Someone mentors you",
+      "terminar": "End",
+      "sinPermisos": "They see nothing of yours.",
+      "permisos": {
+        "oracionesCompartidas": "Prayers you share with them",
+        "objetivosCompartidos": "Goals you share with them"
+      },
+      "aviso": "A mentor only sees what you share, one thing at a time. Never your journal or your conversations."
+    },
+    "compartir": {
+      "titulo": "Share this prayer",
+      "explicacion": "An encrypted copy is sent for each person. No one else can read it, not even us. You can withdraw it whenever you want.",
+      "compartir": "Share",
+      "revocar": "Withdraw",
+      "revocada": "Withdrawn",
+      "sinComparticiones": "You haven't shared it with anyone.",
+      "sinClavePublica_one": "Couldn't share with {{count}} person: they haven't opened QFaith on any device yet.",
+      "sinClavePublica_other": "Couldn't share with {{count}} people: they haven't opened QFaith on any device yet."
+    },
+    "errores": {
+      "codigoInvalido": "That code isn't in the right form.",
+      "sinDestinatarios": "Choose at least one person."
     }
   }
 }

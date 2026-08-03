@@ -13,7 +13,8 @@
     "oracion": "Oración",
     "ia": "IA",
     "perfil": "Perfil",
-    "memorial": "Memorial"
+    "memorial": "Memorial",
+    "iglesia": "Iglesia"
   },
   "inicio": {
     "saludoManana": "Buenos días",
@@ -418,6 +419,78 @@
       "biometriaNoDisponible": "Este dispositivo no tiene huella ni reconocimiento facial.",
       "biometriaSinConfigurar": "Configura la huella o el rostro en los ajustes del teléfono y vuelve.",
       "noRevocarEsteDispositivo": "Para salir de este dispositivo, cierra sesión."
+    }
+  },
+  "iglesia": {
+    "titulo": "Iglesia",
+    "cargando": "Abriendo tu iglesia…",
+    "sinIglesia": "Todavía no perteneces a ninguna iglesia. Puedes unirte con el código que te den, o seguir usando QFaith sin ninguna: nada de lo tuyo depende de esto.",
+    "buscar": "Buscar por código",
+    "campoCodigo": "Código de la iglesia",
+    "unirse": "Solicitar unirme",
+    "solicitudEnviada": "Tu solicitud está pendiente. Te avisarán cuando la acepten.",
+    "abandonar": "Salir de esta iglesia",
+    "abandonarConfirmar": "¿Salir de esta iglesia? Puedes volver cuando quieras.",
+    "noEncontrada": "No hay ninguna iglesia con ese código.",
+    "garantia": "Tu iglesia nunca puede ver tu diario, tus oraciones privadas, tu memorial ni tus conversaciones. Ni el pastor, ni un administrador.",
+    "roles": {
+      "visitor": "Visitante",
+      "member": "Miembro",
+      "mentor": "Mentor",
+      "leader": "Líder",
+      "pastor": "Pastor",
+      "administrator": "Administrador"
+    },
+    "estados": {
+      "pending": "Pendiente",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "left": "Fuera"
+    },
+    "grupos": {
+      "titulo": "Grupos",
+      "sinGrupos": "Esta iglesia todavía no tiene grupos.",
+      "tipos": {
+        "grupo": "Grupo",
+        "mentoria": "Mentoría",
+        "discipulado": "Discipulado",
+        "escuela": "Escuela",
+        "ministerio": "Ministerio"
+      }
+    },
+    "eventos": {
+      "titulo": "Eventos",
+      "sinEventos": "No hay eventos anunciados.",
+      "inscribirse": "Apuntarme",
+      "anular": "Ya no puedo ir",
+      "inscrito": "Estás apuntado"
+    },
+    "mentorias": {
+      "titulo": "Acompañamiento",
+      "sinMentorias": "No tienes ningún acompañamiento activo.",
+      "comoMentor": "Acompañas a alguien",
+      "comoAcompanado": "Alguien te acompaña",
+      "terminar": "Terminar",
+      "sinPermisos": "No ve nada tuyo.",
+      "permisos": {
+        "oracionesCompartidas": "Las oraciones que le compartas",
+        "objetivosCompartidos": "Los objetivos que le compartas"
+      },
+      "aviso": "Un mentor solo ve lo que tú le compartes, una cosa cada vez. Nunca tu diario ni tus conversaciones."
+    },
+    "compartir": {
+      "titulo": "Compartir esta oración",
+      "explicacion": "Se envía una copia cifrada para cada persona. Nadie más puede leerla, ni siquiera nosotros. Puedes retirarla cuando quieras.",
+      "compartir": "Compartir",
+      "revocar": "Retirar",
+      "revocada": "Retirada",
+      "sinComparticiones": "No la has compartido con nadie.",
+      "sinClavePublica_one": "No se pudo compartir con {{count}} persona: todavía no ha abierto QFaith en ningún dispositivo.",
+      "sinClavePublica_other": "No se pudo compartir con {{count}} personas: todavía no han abierto QFaith en ningún dispositivo."
+    },
+    "errores": {
+      "codigoInvalido": "Ese código no tiene la forma correcta.",
+      "sinDestinatarios": "Elige al menos una persona."
     }
   }
 }

@@ -1,21 +1,3 @@
--- ═══════════════════════════════════════════════════════════════════════
--- QFaith · Migraciones desde la 0012
---
--- ARCHIVO GENERADO. No lo edites: se regenera desde supabase/migrations/.
--- Solo las migraciones 0012 en adelante. Para una base que ya tiene
--- aplicadas las anteriores. Comprueba en cuál estás con:
---
---   select version from public.schema_migrations order by version;
---
--- No incluye supabase/tests/00_sustituto_auth.sql, que solo sirve para
--- ejecutar las migraciones en un PostgreSQL local: en Supabase, el esquema
--- `auth` y la función `auth.uid()` los proporciona la propia plataforma.
--- ═══════════════════════════════════════════════════════════════════════
-
--- ───────────────────────────────────────────────────────────
--- 0012_iglesia.sql
--- ───────────────────────────────────────────────────────────
-
 -- Migración 0012 — Iglesia y comunidad (Documento 12, tablas 32 a 38, y 12).
 --
 -- Es la migración con más superficie de permisos del proyecto, y por eso
@@ -625,21 +607,3 @@ create policy user_sharing_keys_actualizacion_propia on public.user_sharing_keys
   with check (user_id = (select auth.uid()));
 
 grant select, insert, update on public.user_sharing_keys to authenticated;
-
--- ───────────────────────────────────────────────────────────
--- Registro de migraciones aplicadas
--- ───────────────────────────────────────────────────────────
-
-create table if not exists public.schema_migrations (
-  version text primary key,
-  applied_at timestamptz not null default now()
-);
-
-alter table public.schema_migrations enable row level security;
--- Sin políticas y sin privilegios: es información de operación, no del
--- usuario. Solo la ve quien entra por el panel o con la clave de servicio.
-revoke all on public.schema_migrations from anon, authenticated;
-
-insert into public.schema_migrations (version) values
-  ('0012_iglesia')
-on conflict (version) do nothing;

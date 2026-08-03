@@ -10,6 +10,7 @@ export type InicioParamList = {
   Habitos: undefined;
   Biblioteca: undefined;
   Memorial: undefined;
+  Iglesia: undefined;
 };
 
 export type PestanasParamList = {
