@@ -15,7 +15,7 @@ import { IaContenedor } from '@modules/ia/screens/IaContenedor';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { MemorialContenedor } from '@modules/memorial/screens/MemorialContenedor';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
-import { PantallaPerfil } from '@modules/perfil/screens/PantallaPerfil';
+import { PerfilContenedor } from '@modules/perfil/screens/PerfilContenedor';
 import { useTema } from '@shared/theme/ProveedorTema';
 import type { InicioParamList, PestanasParamList } from '@shared/navigation/tipos';
 
@@ -64,7 +64,12 @@ function NavegacionInicio() {
   );
 }
 
-export function NavegacionRaiz() {
+export interface PropsNavegacionRaiz {
+  /** Cerrar sesión vive en el arranque: es quien descarta las claves. */
+  readonly alCerrarSesion?: () => void;
+}
+
+export function NavegacionRaiz({ alCerrarSesion }: PropsNavegacionRaiz = {}) {
   const tema = useTema();
   const { t } = useTranslation();
 
@@ -116,11 +121,9 @@ export function NavegacionRaiz() {
           component={IaContenedor}
           options={{ title: t('navegacion.ia'), headerShown: false }}
         />
-        <Pestanas.Screen
-          name="Perfil"
-          component={PantallaPerfil}
-          options={{ title: t('navegacion.perfil') }}
-        />
+        <Pestanas.Screen name="Perfil" options={{ title: t('navegacion.perfil') }}>
+          {() => <PerfilContenedor {...(alCerrarSesion === undefined ? {} : { alCerrarSesion })} />}
+        </Pestanas.Screen>
       </Pestanas.Navigator>
     </NavigationContainer>
   );

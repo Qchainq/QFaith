@@ -7,11 +7,12 @@ import { PantallaBiblia } from '@modules/biblia/screens/PantallaBiblia';
 import { IaContenedor } from '@modules/ia/screens/IaContenedor';
 import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
-import { PantallaPerfil } from '@modules/perfil/screens/PantallaPerfil';
+import { PerfilContenedor } from '@modules/perfil/screens/PerfilContenedor';
 import { ProveedorSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
 import { crearAlmacenEnMemoria } from '@shared/database/almacenEnMemoria';
 import { crearMotorSincronizacion } from '@shared/services/sync/motorSincronizacion';
 import { crearServidorEnMemoria } from '@shared/services/sync/__tests__/servidorEnMemoria';
+import { useEstadoSesion } from '@shared/state/estadoSesion';
 import { renderizar, usarIdioma } from '@shared/testing/renderizar';
 
 /**
@@ -49,10 +50,20 @@ const PANTALLAS = [
   // La pestaña se llama «IA», pero la cabecera de la pantalla dice
   // «Acompañante»: el nombre corto es para la barra, no para quien entra.
   { Componente: IaContenedor, titulo: 'Acompañante', tituloEn: 'Companion' },
-  { Componente: PantallaPerfil, titulo: 'Perfil', tituloEn: 'Profile' },
+  { Componente: PerfilContenedor, titulo: 'Perfil', tituloEn: 'Profile' },
 ] as const;
 
+// El Perfil lee de quién es la cuenta antes de pintar nada, así que sin
+// sesión abierta no monta. No es un apaño de la prueba: una pantalla de
+// perfil sin saber a quién pertenece no tiene nada que enseñar.
+beforeEach(() => {
+  useEstadoSesion
+    .getState()
+    .abrirSesion({ id: 'usuario-1', correo: 'ana@ejemplo.invalid' }, 'dispositivo-1');
+});
+
 afterAll(async () => {
+  useEstadoSesion.getState().cerrarSesion();
   await usarIdioma('es');
 });
 
@@ -74,7 +85,7 @@ describe('pestañas principales', () => {
       // Una clave sin traducir se vería tal cual, con su punto separador. Se
       // busca entre el texto visible en lugar de serializar el árbol: el árbol
       // incluye ahora el proveedor, que tiene referencias circulares.
-      expect(screen.queryByText(/^(navegacion|vacios|comun|oracion|ia)\.\w+/)).toBeNull();
+      expect(screen.queryByText(/^(navegacion|vacios|comun|oracion|ia|perfil)\.\w+/)).toBeNull();
       unmount();
     }
   });

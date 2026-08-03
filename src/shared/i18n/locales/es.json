@@ -343,5 +343,81 @@
       "demasiadasPersonas": "Son demasiadas personas para un solo memorial.",
       "fechaInvalida": "La fecha debe tener la forma AAAA-MM-DD."
     }
+  },
+  "perfil": {
+    "titulo": "Perfil",
+    "cargando": "Abriendo tu perfil…",
+    "sinNombre": "Sin nombre",
+    "campoNombre": "¿Cómo quieres que te llamemos?",
+    "campoZonaHoraria": "Zona horaria",
+    "campoPais": "País (dos letras)",
+    "campoAnoNacimiento": "Año de nacimiento",
+    "guardar": "Guardar",
+    "guardando": "Guardando…",
+    "guardado": "Guardado.",
+    "cancelar": "Cancelar",
+    "editar": "Editar perfil",
+    "configuracion": "Configuración",
+    "seguridad": "Seguridad",
+    "dispositivos": "Dispositivos",
+    "cerrarSesion": "Cerrar sesión",
+    "volver": "Volver",
+    "tema": {
+      "titulo": "Tema",
+      "system": "El del sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "idioma": {
+      "titulo": "Idioma",
+      "es": "Español",
+      "en": "English"
+    },
+    "ajustes": {
+      "notificaciones": "Recordatorios y avisos",
+      "analitica": "Compartir estadísticas de uso anónimas",
+      "analiticaNota": "Está desactivado. Nunca incluye nada de lo que escribes.",
+      "respaldoEnNube": "Copia de seguridad cifrada",
+      "descargasSoloWifi": "Descargar solo con wifi"
+    },
+    "bloqueo": {
+      "titulo": "Bloqueo",
+      "biometrico": "Pedir huella o rostro al abrir",
+      "espera": "Bloquear tras un rato sin usarla",
+      "sinEspera": "No bloquear por inactividad",
+      "segundos_one": "{{count}} segundo",
+      "segundos_other": "{{count}} segundos",
+      "minutos_one": "{{count}} minuto",
+      "minutos_other": "{{count}} minutos",
+      "explicacion": "Bloquear descarta las claves de la memoria. Tus datos siguen cifrados; solo hace falta volver a identificarte."
+    },
+    "dispositivosPantalla": {
+      "titulo": "Dispositivos",
+      "descripcion": "Dispositivos que pueden sincronizar tu cuenta.",
+      "esteDispositivo": "Este dispositivo",
+      "revocar": "Retirar el acceso",
+      "revocado": "Acceso retirado",
+      "sinDispositivos": "Aquí aparecerán los dispositivos donde entres.",
+      "vistoNunca": "Todavía no ha sincronizado"
+    },
+    "eliminar": {
+      "titulo": "Eliminar la cuenta",
+      "explicacion": "Se borrará todo lo tuyo. Nosotros no podemos leerlo, así que tampoco podremos devolvértelo.",
+      "solicitar": "Solicitar la eliminación",
+      "confirmar": "Sí, eliminar mi cuenta",
+      "pendiente_one": "Tu cuenta se eliminará dentro de {{count}} día.",
+      "pendiente_other": "Tu cuenta se eliminará dentro de {{count}} días.",
+      "cancelar": "Cancelar la eliminación",
+      "cancelada": "La eliminación se ha cancelado."
+    },
+    "errores": {
+      "nombreLargo": "El nombre es demasiado largo.",
+      "zonaHorariaVacia": "Hace falta una zona horaria.",
+      "paisInvalido": "El país son dos letras, como ES o MX.",
+      "anoInvalido": "Ese año no parece correcto.",
+      "biometriaNoDisponible": "Este dispositivo no tiene huella ni reconocimiento facial.",
+      "biometriaSinConfigurar": "Configura la huella o el rostro en los ajustes del teléfono y vuelve.",
+      "noRevocarEsteDispositivo": "Para salir de este dispositivo, cierra sesión."
+    }
   }
 }

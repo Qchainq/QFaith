@@ -343,5 +343,81 @@
       "demasiadasPersonas": "That's too many people for a single memorial.",
       "fechaInvalida": "The date must look like YYYY-MM-DD."
     }
+  },
+  "perfil": {
+    "titulo": "Profile",
+    "cargando": "Opening your profile…",
+    "sinNombre": "No name",
+    "campoNombre": "What should we call you?",
+    "campoZonaHoraria": "Time zone",
+    "campoPais": "Country (two letters)",
+    "campoAnoNacimiento": "Year of birth",
+    "guardar": "Save",
+    "guardando": "Saving…",
+    "guardado": "Saved.",
+    "cancelar": "Cancel",
+    "editar": "Edit profile",
+    "configuracion": "Settings",
+    "seguridad": "Security",
+    "dispositivos": "Devices",
+    "cerrarSesion": "Sign out",
+    "volver": "Back",
+    "tema": {
+      "titulo": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "idioma": {
+      "titulo": "Language",
+      "es": "Español",
+      "en": "English"
+    },
+    "ajustes": {
+      "notificaciones": "Reminders and alerts",
+      "analitica": "Share anonymous usage statistics",
+      "analiticaNota": "It's off. It never includes anything you write.",
+      "respaldoEnNube": "Encrypted backup",
+      "descargasSoloWifi": "Download over wifi only"
+    },
+    "bloqueo": {
+      "titulo": "Lock",
+      "biometrico": "Ask for fingerprint or face on open",
+      "espera": "Lock after a while unused",
+      "sinEspera": "Don't lock on inactivity",
+      "segundos_one": "{{count}} second",
+      "segundos_other": "{{count}} seconds",
+      "minutos_one": "{{count}} minute",
+      "minutos_other": "{{count}} minutes",
+      "explicacion": "Locking discards the keys from memory. Your data stays encrypted; you just need to identify yourself again."
+    },
+    "dispositivosPantalla": {
+      "titulo": "Devices",
+      "descripcion": "Devices that can sync your account.",
+      "esteDispositivo": "This device",
+      "revocar": "Remove access",
+      "revocado": "Access removed",
+      "sinDispositivos": "Devices you sign in on will appear here.",
+      "vistoNunca": "Hasn't synced yet"
+    },
+    "eliminar": {
+      "titulo": "Delete account",
+      "explicacion": "Everything of yours will be deleted. We can't read it, so we can't give it back either.",
+      "solicitar": "Request deletion",
+      "confirmar": "Yes, delete my account",
+      "pendiente_one": "Your account will be deleted in {{count}} day.",
+      "pendiente_other": "Your account will be deleted in {{count}} days.",
+      "cancelar": "Cancel deletion",
+      "cancelada": "The deletion has been cancelled."
+    },
+    "errores": {
+      "nombreLargo": "That name is too long.",
+      "zonaHorariaVacia": "A time zone is required.",
+      "paisInvalido": "The country is two letters, like ES or MX.",
+      "anoInvalido": "That year doesn't look right.",
+      "biometriaNoDisponible": "This device has no fingerprint or face recognition.",
+      "biometriaSinConfigurar": "Set up fingerprint or face in your phone's settings and come back.",
+      "noRevocarEsteDispositivo": "To leave this device, sign out."
+    }
   }
 }

@@ -205,7 +205,7 @@ export function Arranque() {
     }
     return (
       <ProveedorSincronizacion usuarioId={usuario.id} dispositivoId={dispositivoId}>
-        <NavegacionRaiz />
+        <NavegacionRaiz alCerrarSesion={() => void cerrarSesion()} />
       </ProveedorSincronizacion>
     );
   }
