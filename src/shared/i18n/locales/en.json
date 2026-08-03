@@ -16,7 +16,8 @@
     "memorial": "Memorial",
     "iglesia": "Church",
     "sermones": "Sermons",
-    "notificaciones": "Notifications"
+    "notificaciones": "Notifications",
+    "pulso": "Pulse"
   },
   "inicio": {
     "saludoManana": "Good morning",
@@ -571,6 +572,97 @@
       "sinConsentimiento": "We need your permission for these alerts.",
       "desactivadas": "You have notifications turned off.",
       "horaInvalida": "The time must look like HH:MM."
+    }
+  },
+  "pulso": {
+    "titulo": "Spiritual pulse",
+    "pregunta": "How is your heart today?",
+    "opcional": "You can skip it. That's fine.",
+    "cargando": "One moment…",
+    "estados": {
+      "enPaz": "At peace",
+      "agradecido": "Grateful",
+      "ansioso": "Anxious",
+      "triste": "Sad",
+      "cansado": "Tired",
+      "tentado": "Tempted",
+      "confundido": "Confused",
+      "necesitoDireccion": "I need direction",
+      "alejadoDeDios": "Far from God"
+    },
+    "campoNota": "Want to say why? (optional)",
+    "guardar": "Save",
+    "guardando": "Saving…",
+    "cambiar": "Change my answer",
+    "hoyRespondiste": "Today you said you feel:",
+    "acompanamiento": {
+      "enPaz": {
+        "lectura": "Psalm 23",
+        "reflexion": "Peace needs tending too. Today might be a good day to be thankful for it.",
+        "oracion": "Thank you for this rest. Help me not take it for granted.",
+        "accion": "Write a line about why you're at peace today."
+      },
+      "agradecido": {
+        "lectura": "Psalm 103",
+        "reflexion": "What you name, you remember. Naming it makes it real.",
+        "oracion": "Thank you for what did go well today.",
+        "accion": "Tell someone you're grateful for them."
+      },
+      "ansioso": {
+        "lectura": "Philippians 4:6-7",
+        "reflexion": "Anxiety isn't a lack of faith. It's a sign that something matters a lot.",
+        "oracion": "I don't know how this will turn out. Stay with me while I wait.",
+        "accion": "Write down exactly what worries you. Sometimes it shrinks when you look at it."
+      },
+      "triste": {
+        "lectura": "Psalm 34:18",
+        "reflexion": "Sadness doesn't have to be fixed today. You can just be in it.",
+        "oracion": "I'm sad and I don't have much more to say. Stay.",
+        "accion": "Rest. Nothing else is needed."
+      },
+      "cansado": {
+        "lectura": "Matthew 11:28",
+        "reflexion": "Tiredness isn't solved with more effort.",
+        "oracion": "I'm worn out. Teach me to stop without feeling guilty.",
+        "accion": "Pick one thing you can leave until tomorrow."
+      },
+      "tentado": {
+        "lectura": "1 Corinthians 10:13",
+        "reflexion": "Being tempted doesn't say who you are. What you do next doesn't decide everything either.",
+        "oracion": "Help me not be alone with this.",
+        "accion": "Change place or activity for ten minutes."
+      },
+      "confundido": {
+        "lectura": "Proverbs 3:5-6",
+        "reflexion": "You don't always have to decide today. Waiting is a decision too.",
+        "oracion": "I can't see clearly. Give me patience while it clears.",
+        "accion": "Write down both options without choosing yet."
+      },
+      "necesitoDireccion": {
+        "lectura": "Psalm 25:4-5",
+        "reflexion": "Asking for direction isn't weakness; it's what anyone serious does.",
+        "oracion": "Show me the next step. One is enough.",
+        "accion": "Talk to someone who's been through something similar."
+      },
+      "alejadoDeDios": {
+        "lectura": "Luke 15:11-24",
+        "reflexion": "The distance you feel isn't the distance there is. And coming back is never late or humiliating.",
+        "oracion": "It's been a while since I talked to you. Here I am.",
+        "accion": "You don't have to catch up all at once. Start with today."
+      }
+    },
+    "etiquetas": {
+      "lectura": "To read",
+      "reflexion": "To think about",
+      "oracion": "To pray",
+      "accion": "Something small"
+    },
+    "hablarConAlguien": "Talking to someone you trust helps more than it seems. It doesn't have to be today, but keep it close.",
+    "privacidad": "This is yours. Your church can't see it, and it's never used for advertising or to diagnose you with anything.",
+    "errores": {
+      "fechaInvalida": "That date isn't in the right form.",
+      "intensidadInvalida": "Intensity goes from 1 to 5.",
+      "notaLarga": "That's too long for this note."
     }
   }
 }

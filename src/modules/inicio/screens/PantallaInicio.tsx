@@ -18,6 +18,7 @@ export interface PropsPantallaInicio {
   readonly alAbrirMemorial?: () => void;
   readonly alAbrirIglesia?: () => void;
   readonly alAbrirSermones?: () => void;
+  readonly alAbrirPulso?: () => void;
 }
 
 export function PantallaInicio({
@@ -27,6 +28,7 @@ export function PantallaInicio({
   alAbrirMemorial,
   alAbrirIglesia,
   alAbrirSermones,
+  alAbrirPulso,
 }: PropsPantallaInicio = {}) {
   const { t } = useTranslation();
   const tema = useTema();
@@ -37,8 +39,15 @@ export function PantallaInicio({
         {t('inicio.sinPendientes')}
       </Texto>
 
-      {alAbrirDiario === undefined ? null : (
+      {/* El pulso va primero: es la pregunta del día y lo demás puede esperar. */}
+      {alAbrirPulso === undefined ? null : (
         <View style={{ marginTop: tema.espaciado.lg }}>
+          <Boton etiqueta={t('pulso.pregunta')} onPress={alAbrirPulso} />
+        </View>
+      )}
+
+      {alAbrirDiario === undefined ? null : (
+        <View style={{ marginTop: tema.espaciado.sm }}>
           <Boton etiqueta={t('diario.titulo')} onPress={alAbrirDiario} />
         </View>
       )}

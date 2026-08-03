@@ -86,7 +86,8 @@ declare
     -- Las notificaciones las escribe el servidor. Si el cliente pudiera,
     -- cualquiera se fabricaría un aviso de seguridad falso a nombre de otro.
     ['authenticated', 'notifications', 'INSERT'],
-    ['authenticated', 'notifications', 'DELETE']
+    ['authenticated', 'notifications', 'DELETE'],
+    ['authenticated', 'spiritual_pulses', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -165,7 +166,9 @@ declare
     ['sermons', 'SELECT'], ['sermons', 'INSERT'], ['sermons', 'UPDATE'],
     ['sermon_notes', 'SELECT'], ['sermon_notes', 'INSERT'], ['sermon_notes', 'UPDATE'],
     ['sermon_actions', 'SELECT'], ['sermon_actions', 'INSERT'], ['sermon_actions', 'UPDATE'],
-    ['notifications', 'SELECT'], ['notifications', 'UPDATE']
+    ['notifications', 'SELECT'], ['notifications', 'UPDATE'],
+    ['spiritual_pulses', 'SELECT'], ['spiritual_pulses', 'INSERT'],
+    ['spiritual_pulses', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

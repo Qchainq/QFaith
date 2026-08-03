@@ -16,7 +16,8 @@
     "memorial": "Memorial",
     "iglesia": "Iglesia",
     "sermones": "Sermones",
-    "notificaciones": "Notificaciones"
+    "notificaciones": "Notificaciones",
+    "pulso": "Pulso"
   },
   "inicio": {
     "saludoManana": "Buenos días",
@@ -571,6 +572,97 @@
       "sinConsentimiento": "Hace falta tu permiso para estos avisos.",
       "desactivadas": "Tienes las notificaciones desactivadas.",
       "horaInvalida": "La hora debe tener la forma HH:MM."
+    }
+  },
+  "pulso": {
+    "titulo": "Pulso espiritual",
+    "pregunta": "¿Cómo está tu corazón hoy?",
+    "opcional": "Puedes saltarlo. No pasa nada.",
+    "cargando": "Un momento…",
+    "estados": {
+      "enPaz": "En paz",
+      "agradecido": "Agradecido",
+      "ansioso": "Ansioso",
+      "triste": "Triste",
+      "cansado": "Cansado",
+      "tentado": "Tentado",
+      "confundido": "Confundido",
+      "necesitoDireccion": "Necesito dirección",
+      "alejadoDeDios": "Alejado de Dios"
+    },
+    "campoNota": "¿Quieres contar por qué? (opcional)",
+    "guardar": "Guardar",
+    "guardando": "Guardando…",
+    "cambiar": "Cambiar mi respuesta",
+    "hoyRespondiste": "Hoy dijiste que estás así:",
+    "acompanamiento": {
+      "enPaz": {
+        "lectura": "Salmo 23",
+        "reflexion": "La paz también se cuida. Hoy puede ser un buen día para agradecerla.",
+        "oracion": "Gracias por este descanso. Ayúdame a no darlo por hecho.",
+        "accion": "Escribe una línea sobre por qué hoy estás en paz."
+      },
+      "agradecido": {
+        "lectura": "Salmo 103",
+        "reflexion": "Lo que se agradece se recuerda mejor. Nombrarlo lo hace concreto.",
+        "oracion": "Gracias por lo que hoy sí ha ido bien.",
+        "accion": "Dile a alguien que se lo agradeces."
+      },
+      "ansioso": {
+        "lectura": "Filipenses 4:6-7",
+        "reflexion": "La ansiedad no es falta de fe. Es una señal de que algo importa mucho.",
+        "oracion": "No sé cómo va a salir esto. Acompáñame mientras espero.",
+        "accion": "Escribe qué es exactamente lo que te preocupa. A veces se encoge al mirarlo."
+      },
+      "triste": {
+        "lectura": "Salmo 34:18",
+        "reflexion": "La tristeza no hay que arreglarla hoy. Se puede simplemente estar en ella.",
+        "oracion": "Estoy triste y no tengo mucho más que decir. Quédate.",
+        "accion": "Descansa. No hace falta nada más."
+      },
+      "cansado": {
+        "lectura": "Mateo 11:28",
+        "reflexion": "El cansancio no se resuelve con más esfuerzo.",
+        "oracion": "Estoy agotado. Enséñame a parar sin sentirme culpable.",
+        "accion": "Elige una sola cosa que puedas dejar para mañana."
+      },
+      "tentado": {
+        "lectura": "1 Corintios 10:13",
+        "reflexion": "Que algo te tiente no dice quién eres. Lo que hagas después tampoco lo decide todo.",
+        "oracion": "Ayúdame a no estar solo con esto.",
+        "accion": "Cambia de sitio o de actividad durante diez minutos."
+      },
+      "confundido": {
+        "lectura": "Proverbios 3:5-6",
+        "reflexion": "No siempre hay que decidir hoy. Esperar también es una decisión.",
+        "oracion": "No veo claro. Dame paciencia mientras se aclara.",
+        "accion": "Escribe las dos opciones sin elegir ninguna todavía."
+      },
+      "necesitoDireccion": {
+        "lectura": "Salmo 25:4-5",
+        "reflexion": "Pedir dirección no es debilidad; es lo que hace cualquiera que va en serio.",
+        "oracion": "Muéstrame el siguiente paso. Con uno me basta.",
+        "accion": "Habla con alguien que ya haya pasado por algo parecido."
+      },
+      "alejadoDeDios": {
+        "lectura": "Lucas 15:11-24",
+        "reflexion": "La distancia que sientes no es la que hay. Y volver nunca es tarde ni humillante.",
+        "oracion": "Hace tiempo que no hablo contigo. Aquí estoy.",
+        "accion": "No hace falta ponerse al día de golpe. Empieza por hoy."
+      }
+    },
+    "etiquetas": {
+      "lectura": "Para leer",
+      "reflexion": "Para pensar",
+      "oracion": "Para orar",
+      "accion": "Algo pequeño"
+    },
+    "hablarConAlguien": "Hablar con alguien de confianza ayuda más de lo que parece. No hace falta que sea hoy, pero tenlo cerca.",
+    "privacidad": "Esto es tuyo. Tu iglesia no lo ve, y nunca se usa para publicidad ni para diagnosticarte nada.",
+    "errores": {
+      "fechaInvalida": "Esa fecha no tiene la forma correcta.",
+      "intensidadInvalida": "La intensidad va de 1 a 5.",
+      "notaLarga": "Es demasiado largo para esta nota."
     }
   }
 }

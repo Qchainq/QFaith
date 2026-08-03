@@ -107,6 +107,12 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
       'verse_end',
     ],
   },
+  spiritual_pulses: {
+    tabla: 'spiritual_pulses',
+    // El estado va en claro para que el servidor pueda preparar el
+    // acompañamiento; la nota, que es donde se cuenta algo, va en el sobre.
+    columnasMetadatos: ['pulse_date', 'mood_code', 'intensity'],
+  },
   sermon_notes: {
     tabla: 'sermon_notes',
     // Solo de qué sermón es. El texto de la nota va dentro del sobre.
