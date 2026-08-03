@@ -49,6 +49,7 @@ function repositorioFalso(subidos: Subido[], sobrescribir: Partial<RepositorioIg
     anularInscripcion: async () => null,
     mentorias: async () => [],
     terminarMentoria: async () => null,
+    sermones: async () => [],
     compartir: async (parametros) => {
       subidos.push({
         cargaCifrada: parametros.cargaCifrada,

@@ -77,7 +77,12 @@ declare
     ['authenticated', 'mentor_relationships', 'DELETE'],
     ['authenticated', 'prayer_shares', 'DELETE'],
     -- Borrar la clave pública de alguien le dejaría sin poder recibir nada.
-    ['authenticated', 'user_sharing_keys', 'DELETE']
+    ['authenticated', 'user_sharing_keys', 'DELETE'],
+    ['authenticated', 'sermons', 'DELETE'],
+    -- Las notas del sermón son del usuario: papelera de 30 días, nunca un
+    -- DELETE directo (invariante 6).
+    ['authenticated', 'sermon_notes', 'DELETE'],
+    ['authenticated', 'sermon_actions', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -152,7 +157,10 @@ declare
     ['mentor_relationships', 'UPDATE'],
     ['prayer_shares', 'SELECT'], ['prayer_shares', 'INSERT'], ['prayer_shares', 'UPDATE'],
     ['user_sharing_keys', 'SELECT'], ['user_sharing_keys', 'INSERT'],
-    ['user_sharing_keys', 'UPDATE']
+    ['user_sharing_keys', 'UPDATE'],
+    ['sermons', 'SELECT'], ['sermons', 'INSERT'], ['sermons', 'UPDATE'],
+    ['sermon_notes', 'SELECT'], ['sermon_notes', 'INSERT'], ['sermon_notes', 'UPDATE'],
+    ['sermon_actions', 'SELECT'], ['sermon_actions', 'INSERT'], ['sermon_actions', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop

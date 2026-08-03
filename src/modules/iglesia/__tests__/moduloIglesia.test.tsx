@@ -77,6 +77,7 @@ function repositorio(): RepositorioIglesia {
       );
       return null;
     },
+    sermones: async () => [],
     compartir: async () => {
       throw new Error('no usado en este recorrido');
     },

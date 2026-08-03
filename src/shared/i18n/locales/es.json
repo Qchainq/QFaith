@@ -14,7 +14,8 @@
     "ia": "IA",
     "perfil": "Perfil",
     "memorial": "Memorial",
-    "iglesia": "Iglesia"
+    "iglesia": "Iglesia",
+    "sermones": "Sermones"
   },
   "inicio": {
     "saludoManana": "Buenos días",
@@ -491,6 +492,43 @@
     "errores": {
       "codigoInvalido": "Ese código no tiene la forma correcta.",
       "sinDestinatarios": "Elige al menos una persona."
+    }
+  },
+  "sermones": {
+    "titulo": "Sermones",
+    "cargando": "Abriendo tus notas…",
+    "descripcion": "Lo que anotes aquí es tuyo. Ni el pastor que predicó puede leerlo.",
+    "sinSermones": "Tu iglesia todavía no ha publicado ningún sermón.",
+    "sinNotas": "Aquí aparecerán tus notas. Puedes escribir también sin que haya un sermón.",
+    "ilegibles_one": "Hay {{count}} nota que este dispositivo no puede leer.",
+    "ilegibles_other": "Hay {{count}} notas que este dispositivo no puede leer.",
+    "notaSuelta": "Nota suelta",
+    "nuevaNota": "Escribir una nota",
+    "notasPropias": "Tus notas",
+    "campoTexto": "¿Qué te llevas de aquí?",
+    "campoDestacado": "Una frase que quieras recordar",
+    "anadirDestacado": "Añadir",
+    "guardar": "Guardar",
+    "guardando": "Guardando…",
+    "cancelar": "Cancelar",
+    "eliminar": "Eliminar",
+    "volver": "Volver",
+    "acciones": {
+      "titulo": "Lo que te propusiste",
+      "sinAcciones": "No tienes nada pendiente.",
+      "nueva": "Añadir algo que quieras hacer",
+      "campoTexto": "¿Qué vas a hacer?",
+      "campoFecha": "¿Para cuándo? (AAAA-MM-DD)",
+      "sinFecha": "Sin fecha",
+      "marcar": "Ya lo hice",
+      "desmarcar": "Todavía no",
+      "hecha": "Hecho"
+    },
+    "errores": {
+      "notaVacia": "Escribe algo antes de guardar.",
+      "accionVacia": "Escribe qué quieres hacer.",
+      "accionLarga": "Es demasiado largo para una sola acción.",
+      "fechaInvalida": "La fecha debe tener la forma AAAA-MM-DD."
     }
   }
 }

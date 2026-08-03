@@ -14,7 +14,8 @@
     "ia": "AI",
     "perfil": "Profile",
     "memorial": "Memorial",
-    "iglesia": "Church"
+    "iglesia": "Church",
+    "sermones": "Sermons"
   },
   "inicio": {
     "saludoManana": "Good morning",
@@ -491,6 +492,43 @@
     "errores": {
       "codigoInvalido": "That code isn't in the right form.",
       "sinDestinatarios": "Choose at least one person."
+    }
+  },
+  "sermones": {
+    "titulo": "Sermons",
+    "cargando": "Opening your notes…",
+    "descripcion": "What you write here is yours. Not even the pastor who preached can read it.",
+    "sinSermones": "Your church hasn't published any sermons yet.",
+    "sinNotas": "Your notes will appear here. You can also write without a sermon.",
+    "ilegibles_one": "There is {{count}} note this device cannot read.",
+    "ilegibles_other": "There are {{count}} notes this device cannot read.",
+    "notaSuelta": "Loose note",
+    "nuevaNota": "Write a note",
+    "notasPropias": "Your notes",
+    "campoTexto": "What are you taking from this?",
+    "campoDestacado": "A line you want to remember",
+    "anadirDestacado": "Add",
+    "guardar": "Save",
+    "guardando": "Saving…",
+    "cancelar": "Cancel",
+    "eliminar": "Delete",
+    "volver": "Back",
+    "acciones": {
+      "titulo": "What you set out to do",
+      "sinAcciones": "Nothing pending.",
+      "nueva": "Add something you want to do",
+      "campoTexto": "What will you do?",
+      "campoFecha": "By when? (YYYY-MM-DD)",
+      "sinFecha": "No date",
+      "marcar": "I did it",
+      "desmarcar": "Not yet",
+      "hecha": "Done"
+    },
+    "errores": {
+      "notaVacia": "Write something before saving.",
+      "accionVacia": "Write what you want to do.",
+      "accionLarga": "That's too long for a single action.",
+      "fechaInvalida": "The date must look like YYYY-MM-DD."
     }
   }
 }

@@ -107,6 +107,16 @@ export const MAPEO_ENTIDADES: Readonly<Record<string, MapeoEntidad>> = {
       'verse_end',
     ],
   },
+  sermon_notes: {
+    tabla: 'sermon_notes',
+    // Solo de qué sermón es. El texto de la nota va dentro del sobre.
+    columnasMetadatos: ['sermon_id'],
+  },
+  sermon_actions: {
+    tabla: 'sermon_actions',
+    // La fecha va en claro porque la necesita el recordatorio; el texto no.
+    columnasMetadatos: ['sermon_note_id', 'due_date', 'completed_at', 'reminder_enabled'],
+  },
   memorials: {
     tabla: 'memorials',
     // La petición de origen y la fecha del recuerdo son lo único que el

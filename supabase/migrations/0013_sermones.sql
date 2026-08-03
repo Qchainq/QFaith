@@ -1,21 +1,3 @@
--- ═══════════════════════════════════════════════════════════════════════
--- QFaith · Migraciones desde la 0013
---
--- ARCHIVO GENERADO. No lo edites: se regenera desde supabase/migrations/.
--- Solo las migraciones 0013 en adelante. Para una base que ya tiene
--- aplicadas las anteriores. Comprueba en cuál estás con:
---
---   select version from public.schema_migrations order by version;
---
--- No incluye supabase/tests/00_sustituto_auth.sql, que solo sirve para
--- ejecutar las migraciones en un PostgreSQL local: en Supabase, el esquema
--- `auth` y la función `auth.uid()` los proporciona la propia plataforma.
--- ═══════════════════════════════════════════════════════════════════════
-
--- ───────────────────────────────────────────────────────────
--- 0013_sermones.sql
--- ───────────────────────────────────────────────────────────
-
 -- Migración 0013 — Sermones (Documento 12, tablas 26 a 28).
 --
 -- El módulo tiene dos mitades con dueños distintos, y la migración las separa
@@ -258,21 +240,3 @@ create policy sermon_actions_actualizacion_propia on public.sermon_actions
 grant select, insert, update on public.sermons to authenticated;
 grant select, insert, update on public.sermon_notes to authenticated;
 grant select, insert, update on public.sermon_actions to authenticated;
-
--- ───────────────────────────────────────────────────────────
--- Registro de migraciones aplicadas
--- ───────────────────────────────────────────────────────────
-
-create table if not exists public.schema_migrations (
-  version text primary key,
-  applied_at timestamptz not null default now()
-);
-
-alter table public.schema_migrations enable row level security;
--- Sin políticas y sin privilegios: es información de operación, no del
--- usuario. Solo la ve quien entra por el panel o con la clave de servicio.
-revoke all on public.schema_migrations from anon, authenticated;
-
-insert into public.schema_migrations (version) values
-  ('0013_sermones')
-on conflict (version) do nothing;

@@ -85,6 +85,9 @@ const TABLAS = [
   'mentor_relationships',
   'prayer_shares',
   'user_sharing_keys',
+  'sermons',
+  'sermon_notes',
+  'sermon_actions',
 ];
 
 const comprobaciones = [];
@@ -488,6 +491,18 @@ async function faseAutenticada(cuentas) {
       token: a.token,
       metodo: 'POST',
       cuerpo: { user_id: a.id, book_code: 'SAL', chapter_number: 23, ...sobre('A') },
+    }),
+    // La nota de sermón es privada aunque el sermón sea institucional, así
+    // que también entra en la comprobación de aislamiento.
+    peticion('/rest/v1/sermon_notes', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: { user_id: a.id, ...sobre('A') },
+    }),
+    peticion('/rest/v1/sermon_actions', {
+      token: a.token,
+      metodo: 'POST',
+      cuerpo: { user_id: a.id, due_date: '2026-09-05', ...sobre('A') },
     }),
   ]);
 

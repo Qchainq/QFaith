@@ -64,6 +64,19 @@ export interface FilaMentoria {
   readonly permissions: Readonly<Record<string, unknown>>;
 }
 
+export interface FilaSermon {
+  readonly id: string;
+  readonly church_id: string | null;
+  readonly title: string | null;
+  readonly speaker_name: string | null;
+  readonly sermon_date: string | null;
+  readonly public_summary: string | null;
+  readonly bible_references: unknown;
+  readonly audio_path: string | null;
+  readonly video_url: string | null;
+  readonly publication_status: string;
+}
+
 export interface FilaComparticion {
   readonly id: string;
   readonly prayer_id: string;
@@ -86,6 +99,9 @@ const COL_EVENTO =
   'registration_required,status';
 const COL_INSCRIPCION = 'id,event_id,user_id,status';
 const COL_MENTORIA = 'id,mentor_user_id,mentee_user_id,status,permissions';
+const COL_SERMON =
+  'id,church_id,title,speaker_name,sermon_date,public_summary,bible_references,' +
+  'audio_path,video_url,publication_status';
 const COL_COMPARTICION =
   'id,prayer_id,owner_user_id,recipient_user_id,group_id,church_id,' +
   'encrypted_shared_payload,encrypted_content_key,nonce,expires_at,revoked_at';
@@ -349,6 +365,22 @@ export function crearRepositorioIglesia(rest: ClienteRest) {
     return (await exigir(respuesta, 'revocar:prayer_shares'))[0] ?? null;
   }
 
+  /**
+   * Sermones de una iglesia.
+   *
+   * La política ya filtra los borradores; aquí no se pide `published` para no
+   * ocultar al liderazgo los suyos, que sí puede ver.
+   */
+  async function sermones(iglesiaId: string): Promise<readonly FilaSermon[]> {
+    const respuesta = await rest.peticion<FilaSermon>({
+      metodo: 'GET',
+      ruta:
+        `/sermons?church_id=eq.${iglesiaId}&select=${COL_SERMON}` +
+        '&order=sermon_date.desc.nullslast',
+    });
+    return exigir(respuesta, 'leer:sermons');
+  }
+
   /** Comparticiones recibidas y vigentes. Las filtra la política, no el cliente. */
   async function recibidas(): Promise<readonly FilaComparticion[]> {
     const respuesta = await rest.peticion<FilaComparticion>({
@@ -371,6 +403,7 @@ export function crearRepositorioIglesia(rest: ClienteRest) {
     anularInscripcion,
     mentorias,
     terminarMentoria,
+    sermones,
     compartir,
     comparticionesDe,
     revocar,

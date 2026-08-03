@@ -315,6 +315,74 @@ begin
   end;
 end $$;
 
+-- ── El pastor que predicó no lee las notas de quien le escuchó ───────────
+
+select set_config('request.jwt.claim.sub', '22222222-2222-4222-8222-222222222222', false);
+
+insert into public.sermons (id, church_id, title, speaker_name, publication_status)
+  values ('eeeeeeee-0000-4000-8000-000000000001',
+          'aaaaaaaa-0000-4000-8000-000000000001',
+          'Sobre el perdón', 'Pablo', 'published');
+
+select set_config('request.jwt.claim.sub', '11111111-1111-4111-8111-111111111111', false);
+
+do $$
+begin
+  -- Marta ve el sermón publicado: para eso se publica.
+  if (select count(*) from public.sermons) <> 1 then
+    raise exception 'Un miembro debería ver el sermón publicado de su iglesia';
+  end if;
+end $$;
+
+insert into public.sermon_notes (id, user_id, sermon_id, encrypted_payload, key_id, nonce)
+  values ('ffffffff-0000-4000-8000-000000000001',
+          '11111111-1111-4111-8111-111111111111',
+          'eeeeeeee-0000-4000-8000-000000000001',
+          'sobre-de-la-nota-de-marta', gen_random_uuid(), 'nonce-nota');
+
+insert into public.sermon_actions (user_id, sermon_note_id, encrypted_payload, key_id, nonce, due_date)
+  values ('11111111-1111-4111-8111-111111111111',
+          'ffffffff-0000-4000-8000-000000000001',
+          'sobre-de-la-accion-de-marta', gen_random_uuid(), 'nonce-accion', current_date);
+
+do $$
+begin
+  if (select count(*) from public.sermon_notes) <> 1
+     or (select count(*) from public.sermon_actions) <> 1 then
+    raise exception 'Marta debería ver sus propias notas: la prueba sería vacía';
+  end if;
+end $$;
+
+select set_config('request.jwt.claim.sub', '22222222-2222-4222-8222-222222222222', false);
+
+do $$
+begin
+  -- El pastor predicó ese sermón y lo ve. Sus notas, no.
+  if (select count(*) from public.sermons) <> 1 then
+    raise exception 'El pastor debería ver el sermón que él mismo publicó';
+  end if;
+  if (select count(*) from public.sermon_notes) <> 0 then
+    raise exception
+      'FALLO GRAVE: el pastor lee lo que alguien anotó mientras le escuchaba';
+  end if;
+  if (select count(*) from public.sermon_actions) <> 0 then
+    raise exception 'FALLO GRAVE: el pastor ve las acciones que alguien se propuso';
+  end if;
+end $$;
+
+-- Un borrador no se enseña a nadie mientras no se publique.
+insert into public.sermons (id, church_id, title, publication_status)
+  values ('eeeeeeee-0000-4000-8000-000000000002',
+          'aaaaaaaa-0000-4000-8000-000000000001', 'Borrador', 'draft');
+
+select set_config('request.jwt.claim.sub', '11111111-1111-4111-8111-111111111111', false);
+do $$
+begin
+  if (select count(*) from public.sermons where publication_status = 'draft') <> 0 then
+    raise exception 'Un borrador no debería ser visible para un miembro';
+  end if;
+end $$;
+
 -- ── Claves públicas de compartición ──────────────────────────────────────
 
 do $$

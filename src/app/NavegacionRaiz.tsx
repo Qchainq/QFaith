@@ -17,6 +17,7 @@ import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { MemorialContenedor } from '@modules/memorial/screens/MemorialContenedor';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PerfilContenedor } from '@modules/perfil/screens/PerfilContenedor';
+import { SermonesContenedor } from '@modules/sermones/screens/SermonesContenedor';
 import { useTema } from '@shared/theme/ProveedorTema';
 import type { InicioParamList, PestanasParamList } from '@shared/navigation/tipos';
 
@@ -39,6 +40,7 @@ function NavegacionInicio() {
             alAbrirBiblioteca={() => navigation.navigate('Biblioteca')}
             alAbrirMemorial={() => navigation.navigate('Memorial')}
             alAbrirIglesia={() => navigation.navigate('Iglesia')}
+            alAbrirSermones={() => navigation.navigate('Sermones')}
           />
         )}
       </PilaInicio.Screen>
@@ -66,6 +68,11 @@ function NavegacionInicio() {
         name="Iglesia"
         component={IglesiaContenedor}
         options={{ title: t('iglesia.titulo'), headerShown: false }}
+      />
+      <PilaInicio.Screen
+        name="Sermones"
+        component={SermonesContenedor}
+        options={{ title: t('sermones.titulo'), headerShown: false }}
       />
     </PilaInicio.Navigator>
   );
