@@ -15,7 +15,8 @@
     "perfil": "Profile",
     "memorial": "Memorial",
     "iglesia": "Church",
-    "sermones": "Sermons"
+    "sermones": "Sermons",
+    "notificaciones": "Notifications"
   },
   "inicio": {
     "saludoManana": "Good morning",
@@ -529,6 +530,47 @@
       "accionVacia": "Write what you want to do.",
       "accionLarga": "That's too long for a single action.",
       "fechaInvalida": "The date must look like YYYY-MM-DD."
+    }
+  },
+  "notificaciones": {
+    "titulo": "Notifications",
+    "descripcion": "Nothing you write ever appears on your lock screen. Not a prayer, not a name, not what an entry is about.",
+    "sinNotificaciones": "You have no alerts.",
+    "marcarLeida": "Mark as read",
+    "silencio": {
+      "titulo": "Quiet hours",
+      "explicacion": "During these hours nothing sounds, except a security alert.",
+      "desde": "From (HH:MM)",
+      "hasta": "Until (HH:MM)"
+    },
+    "limites": {
+      "titulo": "How many per day",
+      "explicacion": "You can ask for fewer whenever you want. We'll never send more.",
+      "espirituales_one": "{{count}} reminder per day",
+      "espirituales_other": "{{count}} reminders per day",
+      "ninguna": "None"
+    },
+    "fatiga": "You haven't been opening these reminders. Want fewer?",
+    "reducir": "Yes, fewer",
+    "dejarComoEsta": "Leave it as it is",
+    "volver": "Back",
+    "tipos": {
+      "seguridad": "Security",
+      "dispositivo_nuevo": "New device",
+      "respaldo": "Backup",
+      "iglesia": "Your church",
+      "evento": "Event",
+      "suscripcion": "Subscription",
+      "sistema": "QFaith"
+    },
+    "errores": {
+      "vacio": "An alert with no text isn't sent.",
+      "lenguajeProhibido": "That text uses language QFaith doesn't use.",
+      "enSilencio": "It's quiet hours.",
+      "limiteAlcanzado": "Today's limit has been reached.",
+      "sinConsentimiento": "We need your permission for these alerts.",
+      "desactivadas": "You have notifications turned off.",
+      "horaInvalida": "The time must look like HH:MM."
     }
   }
 }

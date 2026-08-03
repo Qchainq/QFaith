@@ -15,7 +15,8 @@
     "perfil": "Perfil",
     "memorial": "Memorial",
     "iglesia": "Iglesia",
-    "sermones": "Sermones"
+    "sermones": "Sermones",
+    "notificaciones": "Notificaciones"
   },
   "inicio": {
     "saludoManana": "Buenos días",
@@ -529,6 +530,47 @@
       "accionVacia": "Escribe qué quieres hacer.",
       "accionLarga": "Es demasiado largo para una sola acción.",
       "fechaInvalida": "La fecha debe tener la forma AAAA-MM-DD."
+    }
+  },
+  "notificaciones": {
+    "titulo": "Notificaciones",
+    "descripcion": "Nunca aparece en tu pantalla bloqueada nada de lo que escribes. Ni una oración, ni un nombre, ni de qué trata una entrada.",
+    "sinNotificaciones": "No tienes avisos.",
+    "marcarLeida": "Marcar como leída",
+    "silencio": {
+      "titulo": "Horario de silencio",
+      "explicacion": "Durante estas horas no suena nada, salvo un aviso de seguridad.",
+      "desde": "Desde (HH:MM)",
+      "hasta": "Hasta (HH:MM)"
+    },
+    "limites": {
+      "titulo": "Cuántas al día",
+      "explicacion": "Puedes pedir menos cuando quieras. Nunca te enviaremos más.",
+      "espirituales_one": "{{count}} recordatorio al día",
+      "espirituales_other": "{{count}} recordatorios al día",
+      "ninguna": "Ninguno"
+    },
+    "fatiga": "Últimamente no abres estos recordatorios. ¿Quieres recibir menos?",
+    "reducir": "Sí, menos",
+    "dejarComoEsta": "Dejarlo como está",
+    "volver": "Volver",
+    "tipos": {
+      "seguridad": "Seguridad",
+      "dispositivo_nuevo": "Dispositivo nuevo",
+      "respaldo": "Copia de seguridad",
+      "iglesia": "Tu iglesia",
+      "evento": "Evento",
+      "suscripcion": "Suscripción",
+      "sistema": "QFaith"
+    },
+    "errores": {
+      "vacio": "Un aviso sin texto no se envía.",
+      "lenguajeProhibido": "Ese texto usa lenguaje que QFaith no emplea.",
+      "enSilencio": "Está en horario de silencio.",
+      "limiteAlcanzado": "Ya se alcanzó el límite de hoy.",
+      "sinConsentimiento": "Hace falta tu permiso para estos avisos.",
+      "desactivadas": "Tienes las notificaciones desactivadas.",
+      "horaInvalida": "La hora debe tener la forma HH:MM."
     }
   }
 }

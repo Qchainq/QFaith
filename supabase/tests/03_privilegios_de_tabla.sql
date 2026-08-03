@@ -82,7 +82,11 @@ declare
     -- Las notas del sermón son del usuario: papelera de 30 días, nunca un
     -- DELETE directo (invariante 6).
     ['authenticated', 'sermon_notes', 'DELETE'],
-    ['authenticated', 'sermon_actions', 'DELETE']
+    ['authenticated', 'sermon_actions', 'DELETE'],
+    -- Las notificaciones las escribe el servidor. Si el cliente pudiera,
+    -- cualquiera se fabricaría un aviso de seguridad falso a nombre de otro.
+    ['authenticated', 'notifications', 'INSERT'],
+    ['authenticated', 'notifications', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop
@@ -160,7 +164,8 @@ declare
     ['user_sharing_keys', 'UPDATE'],
     ['sermons', 'SELECT'], ['sermons', 'INSERT'], ['sermons', 'UPDATE'],
     ['sermon_notes', 'SELECT'], ['sermon_notes', 'INSERT'], ['sermon_notes', 'UPDATE'],
-    ['sermon_actions', 'SELECT'], ['sermon_actions', 'INSERT'], ['sermon_actions', 'UPDATE']
+    ['sermon_actions', 'SELECT'], ['sermon_actions', 'INSERT'], ['sermon_actions', 'UPDATE'],
+    ['notifications', 'SELECT'], ['notifications', 'UPDATE']
   ];
 begin
   for i in 1 .. array_length(v_necesario, 1) loop
