@@ -106,6 +106,8 @@ const TABLAS = [
   'reading_plan_days',
   'user_reading_plans',
   'reading_progress',
+  'bible_highlights',
+  'bible_bookmarks',
 ];
 
 const comprobaciones = [];

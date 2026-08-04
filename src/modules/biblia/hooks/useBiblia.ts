@@ -11,8 +11,12 @@ import { tokenAcceso } from '@shared/services/auth/servicioAutenticacion';
 import { claveDeDominio, clavesDerivadas } from '@shared/services/keys/servicioClaves';
 import { crearClienteRest } from '@shared/services/supabase/rest';
 
-import type { BorradorNota } from '../models/biblia';
+import type { BorradorNota, BorradorSubrayado } from '../models/biblia';
 import { crearRepositorioBiblia, type RepositorioBiblia } from '../repositories/repositorioBiblia';
+import {
+  crearRepositorioMarcasBiblicas,
+  type RepositorioMarcasBiblicas,
+} from '../repositories/repositorioMarcasBiblicas';
 import {
   crearRepositorioNotasBiblicas,
   type RepositorioNotasBiblicas,
@@ -40,6 +44,9 @@ export const clavesConsulta = {
     ['biblia', 'capitulo', traduccionId, libro, capitulo] as const,
   notas: (usuarioId: string, libro: string, capitulo: number) =>
     ['biblia', usuarioId, 'notas', libro, capitulo] as const,
+  subrayados: (usuarioId: string, traduccionId: string, libro: string, capitulo: number) =>
+    ['biblia', usuarioId, 'subrayados', traduccionId, libro, capitulo] as const,
+  marcadores: (usuarioId: string) => ['biblia', usuarioId, 'marcadores'] as const,
 };
 
 export function useRepositorioBiblia(): RepositorioBiblia {
@@ -142,6 +149,112 @@ export function useEliminarNota() {
     mutationFn: (id: string) => eliminarNota(repositorio, id),
     onSuccess: () => {
       void cliente.invalidateQueries({ queryKey: ['biblia', usuarioId, 'notas'] });
+    },
+  });
+}
+
+export function useRepositorioMarcas(): RepositorioMarcasBiblicas {
+  const { motor, almacen, usuarioId } = useSincronizacion();
+
+  return useMemo(
+    () =>
+      crearRepositorioMarcasBiblicas({
+        motor,
+        almacen,
+        usuarioId,
+        // Comparten dominio con las notas: es lo mismo, la persona escribiendo
+        // sobre un pasaje. Un dominio por gesto multiplicaría las claves sin
+        // separar nada de verdad.
+        claveNotas: () => claveDeDominio('notaBiblica'),
+        claveHash: () => clavesDerivadas().claveHash,
+      }),
+    [motor, almacen, usuarioId],
+  );
+}
+
+export function useSubrayadosDelCapitulo(
+  traduccionId: string | null,
+  libro: string | null,
+  capitulo: number,
+) {
+  const repositorio = useRepositorioMarcas();
+  const { usuarioId } = useSincronizacion();
+
+  return useQuery({
+    queryKey: clavesConsulta.subrayados(usuarioId, traduccionId ?? '', libro ?? '', capitulo),
+    queryFn: () =>
+      repositorio.delCapitulo({
+        traduccionId: traduccionId ?? '',
+        libro: libro ?? '',
+        capitulo,
+      }),
+    enabled: traduccionId !== null && libro !== null,
+  });
+}
+
+export function useSubrayar() {
+  const repositorio = useRepositorioMarcas();
+  const { usuarioId } = useSincronizacion();
+  const cliente = useQueryClient();
+
+  return useMutation({
+    mutationFn: (borrador: BorradorSubrayado) => repositorio.subrayar(borrador),
+    onSuccess: () => {
+      void cliente.invalidateQueries({ queryKey: ['biblia', usuarioId, 'subrayados'] });
+    },
+  });
+}
+
+export function useQuitarSubrayado() {
+  const repositorio = useRepositorioMarcas();
+  const { usuarioId } = useSincronizacion();
+  const cliente = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => repositorio.quitarSubrayado(id),
+    onSuccess: () => {
+      void cliente.invalidateQueries({ queryKey: ['biblia', usuarioId, 'subrayados'] });
+    },
+  });
+}
+
+export function useMarcadores() {
+  const repositorio = useRepositorioMarcas();
+  const { usuarioId } = useSincronizacion();
+
+  return useQuery({
+    queryKey: clavesConsulta.marcadores(usuarioId),
+    queryFn: () => repositorio.marcadores(),
+  });
+}
+
+export function useMarcar() {
+  const repositorio = useRepositorioMarcas();
+  const { usuarioId } = useSincronizacion();
+  const cliente = useQueryClient();
+
+  return useMutation({
+    mutationFn: (parametros: {
+      readonly traduccionId: string;
+      readonly libro: string;
+      readonly capitulo: number;
+      readonly versiculo?: number | null;
+    }) => repositorio.marcar(parametros),
+    onSuccess: () => {
+      void cliente.invalidateQueries({ queryKey: clavesConsulta.marcadores(usuarioId) });
+    },
+  });
+}
+
+export function useQuitarMarcador() {
+  const repositorio = useRepositorioMarcas();
+  const { usuarioId } = useSincronizacion();
+  const cliente = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => repositorio.quitarMarcador(id),
+    onSuccess: () => {
+      void cliente.invalidateQueries({ queryKey: clavesConsulta.marcadores(usuarioId) });
     },
   });
 }

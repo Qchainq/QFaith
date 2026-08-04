@@ -106,7 +106,11 @@ declare
     ['authenticated', 'reading_plan_days', 'UPDATE'],
     ['authenticated', 'reading_plan_days', 'DELETE'],
     ['authenticated', 'user_reading_plans', 'DELETE'],
-    ['authenticated', 'reading_progress', 'DELETE']
+    ['authenticated', 'reading_progress', 'DELETE'],
+    -- Quitar un subrayado por error y no poder recuperar la nota que llevaba
+    -- dentro sería una pérdida real: papelera, nunca DELETE.
+    ['authenticated', 'bible_highlights', 'DELETE'],
+    ['authenticated', 'bible_bookmarks', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop

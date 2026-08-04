@@ -45,7 +45,30 @@ export const paleta = {
   advertencia: { claro: '#A8762A', oscuro: '#E0B369' },
   error: { claro: '#A5484A', oscuro: '#E29193' },
   informacion: { claro: '#2F5DA8', oscuro: '#8AB0E8' },
+  /**
+   * Colores de subrayado bíblico.
+   *
+   * Van aquí y no en el módulo porque son Design System: un componente que
+   * eligiera sus propios colores rompería el invariante 9.
+   *
+   * Son fondos translúcidos, no rellenos: el texto tiene que seguir leyéndose
+   * encima, y dos subrayados superpuestos —que el esquema permite a
+   * propósito— deben distinguirse igual. En oscuro son más tenues todavía,
+   * porque sobre fondo noche un amarillo saturado deslumbra.
+   */
+  subrayado: {
+    amarillo: { claro: 'rgba(224, 179, 105, 0.38)', oscuro: 'rgba(224, 179, 105, 0.28)' },
+    verde: { claro: 'rgba(63, 125, 82, 0.28)', oscuro: 'rgba(127, 191, 146, 0.24)' },
+    azul: { claro: 'rgba(47, 93, 168, 0.24)', oscuro: 'rgba(138, 176, 232, 0.24)' },
+    rosa: { claro: 'rgba(165, 72, 74, 0.24)', oscuro: 'rgba(226, 145, 147, 0.24)' },
+    naranja: { claro: 'rgba(168, 118, 42, 0.30)', oscuro: 'rgba(224, 179, 105, 0.22)' },
+    // Sin fondo: solo la línea. Para quien prefiere no teñir la página.
+    subrayado: { claro: 'transparent', oscuro: 'transparent' },
+  },
 } as const;
+
+/** Los seis estilos de subrayado del Documento 3. */
+export type EstiloSubrayadoTema = keyof typeof paleta.subrayado;
 
 export interface TemaColores {
   readonly fondo: string;
@@ -64,6 +87,7 @@ export interface TemaColores {
   readonly error: string;
   readonly informacion: string;
   readonly separador: string;
+  readonly subrayados: Readonly<Record<EstiloSubrayadoTema, string>>;
 }
 
 export const coloresClaro: TemaColores = {
@@ -84,6 +108,14 @@ export const coloresClaro: TemaColores = {
   error: paleta.error.claro,
   informacion: paleta.informacion.claro,
   separador: paleta.neutro[200],
+  subrayados: {
+    amarillo: paleta.subrayado.amarillo.claro,
+    verde: paleta.subrayado.verde.claro,
+    azul: paleta.subrayado.azul.claro,
+    rosa: paleta.subrayado.rosa.claro,
+    naranja: paleta.subrayado.naranja.claro,
+    subrayado: paleta.subrayado.subrayado.claro,
+  },
 };
 
 export const coloresOscuro: TemaColores = {
@@ -103,6 +135,14 @@ export const coloresOscuro: TemaColores = {
   error: paleta.error.oscuro,
   informacion: paleta.informacion.oscuro,
   separador: 'rgba(255, 255, 255, 0.12)',
+  subrayados: {
+    amarillo: paleta.subrayado.amarillo.oscuro,
+    verde: paleta.subrayado.verde.oscuro,
+    azul: paleta.subrayado.azul.oscuro,
+    rosa: paleta.subrayado.rosa.oscuro,
+    naranja: paleta.subrayado.naranja.oscuro,
+    subrayado: paleta.subrayado.subrayado.oscuro,
+  },
 };
 
 /** Cuadrícula de espaciado. La aplicación debe respirar. */

@@ -270,6 +270,26 @@
     "notaPrivada": "Tus notas se cifran. El texto bíblico no es tuyo y no se guarda con ellas.",
     "errores": {
       "notaVacia": "Escribe la nota antes de guardarla."
+    },
+    "marcas": {
+      "subrayar": "Subrayar",
+      "quitarSubrayado": "Quitar el subrayado",
+      "marcar": "Guardar dónde voy",
+      "quitarMarcador": "Quitar el marcador",
+      "marcadores": "Dónde lo dejé",
+      "sinMarcadores": "Cuando guardes dónde vas, aparecerá aquí.",
+      "subrayados": "Lo que has subrayado",
+      "sinSubrayados": "Cuando subrayes un pasaje, aparecerá aquí.",
+      "notaDelSubrayado": "¿Quieres anotar algo? (opcional)",
+      "guardado": "Guardado en este dispositivo",
+      "estilos": {
+        "amarillo": "Amarillo",
+        "verde": "Verde",
+        "azul": "Azul",
+        "rosa": "Rosa",
+        "naranja": "Naranja",
+        "subrayado": "Solo subrayado"
+      }
     }
   },
   "biblioteca": {

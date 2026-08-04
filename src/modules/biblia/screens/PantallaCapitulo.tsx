@@ -16,18 +16,32 @@ import { Texto } from '@shared/components/Texto';
 import { esErrorApp } from '@shared/errores/erroresApp';
 import { useTema } from '@shared/theme/ProveedorTema';
 
-import type { NotaBiblica, Versiculo } from '../models/biblia';
+import {
+  ESTILOS_SUBRAYADO,
+  subrayadosDe,
+  type EstiloSubrayado,
+  type NotaBiblica,
+  type Subrayado,
+  type Versiculo,
+} from '../models/biblia';
 
 export interface PropsPantallaCapitulo {
   readonly nombreLibro: string;
   readonly capitulo: number;
   readonly versiculos: readonly Versiculo[];
   readonly notas: readonly NotaBiblica[];
+  readonly subrayados?: readonly Subrayado[];
   readonly cargando?: boolean;
   readonly error?: boolean;
   readonly guardando?: boolean;
   readonly alGuardarNota: (texto: string) => Promise<void>;
   readonly alEliminarNota: (id: string) => Promise<void>;
+  readonly alSubrayar?: (versiculo: number, estilo: EstiloSubrayado) => void;
+  readonly alQuitarSubrayado?: (id: string) => void;
+  /** Guardar por dónde va. `marcadorId` es null cuando aún no está marcado. */
+  readonly alMarcar?: () => void;
+  readonly marcadorId?: string | null;
+  readonly alQuitarMarcador?: (id: string) => void;
   readonly alVolver: () => void;
   readonly alReintentar?: () => void;
 }
@@ -37,11 +51,17 @@ export function PantallaCapitulo({
   capitulo,
   versiculos,
   notas,
+  subrayados = [],
   cargando = false,
   error = false,
   guardando = false,
   alGuardarNota,
   alEliminarNota,
+  alSubrayar,
+  alQuitarSubrayado,
+  alMarcar,
+  marcadorId = null,
+  alQuitarMarcador,
   alVolver,
   alReintentar,
 }: PropsPantallaCapitulo) {
@@ -49,6 +69,9 @@ export function PantallaCapitulo({
   const tema = useTema();
   const [nota, setNota] = useState('');
   const [errorNota, setErrorNota] = useState<string | null>(null);
+  // Qué versículo tiene abierta la paleta. Uno cada vez: dos abiertas a la vez
+  // taparían el texto, que es lo que se ha venido a leer.
+  const [eligiendo, setEligiendo] = useState<number | null>(null);
 
   const titulo = `${nombreLibro} ${capitulo}`;
 
@@ -87,14 +110,94 @@ export function PantallaCapitulo({
   return (
     <PantallaBase titulo={titulo}>
       <ScrollView keyboardShouldPersistTaps="handled">
-        {versiculos.map((versiculo) => (
-          <View key={versiculo.numero} style={{ marginBottom: tema.espaciado.sm }}>
-            <Texto nivel="texto">
-              <Texto nivel="nota" tono="tenue">{`${versiculo.numero} `}</Texto>
-              {versiculo.texto}
-            </Texto>
+        {versiculos.map((versiculo) => {
+          const encima = subrayadosDe(subrayados, versiculo.numero);
+          // El último que marcó queda arriba, como con dos rotuladores sobre
+          // papel; los de debajo se siguen viendo porque son translúcidos.
+          const ultimo = encima[encima.length - 1];
+          const fondo =
+            ultimo === undefined || ultimo.estilo === 'subrayado'
+              ? undefined
+              : tema.colores.subrayados[ultimo.estilo];
+
+          return (
+            <View key={versiculo.numero} style={{ marginBottom: tema.espaciado.sm }}>
+              <Texto
+                nivel="texto"
+                onPress={
+                  alSubrayar === undefined
+                    ? undefined
+                    : () => setEligiendo(eligiendo === versiculo.numero ? null : versiculo.numero)
+                }
+                style={{
+                  ...(fondo === undefined ? {} : { backgroundColor: fondo }),
+                  ...(ultimo?.estilo === 'subrayado'
+                    ? { textDecorationLine: 'underline' as const }
+                    : {}),
+                }}
+              >
+                <Texto nivel="nota" tono="tenue">{`${versiculo.numero} `}</Texto>
+                {versiculo.texto}
+              </Texto>
+
+              {eligiendo === versiculo.numero && alSubrayar !== undefined && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: tema.espaciado.xs,
+                    marginTop: tema.espaciado.xs,
+                  }}
+                >
+                  {ESTILOS_SUBRAYADO.map((estilo) => (
+                    <Boton
+                      key={estilo}
+                      variante="texto"
+                      etiqueta={t(`biblia.marcas.estilos.${estilo}`)}
+                      onPress={() => {
+                        alSubrayar(versiculo.numero, estilo);
+                        setEligiendo(null);
+                      }}
+                    />
+                  ))}
+                  {encima.map((subrayado) =>
+                    alQuitarSubrayado === undefined ? null : (
+                      <Boton
+                        key={subrayado.id}
+                        variante="texto"
+                        etiqueta={t('biblia.marcas.quitarSubrayado')}
+                        onPress={() => {
+                          alQuitarSubrayado(subrayado.id);
+                          setEligiendo(null);
+                        }}
+                      />
+                    ),
+                  )}
+                </View>
+              )}
+            </View>
+          );
+        })}
+
+        {/* Guardar dónde va se ofrece al final del capítulo, que es donde uno
+            para de leer. Arriba sería un botón estorbando mientras se lee. */}
+        {alMarcar !== undefined && (
+          <View style={{ marginTop: tema.espaciado.md }}>
+            {marcadorId === null ? (
+              <Boton
+                variante="secundario"
+                etiqueta={t('biblia.marcas.marcar')}
+                onPress={alMarcar}
+              />
+            ) : (
+              <Boton
+                variante="texto"
+                etiqueta={t('biblia.marcas.quitarMarcador')}
+                onPress={() => alQuitarMarcador?.(marcadorId)}
+              />
+            )}
           </View>
-        ))}
+        )}
 
         <View style={{ marginTop: tema.espaciado.lg }}>
           <Texto nivel="subtitulo">{t('biblia.misNotas')}</Texto>

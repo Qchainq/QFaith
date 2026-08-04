@@ -270,6 +270,26 @@
     "notaPrivada": "Your notes are encrypted. The Bible text isn't yours and isn't stored with them.",
     "errores": {
       "notaVacia": "Write the note before saving it."
+    },
+    "marcas": {
+      "subrayar": "Highlight",
+      "quitarSubrayado": "Remove highlight",
+      "marcar": "Save where I am",
+      "quitarMarcador": "Remove bookmark",
+      "marcadores": "Where I left off",
+      "sinMarcadores": "When you save where you are, it'll show up here.",
+      "subrayados": "What you've highlighted",
+      "sinSubrayados": "When you highlight a passage, it'll show up here.",
+      "notaDelSubrayado": "Want to note something down? (optional)",
+      "guardado": "Saved on this device",
+      "estilos": {
+        "amarillo": "Yellow",
+        "verde": "Green",
+        "azul": "Blue",
+        "rosa": "Pink",
+        "naranja": "Orange",
+        "subrayado": "Underline only"
+      }
     }
   },
   "biblioteca": {
