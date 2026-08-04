@@ -751,5 +751,38 @@
     "teEspera": "Your plan is waiting right where you left it.",
     "leidos_one": "1 day read",
     "leidos_other": "{{count}} days read"
+  },
+  "exportacion": {
+    "titulo": "Take your content with you",
+    "explicacion": "It's built here, on your phone. That's the only place your content exists in readable form — not even we can do it for you.",
+    "aviso": "The file comes out unencrypted, so you can open it with other software. Keep it where you'd keep something private.",
+    "generar": "Prepare my copy",
+    "generando": "Preparing…",
+    "compartir": "Save or share",
+    "listo": "Your copy is ready.",
+    "incompleta_one": "There is 1 record this device can't open, and it isn't included.",
+    "incompleta_other": "There are {{count}} records this device can't open, and they aren't included.",
+    "resumen": "What you're taking",
+    "vacia": "There's nothing to take with you yet.",
+    "modulos": {
+      "journal_entries": "Journal",
+      "prayers": "Prayers",
+      "prayer_updates": "Prayer updates",
+      "habits": "Habits",
+      "habit_logs": "Habit days",
+      "bible_notes": "Bible notes",
+      "bible_highlights": "Highlights",
+      "bible_bookmarks": "Bookmarks",
+      "life_library_items": "Life library",
+      "memorials": "Memorial",
+      "ai_conversations": "Conversations",
+      "ai_messages": "Messages",
+      "sermon_notes": "Sermon notes",
+      "sermon_actions": "Sermon actions",
+      "spiritual_pulses": "Spiritual pulse",
+      "user_reading_plans": "Reading plans",
+      "reading_progress": "Plan days",
+      "private_media": "Files"
+    }
   }
 }

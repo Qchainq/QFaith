@@ -4,6 +4,7 @@
 // pila de navegación: son vistas de la misma cosa, y meterlas en la pila
 // llenaría el botón «atrás» de pasos que nadie quiere deshacer uno a uno.
 import { useState } from 'react';
+import { ExportarContenedor } from '@modules/exportacion/screens/ExportarContenedor';
 
 import { useEstadoSesion } from '@shared/state/estadoSesion';
 import { esErrorApp } from '@shared/errores/erroresApp';
@@ -27,7 +28,7 @@ import { PantallaEditarPerfil } from './PantallaEditarPerfil';
 import { PantallaEliminarCuenta } from './PantallaEliminarCuenta';
 import { PantallaPerfil } from './PantallaPerfil';
 
-type Vista = 'portada' | 'editar' | 'configuracion' | 'dispositivos' | 'eliminar';
+type Vista = 'portada' | 'editar' | 'configuracion' | 'dispositivos' | 'eliminar' | 'exportar';
 
 export interface PropsPerfilContenedor {
   /** Inyectable para las pruebas: evita depender de la red. */
@@ -108,6 +109,10 @@ export function PerfilContenedor({
     );
   }
 
+  if (vista === 'exportar') {
+    return <ExportarContenedor />;
+  }
+
   if (vista === 'dispositivos') {
     return (
       <PantallaDispositivos
@@ -148,6 +153,7 @@ export function PerfilContenedor({
       alAbrirConfiguracion={() => setVista('configuracion')}
       alAbrirDispositivos={() => setVista('dispositivos')}
       alAbrirEliminacion={() => setVista('eliminar')}
+      alAbrirExportacion={() => setVista('exportar')}
       alCerrarSesion={() => alCerrarSesion?.()}
       {...conAhora}
     />

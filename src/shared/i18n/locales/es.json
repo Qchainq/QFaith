@@ -751,5 +751,38 @@
     "teEspera": "Tu plan te espera donde lo dejaste.",
     "leidos_one": "1 día leído",
     "leidos_other": "{{count}} días leídos"
+  },
+  "exportacion": {
+    "titulo": "Llevarte tu contenido",
+    "explicacion": "Se genera aquí, en tu teléfono. Es el único sitio donde tu contenido existe legible: ni nosotros podemos hacerlo por ti.",
+    "aviso": "El archivo sale sin cifrar, para que puedas abrirlo con otros programas. Guárdalo donde guardarías algo íntimo.",
+    "generar": "Preparar mi copia",
+    "generando": "Preparando…",
+    "compartir": "Guardar o compartir",
+    "listo": "Tu copia está lista.",
+    "incompleta_one": "Hay 1 registro que este dispositivo no puede abrir y no va incluido.",
+    "incompleta_other": "Hay {{count}} registros que este dispositivo no puede abrir y no van incluidos.",
+    "resumen": "Qué llevas",
+    "vacia": "Todavía no hay nada que llevarte.",
+    "modulos": {
+      "journal_entries": "Diario",
+      "prayers": "Oraciones",
+      "prayer_updates": "Avances de oración",
+      "habits": "Hábitos",
+      "habit_logs": "Días de hábitos",
+      "bible_notes": "Notas bíblicas",
+      "bible_highlights": "Subrayados",
+      "bible_bookmarks": "Marcadores",
+      "life_library_items": "Biblioteca de vida",
+      "memorials": "Memorial",
+      "ai_conversations": "Conversaciones",
+      "ai_messages": "Mensajes",
+      "sermon_notes": "Notas de sermones",
+      "sermon_actions": "Acciones de sermones",
+      "spiritual_pulses": "Pulso espiritual",
+      "user_reading_plans": "Planes de lectura",
+      "reading_progress": "Días de planes",
+      "private_media": "Archivos"
+    }
   }
 }
