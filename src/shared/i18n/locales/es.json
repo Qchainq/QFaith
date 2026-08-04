@@ -696,5 +696,40 @@
       "audio": "Audio",
       "documento": "Documento"
     }
+  },
+  "planes": {
+    "titulo": "Planes de lectura",
+    "descubrir": "Descubrir planes",
+    "mios": "Mis planes",
+    "sinPlanes": "Cuando empieces un plan, aparecerá aquí.",
+    "sinCatalogo": "Todavía no hay planes disponibles en tu idioma.",
+    "duracion": "{{dias}} días",
+    "empezar": "Empezar este plan",
+    "empezando": "Empezando…",
+    "continuar": "Continuar",
+    "dePago": "Incluido en la suscripción",
+    "posicion": {
+      "enCurso": "Día {{dia}} de {{total}}",
+      "completado": "Lo terminaste"
+    },
+    "estado": {
+      "active": "En curso",
+      "paused": "En pausa",
+      "completed": "Terminado",
+      "abandoned": "Lo dejaste"
+    },
+    "marcarLeido": "Marcar como leído",
+    "marcando": "Guardando…",
+    "reflexion": "¿Qué te ha dicho hoy? (opcional)",
+    "guardarReflexion": "Guardar lo que escribí",
+    "preguntas": "Para pensar",
+    "pasajes": "Lectura de hoy",
+    "pausar": "Pausar",
+    "retomar": "Retomar",
+    "abandonar": "Dejarlo por ahora",
+    "volverAEmpezar": "Volver a empezarlo",
+    "teEspera": "Tu plan te espera donde lo dejaste.",
+    "leidos_one": "1 día leído",
+    "leidos_other": "{{count}} días leídos"
   }
 }

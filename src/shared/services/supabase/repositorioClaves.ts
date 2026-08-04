@@ -138,6 +138,44 @@ export async function subirMaterialCuenta(parametros: {
 }
 
 /**
+ * Sube sobres sueltos, sin tocar la configuración de recuperación.
+ *
+ * Lo usa el arranque cuando la cuenta se encuentra con un dominio de cifrado
+ * que no existía al crearla: la clave se genera en el dispositivo y su sobre
+ * hay que guardarlo para que los demás dispositivos también lo tengan.
+ *
+ * No pasa por `subirMaterialCuenta` porque ahí la recuperación es obligatoria,
+ * y aquí no hay nada que cambiar en ella: la clave maestra es la misma de
+ * siempre y su sobre de recuperación sigue valiendo.
+ */
+export async function subirSobresDeClave(parametros: {
+  readonly rest: ClienteRest;
+  readonly usuarioId: string;
+  readonly sobresClaves: readonly SobreClavePersistido[];
+}): Promise<void> {
+  if (parametros.sobresClaves.length === 0) return;
+
+  const respuesta = await parametros.rest.peticion({
+    metodo: 'POST',
+    ruta: '/user_key_envelopes?on_conflict=user_id,key_id',
+    cuerpo: parametros.sobresClaves.map((sobre) => ({
+      user_id: parametros.usuarioId,
+      key_id: sobre.keyId,
+      key_type: sobre.keyType,
+      encrypted_key: serializar(sobre),
+      encryption_method: sobre.encryptionMethod,
+      key_version: sobre.keyVersion,
+    })),
+    // Reintentar tras un corte no puede fallar por encontrarse lo de la vez
+    // anterior.
+    prefer: 'resolution=merge-duplicates',
+  });
+  if (respuesta.estado >= 400) {
+    throw parametros.rest.comoError(respuesta, 'subir:user_key_envelopes');
+  }
+}
+
+/**
  * Descarga el material de la cuenta.
  *
  * Es lo primero que hace un dispositivo nuevo: sin los sobres no puede

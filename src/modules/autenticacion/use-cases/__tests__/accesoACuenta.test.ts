@@ -2,6 +2,7 @@
 // el usuario puede recuperarla luego. Estas pruebas fijan ese orden y los
 // caminos de vuelta cuando algo falla a mitad.
 import { esErrorApp } from '@shared/errores/erroresApp';
+import type { SobreClavePersistido } from '@shared/services/keys/servicioClaves';
 
 import {
   crearCuenta,
@@ -26,11 +27,13 @@ const mockClaves = {
   desbloquear: jest.fn(),
   restaurarConFrase: jest.fn(),
   olvidarDispositivo: jest.fn(),
+  completarClavesDeDominio: jest.fn<readonly SobreClavePersistido[], []>(() => []),
 };
 
 const mockRepositorioClaves = {
   subirMaterialCuenta: jest.fn(),
   descargarMaterialCuenta: jest.fn(),
+  subirSobresDeClave: jest.fn(),
 };
 
 const mockDispositivos = {
@@ -52,12 +55,14 @@ jest.mock('@shared/services/keys/servicioClaves', () => ({
   desbloquear: (...args: never[]) => mockClaves.desbloquear(...args),
   restaurarConFrase: (...args: never[]) => mockClaves.restaurarConFrase(...args),
   olvidarDispositivo: (...args: never[]) => mockClaves.olvidarDispositivo(...args),
+  completarClavesDeDominio: () => mockClaves.completarClavesDeDominio(),
 }));
 
 jest.mock('@shared/services/supabase/repositorioClaves', () => ({
   subirMaterialCuenta: (...args: never[]) => mockRepositorioClaves.subirMaterialCuenta(...args),
   descargarMaterialCuenta: (...args: never[]) =>
     mockRepositorioClaves.descargarMaterialCuenta(...args),
+  subirSobresDeClave: (...args: never[]) => mockRepositorioClaves.subirSobresDeClave(...args),
 }));
 
 jest.mock('@shared/services/supabase/repositorioDispositivos', () => ({
@@ -289,5 +294,81 @@ describe('salida', () => {
 
     expect(mockClaves.olvidarDispositivo).toHaveBeenCalled();
     expect(mockAuth.cerrarSesion).toHaveBeenCalled();
+  });
+});
+
+describe('dominios de cifrado añadidos después', () => {
+  // QFaith añade módulos, y cada uno trae su dominio. Una cuenta creada antes
+  // no tiene sobre para el dominio nuevo y ese módulo no podría escribir nada.
+  // La clave se crea en el dispositivo —envolverla exige la clave de
+  // envoltorio, que no sale de aquí— y su sobre hay que subirlo para que los
+  // demás dispositivos también lo tengan.
+  const SOBRE_NUEVO: SobreClavePersistido = {
+    keyId: 'clave-de-planes',
+    dominio: 'planes',
+    envoltorioBase64: 'envuelto',
+    nonceBase64: 'nonce',
+    keyType: 'contenido',
+    encryptionMethod: 'xchacha20poly1305',
+    keyVersion: 1,
+  };
+
+  beforeEach(() => {
+    mockAuth.sesionActual.mockResolvedValue(USUARIO);
+    mockRepositorioClaves.descargarMaterialCuenta.mockResolvedValue({
+      sobresClaves: MATERIAL.sobresClaves,
+      sobreRecuperacion: MATERIAL.sobreRecuperacion,
+    });
+    mockClaves.desbloquear.mockResolvedValue(true);
+  });
+
+  it('al reanudar, el sobre nuevo se sube', async () => {
+    mockClaves.completarClavesDeDominio.mockReturnValue([SOBRE_NUEVO]);
+
+    await reanudarSesion(DEPENDENCIAS);
+
+    expect(mockRepositorioClaves.subirSobresDeClave).toHaveBeenCalledWith(
+      expect.objectContaining({ usuarioId: USUARIO.id, sobresClaves: [SOBRE_NUEVO] }),
+    );
+  });
+
+  it('al entrar con contraseña también', async () => {
+    mockAuth.iniciarSesion.mockResolvedValue({ usuario: USUARIO, conSesion: true });
+    mockClaves.completarClavesDeDominio.mockReturnValue([SOBRE_NUEVO]);
+
+    await entrarConCuenta(DEPENDENCIAS, CREDENCIALES);
+
+    expect(mockRepositorioClaves.subirSobresDeClave).toHaveBeenCalled();
+  });
+
+  it('si no falta ninguna clave no se llama al servidor', async () => {
+    // Se ejecuta en cada arranque: una petición por arranque sin nada que
+    // mandar sería gasto puro.
+    mockClaves.completarClavesDeDominio.mockReturnValue([]);
+
+    await reanudarSesion(DEPENDENCIAS);
+
+    expect(mockRepositorioClaves.subirSobresDeClave).not.toHaveBeenCalled();
+  });
+
+  it('si la subida falla, la persona entra igual', async () => {
+    // La sesión ya tiene la clave en memoria: el módulo funciona. Lo que queda
+    // pendiente es que los otros dispositivos la reciban, y el arranque
+    // siguiente lo reintenta. Cerrar el paso a la cuenta entera por esto sería
+    // peor que el problema.
+    mockClaves.completarClavesDeDominio.mockReturnValue([SOBRE_NUEVO]);
+    mockRepositorioClaves.subirSobresDeClave.mockRejectedValue(new Error('sin red'));
+
+    await expect(reanudarSesion(DEPENDENCIAS)).resolves.toMatchObject({ tipo: 'listo' });
+  });
+
+  it('sin poder desbloquear no se intenta completar nada', async () => {
+    // Sin clave maestra en el dispositivo no hay con qué envolver: llamar aquí
+    // fallaría, y además el camino correcto es restaurar con la frase.
+    mockClaves.desbloquear.mockResolvedValue(false);
+
+    await reanudarSesion(DEPENDENCIAS);
+
+    expect(mockClaves.completarClavesDeDominio).not.toHaveBeenCalled();
   });
 });

@@ -15,6 +15,7 @@ export const DOMINIOS_CIFRADO = [
   'ia',
   'bibliotecaVida',
   'medios',
+  'planes',
 ] as const;
 
 export type DominioCifrado = (typeof DOMINIOS_CIFRADO)[number];

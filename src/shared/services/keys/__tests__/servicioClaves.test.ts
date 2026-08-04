@@ -5,10 +5,11 @@ import * as AlmacenSeguro from 'expo-secure-store';
 
 import { aBase64 } from '../../crypto/codificacion';
 import { cifrar, descifrar } from '../../crypto/servicioCriptografia';
-import type { VinculoRegistro } from '../../crypto/tipos';
+import type { DominioCifrado, VinculoRegistro } from '../../crypto/tipos';
 import {
   bloquear,
   claveDeDominio,
+  completarClavesDeDominio,
   clavesDerivadas,
   desbloquear,
   estaDesbloqueada,
@@ -16,6 +17,7 @@ import {
   olvidarDispositivo,
   restaurarConFrase,
   rotarClaveDeDominio,
+  type SobreClavePersistido,
 } from '../servicioClaves';
 
 const VINCULO: VinculoRegistro = {
@@ -366,5 +368,101 @@ describe('sobres de generaciones anteriores', () => {
       desbloquear('usuario-b', [...ajena.sobresClaves, ...propia.sobresClaves]),
     ).resolves.toBe(true);
     expect(claveDeDominio('oracion')).toBeTruthy();
+  });
+});
+
+describe('dominios añadidos después de crear la cuenta', () => {
+  // QFaith añade módulos con el tiempo, y cada uno trae su dominio de cifrado.
+  // Una cuenta creada antes tiene sobres para los dominios de entonces y para
+  // ninguno más: al abrir el módulo nuevo, su clave no está y no puede
+  // escribir nada. Este es el caso que `completarClavesDeDominio` resuelve, y
+  // el que se olvidaría hasta que alguien lo sufriera en producción.
+
+  /**
+   * Sobres de una cuenta a la que le falta un dominio.
+   *
+   * Es el mismo teléfono de siempre —la clave maestra sigue en su almacén
+   * seguro—; lo que le falta es el sobre del dominio que aún no existía
+   * cuando se creó la cuenta. Un dispositivo nuevo sería otro caso distinto:
+   * ahí no hay clave maestra y hace falta la frase.
+   */
+  const sobresSin = (
+    sobres: readonly SobreClavePersistido[],
+    dominio: DominioCifrado,
+  ): readonly SobreClavePersistido[] => sobres.filter((sobre) => sobre.dominio !== dominio);
+
+  it('una cuenta antigua no tiene la clave del dominio nuevo', async () => {
+    // Sin esta comprobación, todo lo que sigue pasaría también sobre una
+    // cuenta completa y no probaría nada.
+    const { sobresClaves } = await nuevaCuenta();
+    bloquear();
+    await desbloquear(USUARIO, sobresSin(sobresClaves, 'planes'));
+
+    expect(() => claveDeDominio('planes')).toThrow(
+      expect.objectContaining({ codigo: 'CLAVE_DOMINIO_AUSENTE' }),
+    );
+  });
+
+  it('completar las claves crea la que falta y deja el módulo utilizable', async () => {
+    const { sobresClaves } = await nuevaCuenta();
+    bloquear();
+    await desbloquear(USUARIO, sobresSin(sobresClaves, 'planes'));
+
+    const nuevos = completarClavesDeDominio();
+
+    expect(nuevos.map((sobre) => sobre.dominio)).toEqual(['planes']);
+    const clave = claveDeDominio('planes');
+    const vinculo = { ...VINCULO, tipoEntidad: 'reading_progress' };
+    const sobre = cifrar({
+      contenido: CONTENIDO,
+      clave,
+      claveHash: clavesDerivadas().claveHash,
+      vinculo,
+    });
+    expect(descifrar({ sobre, clave, vinculo })).toBe(CONTENIDO);
+  });
+
+  it('no toca las claves que ya estaban', async () => {
+    // Regenerar una clave existente dejaría ilegible todo lo cifrado con ella.
+    const { sobresClaves } = await nuevaCuenta();
+    bloquear();
+    await desbloquear(USUARIO, sobresSin(sobresClaves, 'planes'));
+
+    const antes = claveDeDominio('diario').keyId;
+    completarClavesDeDominio();
+
+    expect(claveDeDominio('diario').keyId).toBe(antes);
+  });
+
+  it('en una cuenta completa no crea nada', async () => {
+    const { sobresClaves } = await nuevaCuenta();
+    bloquear();
+    await desbloquear(USUARIO, sobresClaves);
+
+    // Se llama en cada arranque: si generara sobres cada vez, la cuenta
+    // acumularía claves inútiles y cada una sería una subida de más.
+    expect(completarClavesDeDominio()).toEqual([]);
+  });
+
+  it('el sobre nuevo se puede volver a abrir con la misma clave maestra', async () => {
+    // Es lo que hace que sirva de algo subirlo: al entrar en otro dispositivo,
+    // ese sobre tiene que abrir.
+    const { sobresClaves } = await nuevaCuenta();
+    bloquear();
+    await desbloquear(USUARIO, sobresSin(sobresClaves, 'planes'));
+    const nuevos = completarClavesDeDominio();
+    const keyId = claveDeDominio('planes').keyId;
+
+    bloquear();
+    await desbloquear(USUARIO, [...sobresSin(sobresClaves, 'planes'), ...nuevos]);
+
+    expect(claveDeDominio('planes').keyId).toBe(keyId);
+  });
+
+  it('sin sesión abierta no se puede completar nada', async () => {
+    await nuevaCuenta();
+    bloquear();
+
+    expect(() => completarClavesDeDominio()).toThrow();
   });
 });

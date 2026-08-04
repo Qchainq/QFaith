@@ -13,6 +13,7 @@ export type InicioParamList = {
   Iglesia: undefined;
   Sermones: undefined;
   Pulso: undefined;
+  Planes: undefined;
 };
 
 export type PestanasParamList = {

@@ -209,6 +209,39 @@ function desenvolverSobres(
 }
 
 /**
+ * Claves de dominio que esta cuenta todavía no tiene.
+ *
+ * QFaith añade módulos con el tiempo, y cada módulo nuevo trae su dominio de
+ * cifrado. Una cuenta creada antes tiene sobres para los dominios que existían
+ * entonces y para ninguno más, así que al abrir el módulo nuevo se encontraría
+ * con que su clave no está y no podría escribir nada.
+ *
+ * Esto lo resuelve donde toca —**en el dispositivo, con la clave maestra que
+ * ya está ahí**— en lugar de en una migración del servidor, que no podría:
+ * envolver una clave requiere la clave de envoltorio, y esa no sale nunca del
+ * teléfono.
+ *
+ * Las claves que faltan se crean nuevas. No se derivan de la maestra a
+ * propósito: si un día hace falta rotar la clave de un dominio, una clave
+ * derivada obligaría a rotar la maestra con ella.
+ *
+ * Quien llama debe subir los sobres devueltos. Que la subida falle no rompe
+ * nada: la sesión ya tiene la clave en memoria y el intento siguiente vuelve a
+ * generarlos.
+ */
+export function completarClavesDeDominio(): readonly SobreClavePersistido[] {
+  const actual = exigirSesion();
+  const faltan = DOMINIOS_CIFRADO.filter((dominio) => !actual.clavesPorDominio.has(dominio));
+  if (faltan.length === 0) return [];
+
+  const nuevas = faltan.map((dominio) => crearClaveContenido(dominio));
+  for (const clave of nuevas) {
+    actual.clavesPorDominio.set(clave.dominio, clave);
+  }
+  return nuevas.map((clave) => persistirSobre(actual.derivadas, clave));
+}
+
+/**
  * ¿La clave maestra corresponde a esta cuenta?
  *
  * Si había sobres y ninguno abrió, no corresponde. Sin sobres no se puede

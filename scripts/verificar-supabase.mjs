@@ -100,6 +100,12 @@ const TABLAS = [
   'notifications',
   'spiritual_pulses',
   'private_media',
+  // El catálogo de planes es contenido público para quien tiene sesión, pero
+  // el rol anónimo no alcanza nada: sin sesión no hay aplicación.
+  'reading_plans',
+  'reading_plan_days',
+  'user_reading_plans',
+  'reading_progress',
 ];
 
 const comprobaciones = [];
@@ -665,6 +671,76 @@ async function faseAutenticada(cuentas) {
 
   await faseIglesia(a, b);
   await faseArchivos(a, b);
+  await fasePlanes(a);
+}
+
+/**
+ * Los planes de lectura, contra el proyecto real.
+ *
+ * Lo que se comprueba aquí no es aislamiento entre personas —eso es igual que
+ * en las demás tablas— sino el cierre del **contenido de pago**, que depende
+ * de una función `security definer` y no de una política escrita a mano. Que
+ * esa función devuelva `false` mientras no exista la suscripción es lo que
+ * impide repartir contenido que después no se puede recuperar.
+ */
+async function fasePlanes(a) {
+  console.log('\n▸ Fase Planes: catálogo abierto, contenido de pago cerrado\n');
+
+  const catalogo = await peticion('/rest/v1/reading_plans?select=id,is_premium,is_published', {
+    token: a.token,
+  });
+  exigirPostgrest(catalogo, 'GET reading_plans');
+  const filas = Array.isArray(catalogo.datos) ? catalogo.datos : [];
+
+  comprobar(
+    'el catálogo se puede leer con sesión',
+    catalogo.estado < 400,
+    `HTTP ${catalogo.estado}`,
+  );
+  comprobar(
+    'ningún plan sin publicar es visible',
+    filas.every((fila) => fila.is_published === true),
+    `${filas.filter((f) => f.is_published !== true).length} sin publicar`,
+  );
+  // Mientras no exista la capa de suscripción, la respuesta correcta es cero.
+  comprobar(
+    'ningún plan de pago es visible sin suscripción',
+    filas.every((fila) => fila.is_premium === false),
+    `${filas.filter((f) => f.is_premium === true).length} de pago`,
+  );
+
+  const dias = await peticion('/rest/v1/reading_plan_days?select=id,plan_id', { token: a.token });
+  exigirPostgrest(dias, 'GET reading_plan_days');
+  const visibles = new Set(filas.map((fila) => fila.id));
+  const huerfanos = (Array.isArray(dias.datos) ? dias.datos : []).filter(
+    (dia) => !visibles.has(dia.plan_id),
+  );
+  // Es el caso que se olvida cuando la comprobación se pone solo en la tabla
+  // de planes: pedir los días por identificador, saltándose el catálogo.
+  comprobar(
+    'no se alcanzan días de planes que no se ven',
+    huerfanos.length === 0,
+    `${huerfanos.length} días de planes invisibles`,
+  );
+
+  // El catálogo no lo escribe el cliente, ni siquiera con sesión.
+  const publicar = await peticion('/rest/v1/reading_plans', {
+    token: a.token,
+    metodo: 'POST',
+    cuerpo: {
+      creator_type: 'user',
+      creator_id: a.id,
+      title: 'Plan de verificación',
+      language_code: 'es',
+      duration_days: 3,
+    },
+  });
+  exigirPostgrest(publicar, 'POST reading_plans');
+  comprobar(
+    'el cliente no puede publicar en el catálogo',
+    publicar.estado >= 400,
+    `HTTP ${publicar.estado} ${codigo(publicar) ?? ''}`,
+  );
 }
 
 /**

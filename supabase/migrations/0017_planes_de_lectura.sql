@@ -1,21 +1,3 @@
--- ═══════════════════════════════════════════════════════════════════════
--- QFaith · Migraciones desde la 0017
---
--- ARCHIVO GENERADO. No lo edites: se regenera desde supabase/migrations/.
--- Solo las migraciones 0017 en adelante. Para una base que ya tiene
--- aplicadas las anteriores. Comprueba en cuál estás con:
---
---   select version from public.schema_migrations order by version;
---
--- No incluye supabase/tests/00_sustituto_auth.sql, que solo sirve para
--- ejecutar las migraciones en un PostgreSQL local: en Supabase, el esquema
--- `auth` y la función `auth.uid()` los proporciona la propia plataforma.
--- ═══════════════════════════════════════════════════════════════════════
-
--- ───────────────────────────────────────────────────────────
--- 0017_planes_de_lectura.sql
--- ───────────────────────────────────────────────────────────
-
 -- Migración 0017 — Planes de lectura (Documento 12, tablas 22 a 25;
 -- Documento 6, «Devocionales y planes»).
 --
@@ -322,21 +304,3 @@ create policy reading_progress_actualizacion_propia on public.reading_progress
 grant select on public.reading_plans, public.reading_plan_days to authenticated;
 grant select, insert, update on public.user_reading_plans to authenticated;
 grant select, insert, update on public.reading_progress to authenticated;
-
--- ───────────────────────────────────────────────────────────
--- Registro de migraciones aplicadas
--- ───────────────────────────────────────────────────────────
-
-create table if not exists public.schema_migrations (
-  version text primary key,
-  applied_at timestamptz not null default now()
-);
-
-alter table public.schema_migrations enable row level security;
--- Sin políticas y sin privilegios: es información de operación, no del
--- usuario. Solo la ve quien entra por el panel o con la clave de servicio.
-revoke all on public.schema_migrations from anon, authenticated;
-
-insert into public.schema_migrations (version) values
-  ('0017_planes_de_lectura')
-on conflict (version) do nothing;

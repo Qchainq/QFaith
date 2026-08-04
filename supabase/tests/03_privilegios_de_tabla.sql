@@ -87,7 +87,26 @@ declare
     -- cualquiera se fabricaría un aviso de seguridad falso a nombre de otro.
     ['authenticated', 'notifications', 'INSERT'],
     ['authenticated', 'notifications', 'DELETE'],
-    ['authenticated', 'spiritual_pulses', 'DELETE']
+    ['authenticated', 'spiritual_pulses', 'DELETE'],
+    -- La ficha de un archivo se retira a la papelera; el blob del cubo lo
+    -- borra la purga, no el cliente.
+    ['authenticated', 'private_media', 'DELETE'],
+    -- El catálogo de planes lo publica un proceso administrativo, como el
+    -- texto bíblico. Un cliente que pudiera escribirlo repartiría contenido
+    -- espiritual sin revisar a todo el mundo.
+    --
+    -- Sin esta comprobación, conceder el privilegio pasaría inadvertido: no
+    -- hay política de inserción, así que RLS lo frena igual y el rechazo se
+    -- ve idéntico. Queda un privilegio de más esperando a que alguien añada
+    -- una política amplia.
+    ['authenticated', 'reading_plans', 'INSERT'],
+    ['authenticated', 'reading_plans', 'UPDATE'],
+    ['authenticated', 'reading_plans', 'DELETE'],
+    ['authenticated', 'reading_plan_days', 'INSERT'],
+    ['authenticated', 'reading_plan_days', 'UPDATE'],
+    ['authenticated', 'reading_plan_days', 'DELETE'],
+    ['authenticated', 'user_reading_plans', 'DELETE'],
+    ['authenticated', 'reading_progress', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop

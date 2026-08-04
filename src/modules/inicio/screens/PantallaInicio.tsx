@@ -19,6 +19,7 @@ export interface PropsPantallaInicio {
   readonly alAbrirIglesia?: () => void;
   readonly alAbrirSermones?: () => void;
   readonly alAbrirPulso?: () => void;
+  readonly alAbrirPlanes?: () => void;
 }
 
 export function PantallaInicio({
@@ -29,6 +30,7 @@ export function PantallaInicio({
   alAbrirIglesia,
   alAbrirSermones,
   alAbrirPulso,
+  alAbrirPlanes,
 }: PropsPantallaInicio = {}) {
   const { t } = useTranslation();
   const tema = useTema();
@@ -83,6 +85,12 @@ export function PantallaInicio({
       {alAbrirSermones === undefined ? null : (
         <View style={{ marginTop: tema.espaciado.sm }}>
           <Boton variante="secundario" etiqueta={t('sermones.titulo')} onPress={alAbrirSermones} />
+        </View>
+      )}
+
+      {alAbrirPlanes === undefined ? null : (
+        <View style={{ marginTop: tema.espaciado.sm }}>
+          <Boton variante="secundario" etiqueta={t('planes.titulo')} onPress={alAbrirPlanes} />
         </View>
       )}
     </PantallaBase>

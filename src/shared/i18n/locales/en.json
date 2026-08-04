@@ -696,5 +696,40 @@
       "audio": "Audio",
       "documento": "Document"
     }
+  },
+  "planes": {
+    "titulo": "Reading plans",
+    "descubrir": "Browse plans",
+    "mios": "My plans",
+    "sinPlanes": "When you start a plan, it'll show up here.",
+    "sinCatalogo": "No plans available in your language yet.",
+    "duracion": "{{dias}} days",
+    "empezar": "Start this plan",
+    "empezando": "Starting…",
+    "continuar": "Continue",
+    "dePago": "Included with the subscription",
+    "posicion": {
+      "enCurso": "Day {{dia}} of {{total}}",
+      "completado": "You finished it"
+    },
+    "estado": {
+      "active": "In progress",
+      "paused": "Paused",
+      "completed": "Finished",
+      "abandoned": "You set it aside"
+    },
+    "marcarLeido": "Mark as read",
+    "marcando": "Saving…",
+    "reflexion": "What did it say to you today? (optional)",
+    "guardarReflexion": "Save what I wrote",
+    "preguntas": "To think about",
+    "pasajes": "Today's reading",
+    "pausar": "Pause",
+    "retomar": "Resume",
+    "abandonar": "Set it aside for now",
+    "volverAEmpezar": "Start it again",
+    "teEspera": "Your plan is waiting right where you left it.",
+    "leidos_one": "1 day read",
+    "leidos_other": "{{count}} days read"
   }
 }

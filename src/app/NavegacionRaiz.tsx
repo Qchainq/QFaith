@@ -17,6 +17,7 @@ import { PantallaInicio } from '@modules/inicio/screens/PantallaInicio';
 import { MemorialContenedor } from '@modules/memorial/screens/MemorialContenedor';
 import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PerfilContenedor } from '@modules/perfil/screens/PerfilContenedor';
+import { PlanesContenedor } from '@modules/planes/screens/PlanesContenedor';
 import { PulsoContenedor } from '@modules/pulso/screens/PulsoContenedor';
 import { SermonesContenedor } from '@modules/sermones/screens/SermonesContenedor';
 import { useTema } from '@shared/theme/ProveedorTema';
@@ -43,6 +44,7 @@ function NavegacionInicio() {
             alAbrirIglesia={() => navigation.navigate('Iglesia')}
             alAbrirSermones={() => navigation.navigate('Sermones')}
             alAbrirPulso={() => navigation.navigate('Pulso')}
+            alAbrirPlanes={() => navigation.navigate('Planes')}
           />
         )}
       </PilaInicio.Screen>
@@ -80,6 +82,11 @@ function NavegacionInicio() {
         name="Pulso"
         component={PulsoContenedor}
         options={{ title: t('pulso.titulo'), headerShown: false }}
+      />
+      <PilaInicio.Screen
+        name="Planes"
+        component={PlanesContenedor}
+        options={{ title: t('planes.titulo'), headerShown: false }}
       />
     </PilaInicio.Navigator>
   );

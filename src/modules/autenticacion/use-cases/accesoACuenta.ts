@@ -23,6 +23,7 @@ import {
 } from '@shared/services/auth/servicioAutenticacion';
 import {
   bloquear,
+  completarClavesDeDominio,
   desbloquear,
   inicializarCuenta,
   olvidarDispositivo,
@@ -31,6 +32,7 @@ import {
 import {
   descargarMaterialCuenta,
   subirMaterialCuenta,
+  subirSobresDeClave,
 } from '@shared/services/supabase/repositorioClaves';
 import {
   asegurarDispositivo,
@@ -156,6 +158,7 @@ export async function entrarConCuenta(
 
   const material = await descargarMaterialCuenta({ rest });
   const abierta = await desbloquear(acceso.usuario.id, material.sobresClaves);
+  if (abierta) await completarDominios(rest, acceso.usuario.id);
 
   const dispositivoId = await registrarDispositivo(dependencias, acceso.usuario.id);
 
@@ -187,7 +190,32 @@ export async function restaurarCuenta(
   });
 
   const dispositivoId = await registrarDispositivo(dependencias, usuario.id);
+  await completarDominios(clienteDe(dependencias), usuario.id);
   return { tipo: 'listo', usuario, dispositivoId };
+}
+
+/**
+ * Da a la cuenta las claves de los dominios que no tenía.
+ *
+ * QFaith añade módulos, y cada uno trae su dominio de cifrado. Una cuenta
+ * creada antes no tiene sobre para el dominio nuevo, y sin él ese módulo no
+ * puede escribir nada. La clave se crea aquí, en el dispositivo, porque
+ * envolverla requiere la clave de envoltorio y esa nunca sale de aquí.
+ *
+ * **Un fallo al subir no impide entrar.** La sesión ya tiene la clave en
+ * memoria, así que el módulo funciona igual; lo que queda pendiente es que los
+ * demás dispositivos la reciban, y el arranque siguiente lo reintenta. Cortar
+ * el acceso a la cuenta entera por esto sería peor que el problema.
+ */
+async function completarDominios(rest: ClienteRest, usuarioId: string): Promise<void> {
+  const nuevos = completarClavesDeDominio();
+  if (nuevos.length === 0) return;
+  try {
+    await subirSobresDeClave({ rest, usuarioId, sobresClaves: nuevos });
+  } catch {
+    // Nunca se registra qué dominio falló: diría qué módulos usa la persona
+    // (invariante 2).
+  }
 }
 
 /**
@@ -202,11 +230,13 @@ export async function reanudarSesion(dependencias: DependenciasAcceso): Promise<
     return { tipo: 'sinSesion' };
   }
 
-  const material = await descargarMaterialCuenta({ rest: clienteDe(dependencias) });
+  const rest = clienteDe(dependencias);
+  const material = await descargarMaterialCuenta({ rest });
   const abierta = await desbloquear(usuario.id, material.sobresClaves);
   if (!abierta) {
     return { tipo: 'restaurarConFrase', usuario };
   }
+  await completarDominios(rest, usuario.id);
 
   // Volver a darlo de alta es idempotente y además refresca `last_seen_at`,
   // que es lo que permite al usuario reconocer sus dispositivos activos.
