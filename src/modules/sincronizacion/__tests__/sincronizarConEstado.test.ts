@@ -119,3 +119,66 @@ describe('sincronización fallida', () => {
     expect(useEstadoSincronizacion.getState().ultimaCorrecta).toBe(AHORA);
   });
 });
+
+describe('tareas de fondo', () => {
+  // Los archivos no viajan por el motor: la ficha sí, el blob va por su
+  // cuenta al cubo. Si nadie lo engancha aquí, una foto adjuntada sin
+  // cobertura se queda en el teléfono para siempre.
+  it('se ejecutan después de sincronizar, no antes', async () => {
+    const orden: string[] = [];
+    const motor = motorReal();
+    const observado: MotorSincronizacion = {
+      ...motor,
+      sincronizar: async () => {
+        orden.push('sincronizar');
+        return motor.sincronizar();
+      },
+    };
+
+    await sincronizarConEstado(observado, () => AHORA, [
+      async () => {
+        orden.push('tarea');
+      },
+    ]);
+
+    // Al revés, subir el blob de una ficha que aún no existe en el servidor
+    // dejaría un archivo huérfano en el cubo si el envío fallara.
+    expect(orden).toEqual(['sincronizar', 'tarea']);
+  });
+
+  it('una tarea que falla no tumba la ronda', async () => {
+    const resultado = await sincronizarConEstado(motorReal(), () => AHORA, [
+      async () => {
+        throw new Error('el cubo no responde');
+      },
+    ]);
+
+    // La sincronización sí funcionó. Decir lo contrario haría que la pantalla
+    // avisara de un problema que no afecta a lo que la persona escribió.
+    expect(resultado.correcta).toBe(true);
+    expect(useEstadoSincronizacion.getState().fase).toBe('inactiva');
+  });
+
+  it('si la sincronización falla, las tareas no se intentan', async () => {
+    let intentada = false;
+    const motor = motorReal();
+
+    await sincronizarConEstado(
+      {
+        ...motor,
+        sincronizar: async () => {
+          throw new Error('sin red');
+        },
+      },
+      () => AHORA,
+      [
+        async () => {
+          intentada = true;
+        },
+      ],
+    );
+
+    // Sin red para la ficha tampoco la hay para el archivo.
+    expect(intentada).toBe(false);
+  });
+});

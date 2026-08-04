@@ -6,12 +6,15 @@ import { wordlist } from '@scure/bip39/wordlists/english';
 import { aBytes, aBase64, desdeBase64 } from '../codificacion';
 import {
   abrirSobreRecuperacion,
+  calcularHashArchivo,
   calcularHashContenido,
   cifrar,
+  cifrarBytes,
   crearClaveContenido,
   crearSobreRecuperacion,
   derivarClaves,
   descifrar,
+  descifrarBytes,
   desenvolverClaveContenido,
   envolverClaveContenido,
   esFraseRecuperacionValida,
@@ -228,6 +231,162 @@ describe('hash de contenido', () => {
     expect(calcularHashContenido(primeraCuenta.claveHash, CONTENIDO)).not.toBe(
       calcularHashContenido(segundaCuenta.claveHash, CONTENIDO),
     );
+  });
+});
+
+describe('cifrado de archivos', () => {
+  // Una fotografía o un audio no caben por el camino de texto: pasarlos por
+  // base64 los infla un tercio y obliga a tener original, cadena y
+  // criptograma en memoria a la vez. Estas pruebas fijan que el camino
+  // binario ofrece exactamente las mismas garantías que el de texto, para que
+  // no acabe siendo la puerta de atrás por descuido.
+  const BYTES = new TextEncoder().encode('los bytes de un archivo privado');
+
+  function montarArchivo() {
+    const { derivadas } = montarEntorno();
+    const clave = crearClaveContenido('medios');
+    return { derivadas, clave };
+  }
+
+  it('ida y vuelta devuelve exactamente los mismos bytes', () => {
+    const { derivadas, clave } = montarArchivo();
+
+    const sobre = cifrarBytes({
+      contenido: BYTES,
+      clave,
+      claveHash: derivadas.claveHash,
+      vinculo: VINCULO,
+    });
+
+    expect(
+      Buffer.from(descifrarBytes({ sobre, clave, vinculo: VINCULO })).equals(Buffer.from(BYTES)),
+    ).toBe(true);
+  });
+
+  it('el criptograma no contiene el original', () => {
+    const { derivadas, clave } = montarArchivo();
+
+    const sobre = cifrarBytes({
+      contenido: BYTES,
+      clave,
+      claveHash: derivadas.claveHash,
+      vinculo: VINCULO,
+    });
+
+    expect(new TextDecoder().decode(sobre.criptograma)).not.toContain('archivo privado');
+  });
+
+  it('no borra los bytes que recibe', () => {
+    // A diferencia de `cifrar`, esos bytes son de quien llama: normalmente lo
+    // que la persona acaba de elegir, y puede necesitarlos para una vista
+    // previa. Vaciárselos sería una sorpresa desagradable.
+    const { derivadas, clave } = montarArchivo();
+    const originales = Uint8Array.from(BYTES);
+
+    cifrarBytes({ contenido: BYTES, clave, claveHash: derivadas.claveHash, vinculo: VINCULO });
+
+    expect(Buffer.from(BYTES).equals(Buffer.from(originales))).toBe(true);
+  });
+
+  it('dos cifrados del mismo archivo no coinciden', () => {
+    const { derivadas, clave } = montarArchivo();
+    const cifrarlo = () =>
+      cifrarBytes({ contenido: BYTES, clave, claveHash: derivadas.claveHash, vinculo: VINCULO });
+
+    expect(Buffer.from(cifrarlo().criptograma).equals(Buffer.from(cifrarlo().criptograma))).toBe(
+      false,
+    );
+  });
+
+  it('un byte cambiado hace que falle, no que devuelva basura', () => {
+    const { derivadas, clave } = montarArchivo();
+    const sobre = cifrarBytes({
+      contenido: BYTES,
+      clave,
+      claveHash: derivadas.claveHash,
+      vinculo: VINCULO,
+    });
+
+    const alterado = Uint8Array.from(sobre.criptograma);
+    alterado[0] = (alterado[0] ?? 0) ^ 0x01;
+
+    expect(() =>
+      descifrarBytes({ sobre: { ...sobre, criptograma: alterado }, clave, vinculo: VINCULO }),
+    ).toThrow(expect.objectContaining({ codigo: 'DESCIFRADO_FALLIDO' }));
+  });
+
+  it('un archivo de otra fila no se abre aquí', () => {
+    // Sin los datos autenticados, alguien con acceso a la base movería el
+    // criptograma a otra fila y el cliente lo abriría sin notarlo.
+    const { derivadas, clave } = montarArchivo();
+    const sobre = cifrarBytes({
+      contenido: BYTES,
+      clave,
+      claveHash: derivadas.claveHash,
+      vinculo: VINCULO,
+    });
+
+    expect(() =>
+      descifrarBytes({
+        sobre,
+        clave,
+        vinculo: { ...VINCULO, entidadId: '33333333-3333-4333-8333-333333333333' },
+      }),
+    ).toThrow(expect.objectContaining({ codigo: 'DESCIFRADO_FALLIDO' }));
+  });
+
+  it('una clave que no corresponde se rechaza antes de intentar nada', () => {
+    const { derivadas, clave } = montarArchivo();
+    const sobre = cifrarBytes({
+      contenido: BYTES,
+      clave,
+      claveHash: derivadas.claveHash,
+      vinculo: VINCULO,
+    });
+
+    expect(() =>
+      descifrarBytes({ sobre, clave: crearClaveContenido('medios'), vinculo: VINCULO }),
+    ).toThrow(expect.objectContaining({ codigo: 'CLAVE_NO_CORRESPONDE' }));
+  });
+
+  it('el hash del archivo lleva clave, como el del texto', () => {
+    const primera = derivarClaves(generarClaveMaestra());
+    const segunda = derivarClaves(generarClaveMaestra());
+
+    // Con un SHA-256 a secas, el servidor podría comprobar si dos personas
+    // guardan el mismo archivo o si alguien tiene una imagen conocida.
+    expect(calcularHashArchivo(primera.claveHash, BYTES)).not.toBe(
+      calcularHashArchivo(segunda.claveHash, BYTES),
+    );
+    expect(calcularHashArchivo(primera.claveHash, BYTES)).toBe(
+      calcularHashArchivo(primera.claveHash, BYTES),
+    );
+  });
+
+  it('el hash de un archivo coincide con el que deja el sobre', () => {
+    const { derivadas, clave } = montarArchivo();
+    const sobre = cifrarBytes({
+      contenido: BYTES,
+      clave,
+      claveHash: derivadas.claveHash,
+      vinculo: VINCULO,
+    });
+
+    expect(sobre.contentHash).toBe(calcularHashArchivo(derivadas.claveHash, BYTES));
+  });
+
+  it('un archivo vacío se cifra sin caso especial', () => {
+    // El repositorio los rechaza antes, pero el núcleo no debe tener aquí una
+    // rama distinta: es donde se esconden los fallos.
+    const { derivadas, clave } = montarArchivo();
+    const sobre = cifrarBytes({
+      contenido: new Uint8Array(0),
+      clave,
+      claveHash: derivadas.claveHash,
+      vinculo: VINCULO,
+    });
+
+    expect(descifrarBytes({ sobre, clave, vinculo: VINCULO })).toHaveLength(0);
   });
 });
 

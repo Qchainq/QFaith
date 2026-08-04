@@ -81,6 +81,14 @@
       "contrasenaDebil": "Elige una contraseña más larga o menos común.",
       "correoSinConfirmar": "Confirma tu correo desde el mensaje que te enviamos y vuelve a entrar.",
       "demasiadosIntentos": "Demasiados intentos seguidos. Prueba de nuevo en unos minutos."
+    },
+    "archivos": {
+      "tipoNoAdmitido": "Ese tipo de archivo todavía no se puede adjuntar.",
+      "vacio": "Ese archivo está vacío.",
+      "demasiadoGrande": "Ese archivo pesa más de 50 MB. Prueba con uno más pequeño.",
+      "ilegible": "No pudimos abrir este archivo en este dispositivo.",
+      "noEncontrado": "No encontramos este archivo.",
+      "almacenamiento": "No pudimos guardar el archivo ahora mismo. Lo intentaremos de nuevo."
     }
   },
   "vacios": {
@@ -666,6 +674,27 @@
       "fechaInvalida": "Esa fecha no tiene la forma correcta.",
       "intensidadInvalida": "La intensidad va de 1 a 5.",
       "notaLarga": "Es demasiado largo para esta nota."
+    }
+  },
+  "archivos": {
+    "titulo": "Archivos",
+    "adjuntos": "Adjuntos",
+    "anadir": "Añadir un archivo",
+    "sinAdjuntos": "Todavía no has adjuntado nada.",
+    "cifradoAviso": "Se cifra en tu teléfono antes de salir. Nadie más puede abrirlo.",
+    "abrir": "Abrir",
+    "abriendo": "Abriendo…",
+    "retirar": "Quitar",
+    "estado": {
+      "pending": "Se subirá cuando haya conexión",
+      "uploading": "Subiendo…",
+      "uploaded": "Guardado en tus dispositivos",
+      "failed": "No se pudo subir"
+    },
+    "sinNombre": {
+      "imagen": "Imagen",
+      "audio": "Audio",
+      "documento": "Documento"
     }
   }
 }

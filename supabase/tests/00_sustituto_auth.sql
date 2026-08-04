@@ -61,6 +61,57 @@ grant usage on schema public to anon, authenticated;
 grant usage on schema auth to anon, authenticated;
 grant select on auth.users to authenticated;
 
+-- ── Sustituto del esquema `storage` ──────────────────────────────────────
+--
+-- Igual que con `auth`: en Supabase lo proporciona la plataforma. Aquí se
+-- reproduce lo justo para que las políticas de archivos se puedan ejecutar y,
+-- sobre todo, **probar**. Sin esto las políticas de Storage serían el único
+-- sitio del proyecto donde nadie comprueba que el aislamiento funciona, que
+-- es justo donde acaban las fotografías y los audios de la gente.
+
+create schema if not exists storage;
+
+create table if not exists storage.buckets (
+  id text primary key,
+  name text not null,
+  public boolean not null default false,
+  file_size_limit bigint,
+  allowed_mime_types text[]
+);
+
+create table if not exists storage.objects (
+  id uuid primary key default gen_random_uuid(),
+  bucket_id text not null references storage.buckets (id),
+  name text not null,
+  owner uuid,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  metadata jsonb
+);
+
+-- Divide la ruta en carpetas, como la función real de Supabase. La primera
+-- carpeta es el identificador del usuario, y de ahí depende todo el
+-- aislamiento.
+create or replace function storage.foldername(name text)
+returns text[]
+language plpgsql
+as $$
+declare
+  partes text[];
+begin
+  select string_to_array(name, '/') into partes;
+  return partes[1 : array_length(partes, 1) - 1];
+end
+$$;
+
+-- En Supabase, `authenticated` tiene los cuatro verbos sobre `storage.objects`
+-- y quien decide es RLS. Reproducirlo es lo que hace que la prueba valga: si
+-- aquí se cerrara con privilegios, una política mal escrita pasaría
+-- inadvertida.
+grant usage on schema storage to anon, authenticated;
+grant select on storage.buckets to anon, authenticated;
+grant select, insert, update, delete on storage.objects to anon, authenticated;
+
 -- Supabase concede por defecto TODOS los privilegios sobre las tablas nuevas
 -- de `public` a `anon` y `authenticated`. Reproducirlo aquí no es un detalle:
 -- sin esto, una prueba local parte de una base cerrada que el proyecto real

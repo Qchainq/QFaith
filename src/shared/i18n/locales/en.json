@@ -81,6 +81,14 @@
       "contrasenaDebil": "Choose a longer or less common password.",
       "correoSinConfirmar": "Confirm your email from the message we sent, then sign in again.",
       "demasiadosIntentos": "Too many attempts in a row. Try again in a few minutes."
+    },
+    "archivos": {
+      "tipoNoAdmitido": "That kind of file can't be attached yet.",
+      "vacio": "That file is empty.",
+      "demasiadoGrande": "That file is over 50 MB. Try a smaller one.",
+      "ilegible": "We couldn't open this file on this device.",
+      "noEncontrado": "We couldn't find this file.",
+      "almacenamiento": "We couldn't save the file right now. We'll try again."
     }
   },
   "vacios": {
@@ -666,6 +674,27 @@
       "fechaInvalida": "That date isn't in the right form.",
       "intensidadInvalida": "Intensity goes from 1 to 5.",
       "notaLarga": "That's too long for this note."
+    }
+  },
+  "archivos": {
+    "titulo": "Files",
+    "adjuntos": "Attachments",
+    "anadir": "Add a file",
+    "sinAdjuntos": "You haven't attached anything yet.",
+    "cifradoAviso": "Encrypted on your phone before it leaves. No one else can open it.",
+    "abrir": "Open",
+    "abriendo": "Opening…",
+    "retirar": "Remove",
+    "estado": {
+      "pending": "Will upload when you have a connection",
+      "uploading": "Uploading…",
+      "uploaded": "Saved to your devices",
+      "failed": "Couldn't upload"
+    },
+    "sinNombre": {
+      "imagen": "Image",
+      "audio": "Audio",
+      "documento": "Document"
     }
   }
 }

@@ -34,6 +34,10 @@ module.exports = {
     // API de expo-sqlite, y no puede ejecutarse fuera de un dispositivo. El
     // SQL que envuelve sí se prueba, contra un motor SQLite real.
     '!src/shared/database/ejecutorExpo.ts',
+    // Mismo caso: solo traduce entre el puerto de archivos y expo-file-system.
+    // La política de qué hacer cuando el disco falla vive en
+    // `almacenamientoExpo`, y esa sí se prueba.
+    '!src/shared/services/storage/sistemaDeArchivosExpo.ts',
   ],
   coverageThreshold: {
     global: {

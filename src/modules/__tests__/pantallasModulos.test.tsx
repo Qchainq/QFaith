@@ -2,6 +2,7 @@
 // cada módulo, pero conviene comprobar que cada una monta, muestra su título
 // traducido y no filtra texto sin traducir.
 import { screen } from '@testing-library/react-native';
+import { crearSincronizacionDePrueba } from '@modules/sincronizacion/__tests__/sincronizacionDePrueba';
 
 import { PantallaBiblia } from '@modules/biblia/screens/PantallaBiblia';
 import { IaContenedor } from '@modules/ia/screens/IaContenedor';
@@ -10,7 +11,6 @@ import { PantallaOracion } from '@modules/oracion/screens/PantallaOracion';
 import { PerfilContenedor } from '@modules/perfil/screens/PerfilContenedor';
 import { ProveedorSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
 import { crearAlmacenEnMemoria } from '@shared/database/almacenEnMemoria';
-import { crearMotorSincronizacion } from '@shared/services/sync/motorSincronizacion';
 import { crearServidorEnMemoria } from '@shared/services/sync/__tests__/servidorEnMemoria';
 import { useEstadoSesion } from '@shared/state/estadoSesion';
 import { renderizar, usarIdioma } from '@shared/testing/renderizar';
@@ -22,16 +22,11 @@ import { renderizar, usarIdioma } from '@shared/testing/renderizar';
  */
 function conSincronizacion(nodo: React.ReactElement) {
   const almacen = crearAlmacenEnMemoria();
-  const sincronizacion = {
+  const sincronizacion = crearSincronizacionDePrueba({
     almacen,
     usuarioId: 'usuario-1',
-    motor: crearMotorSincronizacion({
-      almacen,
-      remoto: crearServidorEnMemoria(),
-      usuarioId: 'usuario-1',
-      dispositivoId: 'dispositivo-1',
-    }),
-  };
+    remoto: crearServidorEnMemoria(),
+  });
   return (
     <ProveedorSincronizacion
       usuarioId="usuario-1"

@@ -28,15 +28,40 @@ export interface ResultadoSincronizacion {
   readonly resumen?: ResumenSincronizacion;
 }
 
+/**
+ * Trabajo extra que hay que hacer en cada vuelta.
+ *
+ * Los archivos no viajan por el motor: la ficha sí, pero el blob cifrado va
+ * por su cuenta al cubo. Sin engancharlo aquí, una foto adjuntada sin
+ * cobertura se quedaría en el teléfono para siempre, con la ficha diciendo
+ * que existe en un sitio donde no está.
+ *
+ * Se pasa como función y no como dependencia fija para que este caso de uso
+ * siga sin saber nada de archivos.
+ */
+export type TareaDeFondo = () => Promise<unknown>;
+
 export async function sincronizarConEstado(
   motor: MotorSincronizacion,
   ahora: () => string = () => new Date().toISOString(),
+  tareas: readonly TareaDeFondo[] = [],
 ): Promise<ResultadoSincronizacion> {
   const estado = useEstadoSincronizacion.getState();
   estado.comenzar();
 
   try {
     const resumen = await motor.sincronizar();
+
+    // Después de sincronizar y no antes: subir el blob de una ficha que
+    // todavía no existe en el servidor dejaría un archivo huérfano en el cubo
+    // si el envío de la ficha fallara.
+    //
+    // Que una tarea falle no tumba la ronda: la sincronización sí funcionó, y
+    // decir lo contrario haría que la pantalla avisara de un problema que no
+    // afecta a lo que la persona acaba de escribir.
+    for (const tarea of tareas) {
+      await tarea().catch(() => undefined);
+    }
     // Los conflictos pendientes se cuentan aparte del resumen: puede haber de
     // rondas anteriores que nadie ha resuelto todavía.
     const pendientes = await motor.conflictosPendientes();

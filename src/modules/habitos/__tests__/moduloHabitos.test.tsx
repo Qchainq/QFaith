@@ -1,5 +1,6 @@
 // Recorrido del módulo completo con el cifrado real.
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { crearSincronizacionDePrueba } from '@modules/sincronizacion/__tests__/sincronizacionDePrueba';
 
 import {
   ProveedorSincronizacion,
@@ -11,7 +12,6 @@ import {
   inicializarCuenta,
   olvidarDispositivo,
 } from '@shared/services/keys/servicioClaves';
-import { crearMotorSincronizacion } from '@shared/services/sync/motorSincronizacion';
 import {
   crearServidorEnMemoria,
   type ServidorEnMemoria,
@@ -38,16 +38,12 @@ beforeEach(async () => {
 
   const almacen = crearAlmacenEnMemoria();
   servidor = crearServidorEnMemoria();
-  sincronizacion = {
+  sincronizacion = crearSincronizacionDePrueba({
     almacen,
     usuarioId: USUARIO,
-    motor: crearMotorSincronizacion({
-      almacen,
-      remoto: servidor,
-      usuarioId: USUARIO,
-      dispositivoId: 'dispositivo-1',
-    }),
-  };
+    remoto: servidor,
+    dispositivoId: 'dispositivo-1',
+  });
 });
 
 function montar() {

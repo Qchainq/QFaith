@@ -2,6 +2,7 @@
 // prueba que dice si los módulos pueden leerse entre sí sin que ninguno
 // conozca al otro y sin romper el aislamiento.
 import { fireEvent, screen } from '@testing-library/react-native';
+import { crearSincronizacionDePrueba } from '@modules/sincronizacion/__tests__/sincronizacionDePrueba';
 
 import { crearRepositorioDiario } from '@modules/diario/repositories/repositorioDiario';
 import { crearRepositorioOracion } from '@modules/oracion/repositories/repositorioOracion';
@@ -50,7 +51,7 @@ beforeEach(async () => {
     usuarioId: USUARIO,
     dispositivoId: 'dispositivo-1',
   });
-  sincronizacion = { almacen, usuarioId: USUARIO, motor };
+  sincronizacion = crearSincronizacionDePrueba({ almacen, usuarioId: USUARIO, remoto: servidor });
 
   // Contenido de partida, escrito con los repositorios de verdad de cada
   // módulo: la Biblioteca tiene que poder leerlo sin conocerlos.

@@ -14,11 +14,21 @@ import type { AlmacenLocal } from '@shared/database/tipos';
 import { crearEjecutorExpo } from '@shared/database/ejecutorExpo';
 import { tokenAcceso } from '@shared/services/auth/servicioAutenticacion';
 import { crearPuertoRemotoSupabase } from '@shared/services/supabase/puertoRemotoSupabase';
+import { crearAlmacenamientoSupabase } from '@shared/services/storage/almacenamientoSupabase';
+import { crearAlmacenamientoDeArchivos } from '@shared/services/storage/almacenamientoExpo';
+import { crearSistemaDeArchivosExpo } from '@shared/services/storage/sistemaDeArchivosExpo';
+import type {
+  AlmacenamientoLocal,
+  AlmacenamientoRemoto,
+} from '@shared/services/storage/puertoAlmacenamiento';
 import {
   crearMotorSincronizacion,
   type MotorSincronizacion,
 } from '@shared/services/sync/motorSincronizacion';
 import { configuracion } from '@shared/constants/configuracion';
+
+import { crearRepositorioArchivos } from '@modules/archivos/repositories/repositorioArchivos';
+import { claveDeDominio, clavesDerivadas } from '@shared/services/keys/servicioClaves';
 
 import { sincronizarConEstado } from '../use-cases/sincronizarConEstado';
 
@@ -26,6 +36,15 @@ export interface Sincronizacion {
   readonly motor: MotorSincronizacion;
   readonly almacen: AlmacenLocal;
   readonly usuarioId: string;
+  /**
+   * El cubo y la copia en disco de los archivos privados.
+   *
+   * Viven aquí y no en el módulo de archivos porque son de sesión, como el
+   * motor: cambian con el usuario y se abren una sola vez. Un módulo que los
+   * construyera por su cuenta acabaría con dos cachés del mismo archivo.
+   */
+  readonly almacenamientoRemoto: AlmacenamientoRemoto;
+  readonly almacenamientoLocal: AlmacenamientoLocal;
 }
 
 const Contexto = createContext<Sincronizacion | null>(null);
@@ -63,6 +82,8 @@ async function construirPorDefecto(parametros: {
   return {
     almacen,
     usuarioId: parametros.usuarioId,
+    almacenamientoRemoto: crearAlmacenamientoSupabase({ proveerToken: tokenAcceso }),
+    almacenamientoLocal: crearAlmacenamientoDeArchivos(crearSistemaDeArchivosExpo()),
     motor: crearMotorSincronizacion({
       almacen,
       remoto,
@@ -112,9 +133,28 @@ export function ProveedorSincronizacion({
   useEffect(() => {
     if (sincronizacion === null || !sincronizarEnSegundoPlano) return;
 
+    // Los archivos pendientes se suben en la misma vuelta. El repositorio se
+    // construye aquí, dentro del efecto, porque necesita las claves de la
+    // sesión y estas solo existen con la cuenta desbloqueada.
+    const subirArchivosPendientes = async (): Promise<void> => {
+      const archivos = crearRepositorioArchivos({
+        motor: sincronizacion.motor,
+        almacen: sincronizacion.almacen,
+        usuarioId: sincronizacion.usuarioId,
+        remoto: sincronizacion.almacenamientoRemoto,
+        local: sincronizacion.almacenamientoLocal,
+        claveMedios: () => claveDeDominio('medios'),
+        claveEnvoltorio: () => clavesDerivadas().claveEnvoltorio,
+        claveHash: () => clavesDerivadas().claveHash,
+      });
+      await archivos.subirPendientes();
+    };
+
     let vigente = true;
     const intentar = (): void => {
-      if (vigente) void sincronizarConEstado(sincronizacion.motor);
+      if (vigente) {
+        void sincronizarConEstado(sincronizacion.motor, undefined, [subirArchivosPendientes]);
+      }
     };
 
     intentar();

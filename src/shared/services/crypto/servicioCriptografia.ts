@@ -261,6 +261,104 @@ export function calcularHashContenido(claveHash: Uint8Array, contenido: string):
   return aBase64(hmac(sha256, claveHash, aBytes(contenido)).subarray(0, LONGITUD_HASH_CONTENIDO));
 }
 
+// ── Archivos ──────────────────────────────────────────────────────────────
+//
+// Un archivo no cabe en `cifrar`: pasarlo por base64 para tratarlo como texto
+// añade un tercio de tamaño y obliga a tener en memoria el original, la
+// cadena y el criptograma a la vez. Un audio de veinte megas se convierte en
+// setenta, y en un teléfono modesto eso es un cierre por falta de memoria.
+//
+// Todo lo demás es idéntico al camino de texto —mismo algoritmo, mismos datos
+// autenticados, mismo `contentHash` con clave— para que un archivo no sea un
+// caso especial que se olvide de rotar o de auditar.
+
+/**
+ * Sobre de un archivo.
+ *
+ * El criptograma va en bytes y no en base64: sale directo hacia Storage, y
+ * pasarlo por texto solo serviría para volver a inflarlo. Los campos
+ * pequeños sí van en base64, porque acaban en columnas de la base de datos.
+ */
+export interface SobreArchivo {
+  readonly criptograma: Uint8Array;
+  readonly encryptionVersion: number;
+  readonly keyId: string;
+  readonly nonce: string;
+  readonly contentHash: string;
+}
+
+/**
+ * Cifra un archivo antes de que salga del dispositivo.
+ *
+ * A diferencia de `cifrar`, **no borra el contenido recibido**: esos bytes son
+ * de quien llama —normalmente lo que acaba de elegir la persona— y puede
+ * necesitarlos después para enseñar una vista previa. Borrarlos aquí sería
+ * una sorpresa desagradable.
+ */
+export function cifrarBytes(parametros: {
+  readonly contenido: Uint8Array;
+  readonly clave: ClaveContenido;
+  readonly claveHash: Uint8Array;
+  readonly vinculo: VinculoRegistro;
+  readonly version?: number;
+}): SobreArchivo {
+  const version = parametros.version ?? VERSION_CIFRADO_ACTUAL;
+  const nonce = generarBytesAleatorios(LONGITUD_NONCE);
+  const datosAutenticados = construirDatosAutenticados(
+    parametros.vinculo,
+    parametros.clave.keyId,
+    version,
+  );
+
+  const cifrador = xchacha20poly1305(parametros.clave.material, nonce, datosAutenticados);
+  const hash = hmac(sha256, parametros.claveHash, parametros.contenido);
+
+  return {
+    criptograma: cifrador.encrypt(parametros.contenido),
+    encryptionVersion: version,
+    keyId: parametros.clave.keyId,
+    nonce: aBase64(nonce),
+    contentHash: aBase64(hash.subarray(0, LONGITUD_HASH_CONTENIDO)),
+  };
+}
+
+/**
+ * Descifra un archivo.
+ *
+ * Falla igual que `descifrar`: clave que no corresponde, criptograma
+ * manipulado o sobre movido a otra fila. Un archivo cifrado para el diario de
+ * alguien no se abre como adjunto de la oración de otro.
+ */
+export function descifrarBytes(parametros: {
+  readonly sobre: SobreArchivo;
+  readonly clave: ClaveContenido;
+  readonly vinculo: VinculoRegistro;
+}): Uint8Array {
+  if (parametros.sobre.keyId !== parametros.clave.keyId) {
+    throw errorCifrado('CLAVE_NO_CORRESPONDE', 'errores.cifrado.claveNoCorresponde');
+  }
+  const datosAutenticados = construirDatosAutenticados(
+    parametros.vinculo,
+    parametros.sobre.keyId,
+    parametros.sobre.encryptionVersion,
+  );
+  try {
+    const cifrador = xchacha20poly1305(
+      parametros.clave.material,
+      desdeBase64(parametros.sobre.nonce),
+      datosAutenticados,
+    );
+    return cifrador.decrypt(parametros.sobre.criptograma);
+  } catch (causa) {
+    throw errorCifrado('DESCIFRADO_FALLIDO', 'errores.cifrado.descifradoFallido', causa);
+  }
+}
+
+/** Comprueba que un archivo descargado es el que se subió, sin revelarlo. */
+export function calcularHashArchivo(claveHash: Uint8Array, contenido: Uint8Array): string {
+  return aBase64(hmac(sha256, claveHash, contenido).subarray(0, LONGITUD_HASH_CONTENIDO));
+}
+
 // ── Recuperación ──────────────────────────────────────────────────────────
 
 /** Genera la frase de recuperación: 24 palabras, 256 bits de entropía. */
