@@ -8,13 +8,22 @@
 // Supabase, que es lo único que confirma que `auth.uid()` se comporta como
 // esperamos.
 //
-// Se ejecuta en dos fases:
+// Se ejecuta en cuatro fases, las dos primeras siempre:
 //
-//   · Fase anónima — siempre. Comprueba que las diez tablas existen y que el
-//     rol anónimo no alcanza ninguna. Solo necesita URL y clave publicable.
+//   · Fase anónima — comprueba que todas las tablas existen y que el rol
+//     anónimo no alcanza ninguna. Solo necesita URL y clave publicable.
 //
-//   · Fase autenticada — solo si hay dos usuarios de prueba. Comprueba el
-//     aislamiento real entre ellos.
+//   · Fase cubo — comprueba que el cubo de archivos privados existe y que no
+//     es público. Storage distingue «no existe el cubo» de «no existe el
+//     objeto», y eso basta para saberlo sin sesión.
+//
+//   · Fase autenticada — solo con dos usuarios de prueba. Aislamiento real
+//     entre ellos, incluida la fase Iglesia.
+//
+//   · Fase archivos — dentro de la autenticada. Sube un archivo con la sesión
+//     de A e intenta alcanzarlo con la de B. Es la única forma de comprobar
+//     las políticas del cubo: la batería SQL local las prueba sobre un
+//     sustituto de `storage` escrito a mano.
 //
 // Uso mínimo:
 //   EXPO_PUBLIC_SUPABASE_URL=... EXPO_PUBLIC_SUPABASE_ANON_KEY=... \
@@ -88,6 +97,9 @@ const TABLAS = [
   'sermons',
   'sermon_notes',
   'sermon_actions',
+  'notifications',
+  'spiritual_pulses',
+  'private_media',
 ];
 
 const comprobaciones = [];
@@ -652,6 +664,7 @@ async function faseAutenticada(cuentas) {
   );
 
   await faseIglesia(a, b);
+  await faseArchivos(a, b);
 }
 
 /**
@@ -791,10 +804,160 @@ async function faseIglesia(a, b) {
   );
 }
 
+/**
+ * Lo que se puede saber del cubo sin ninguna sesión.
+ *
+ * Storage distingue dos errores que aquí valen oro: `NoSuchBucket` cuando el
+ * cubo no existe y `NoSuchKey` cuando existe pero el objeto no. Eso permite
+ * confirmar que la migración creó el cubo sin necesidad de credenciales.
+ *
+ * Importa porque la comprobación siguiente —que la URL pública no sirve el
+ * archivo— se cumpliría igual sobre un cubo inexistente, y sería el clásico
+ * falso positivo: verde por no haber nada que ver.
+ */
+async function faseCubo() {
+  console.log('▸ Fase cubo: existencia y cierre público\n');
+
+  const CUBO = 'archivos-privados';
+
+  const sonda = async (nombre) => {
+    const respuesta = await fetch(`${url}/storage/v1/object/${nombre}/sonda/sonda`, {
+      headers: { apikey: clave, Authorization: `Bearer ${clave}` },
+    });
+    try {
+      return JSON.parse(await respuesta.text()).code ?? null;
+    } catch {
+      return null;
+    }
+  };
+
+  const propio = await sonda(CUBO);
+  comprobar('el cubo de archivos privados existe', propio === 'NoSuchKey', String(propio));
+
+  // Si esto no dijera `NoSuchBucket`, la comprobación de arriba no
+  // distinguiría nada y daría verde con cualquier nombre.
+  const inventado = await sonda('cubo-que-no-existe-abcdef');
+  comprobar(
+    'un cubo inventado se distingue de uno real',
+    inventado === 'NoSuchBucket',
+    String(inventado),
+  );
+
+  const publica = await fetch(`${url}/storage/v1/object/public/${CUBO}/sonda/sonda`);
+  comprobar(
+    'la URL pública no sirve nada del cubo: no es público',
+    publica.status >= 400,
+    `HTTP ${publica.status}`,
+  );
+
+  const cubos = await fetch(`${url}/storage/v1/bucket`, {
+    headers: { apikey: clave, Authorization: `Bearer ${clave}` },
+  });
+  const listados = await cubos.json().catch(() => null);
+  comprobar(
+    'el rol anónimo no puede enumerar los cubos',
+    Array.isArray(listados) && listados.length === 0,
+    Array.isArray(listados) ? `${listados.length} cubos` : String(listados),
+  );
+}
+
+/**
+ * El cubo de archivos privados, contra el Storage real.
+ *
+ * Es la parte del proyecto donde la batería SQL local vale menos: allí
+ * `storage.objects` y `storage.foldername` son un sustituto escrito a mano, y
+ * lo que de verdad decide es la implementación de Supabase. Un cubo creado a
+ * mano en el panel, un `public` que se quedó en `true` o una política que no
+ * llegó a aplicarse solo se ven aquí.
+ *
+ * Se sube un archivo con la sesión de A y se intenta alcanzarlo con la de B.
+ * Al terminar se limpia: nada de lo que sube este script debe quedarse.
+ */
+async function faseArchivos(a, b) {
+  console.log('\n▸ Fase Archivos: A sube un archivo, B intenta alcanzarlo\n');
+
+  const CUBO = 'archivos-privados';
+  const archivoId = '77777777-7777-4777-8777-777777777777';
+  const ruta = `${a.id}/${archivoId}`;
+  const contenido = new Uint8Array([1, 2, 3, 4, 5]);
+
+  const objeto = async (token, metodo, cuerpo) => {
+    const respuesta = await fetch(`${url}/storage/v1/object/${CUBO}/${ruta}`, {
+      method: metodo,
+      headers: {
+        apikey: clave,
+        Authorization: `Bearer ${token ?? clave}`,
+        ...(cuerpo === undefined
+          ? {}
+          : { 'Content-Type': 'application/octet-stream', 'x-upsert': 'true' }),
+      },
+      ...(cuerpo === undefined ? {} : { body: cuerpo }),
+    });
+    return { estado: respuesta.status, cuerpo: await respuesta.text() };
+  };
+
+  const subida = await objeto(a.token, 'POST', contenido);
+  comprobar('A puede subir a su propia carpeta', subida.estado < 400, `HTTP ${subida.estado}`);
+
+  // Sin esto, todo lo que viene después se cumpliría sobre un cubo vacío.
+  const propia = await objeto(a.token, 'GET');
+  comprobar('A puede volver a descargar lo suyo', propia.estado < 400, `HTTP ${propia.estado}`);
+
+  const ajena = await objeto(b.token, 'GET');
+  comprobar(
+    'B no puede descargar el archivo de A aun conociendo la ruta exacta',
+    ajena.estado >= 400,
+    `HTTP ${ajena.estado}`,
+  );
+
+  const anonima = await objeto(null, 'GET');
+  comprobar(
+    'sin sesión tampoco se descarga: el cubo no es público',
+    anonima.estado >= 400,
+    `HTTP ${anonima.estado}`,
+  );
+
+  // La URL pública existe como ruta aunque el cubo sea privado; lo que no debe
+  // existir es que devuelva el archivo.
+  const publica = await fetch(`${url}/storage/v1/object/public/${CUBO}/${ruta}`);
+  comprobar('la URL pública no sirve el archivo', publica.status >= 400, `HTTP ${publica.status}`);
+
+  const intruso = await fetch(`${url}/storage/v1/object/${CUBO}/${a.id}/intruso`, {
+    method: 'POST',
+    headers: {
+      apikey: clave,
+      Authorization: `Bearer ${b.token}`,
+      'Content-Type': 'application/octet-stream',
+    },
+    body: new Uint8Array([9]),
+  });
+  comprobar(
+    'B no puede dejar un archivo dentro de la carpeta de A',
+    intruso.status >= 400,
+    `HTTP ${intruso.status}`,
+  );
+
+  const borradoAjeno = await objeto(b.token, 'DELETE');
+  const siguePresente = await objeto(a.token, 'GET');
+  comprobar(
+    'B no puede borrar el archivo de A',
+    siguePresente.estado < 400,
+    `borrado HTTP ${borradoAjeno.estado}, lectura posterior HTTP ${siguePresente.estado}`,
+  );
+
+  const limpieza = await objeto(a.token, 'DELETE');
+  comprobar(
+    'A puede borrar lo suyo (y el script no deja basura)',
+    limpieza.estado < 400,
+    `HTTP ${limpieza.estado}`,
+  );
+}
+
 async function main() {
   console.log(`▸ Proyecto: ${url}\n`);
 
   await faseAnonima();
+  await faseCubo();
 
   const cuentas = await resolverCuentas();
   if (cuentas === null) {
@@ -822,7 +985,7 @@ async function main() {
   }
   console.log(
     cuentas === null
-      ? '\nEsquema y cierre del rol anónimo verificados contra el proyecto real.'
+      ? '\nEsquema, cierre del rol anónimo y cubo verificados contra el proyecto real.'
       : '\nEsquema y aislamiento verificados contra el proyecto real.',
   );
 }
