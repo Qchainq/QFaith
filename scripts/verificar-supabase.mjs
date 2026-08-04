@@ -108,6 +108,7 @@ const TABLAS = [
   'reading_progress',
   'bible_highlights',
   'bible_bookmarks',
+  'subscriptions',
 ];
 
 const comprobaciones = [];

@@ -25,6 +25,7 @@ export interface PropsPantallaPerfil {
   readonly alAbrirDispositivos: () => void;
   readonly alAbrirEliminacion: () => void;
   readonly alAbrirExportacion: () => void;
+  readonly alAbrirSuscripcion: () => void;
   readonly alCerrarSesion: () => void;
   /** Inyectable para que la prueba no dependa del día en que se ejecute. */
   readonly ahora?: Date;
@@ -40,6 +41,7 @@ export function PantallaPerfil({
   alAbrirDispositivos,
   alAbrirEliminacion,
   alAbrirExportacion,
+  alAbrirSuscripcion,
   alCerrarSesion,
   ahora = new Date(),
 }: PropsPantallaPerfil) {
@@ -87,6 +89,11 @@ export function PantallaPerfil({
         />
         {/* Llevarse el contenido va antes de cerrar sesión y de eliminar la
             cuenta: quien está pensando en irse debería encontrarlo primero. */}
+        <Boton
+          variante="secundario"
+          etiqueta={t('suscripcion.titulo')}
+          onPress={alAbrirSuscripcion}
+        />
         <Boton
           variante="secundario"
           etiqueta={t('exportacion.titulo')}

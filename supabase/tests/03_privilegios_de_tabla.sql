@@ -110,7 +110,12 @@ declare
     -- Quitar un subrayado por error y no poder recuperar la nota que llevaba
     -- dentro sería una pérdida real: papelera, nunca DELETE.
     ['authenticated', 'bible_highlights', 'DELETE'],
-    ['authenticated', 'bible_bookmarks', 'DELETE']
+    ['authenticated', 'bible_bookmarks', 'DELETE'],
+    -- La suscripción la escribe un proceso de servidor tras validar el recibo.
+    -- Si el cliente pudiera, cualquiera se concedería acceso de pago.
+    ['authenticated', 'subscriptions', 'INSERT'],
+    ['authenticated', 'subscriptions', 'UPDATE'],
+    ['authenticated', 'subscriptions', 'DELETE']
   ];
 begin
   for i in 1 .. array_length(v_prohibido, 1) loop

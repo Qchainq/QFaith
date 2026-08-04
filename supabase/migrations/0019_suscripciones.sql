@@ -1,21 +1,3 @@
--- ═══════════════════════════════════════════════════════════════════════
--- QFaith · Migraciones desde la 0019
---
--- ARCHIVO GENERADO. No lo edites: se regenera desde supabase/migrations/.
--- Solo las migraciones 0019 en adelante. Para una base que ya tiene
--- aplicadas las anteriores. Comprueba en cuál estás con:
---
---   select version from public.schema_migrations order by version;
---
--- No incluye supabase/tests/00_sustituto_auth.sql, que solo sirve para
--- ejecutar las migraciones en un PostgreSQL local: en Supabase, el esquema
--- `auth` y la función `auth.uid()` los proporciona la propia plataforma.
--- ═══════════════════════════════════════════════════════════════════════
-
--- ───────────────────────────────────────────────────────────
--- 0019_suscripciones.sql
--- ───────────────────────────────────────────────────────────
-
 -- Migración 0019 — Suscripciones (Documento 12, tabla 40; Documento 14,
 -- «Pagos» y «Precios»).
 --
@@ -160,21 +142,3 @@ create policy subscriptions_lectura_propia on public.subscriptions
   for select using (user_id = (select auth.uid()));
 
 grant select on public.subscriptions to authenticated;
-
--- ───────────────────────────────────────────────────────────
--- Registro de migraciones aplicadas
--- ───────────────────────────────────────────────────────────
-
-create table if not exists public.schema_migrations (
-  version text primary key,
-  applied_at timestamptz not null default now()
-);
-
-alter table public.schema_migrations enable row level security;
--- Sin políticas y sin privilegios: es información de operación, no del
--- usuario. Solo la ve quien entra por el panel o con la clave de servicio.
-revoke all on public.schema_migrations from anon, authenticated;
-
-insert into public.schema_migrations (version) values
-  ('0019_suscripciones')
-on conflict (version) do nothing;

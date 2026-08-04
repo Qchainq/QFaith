@@ -784,5 +784,32 @@
       "reading_progress": "Plan days",
       "private_media": "Files"
     }
+  },
+  "suscripcion": {
+    "titulo": "Subscription",
+    "invitacion": "QFaith works without paying anything. A subscription adds features; it doesn't unlock your life.",
+    "incluye": "What it adds",
+    "noDisponible": "You can't subscribe from here yet.",
+    "comprar": "Subscribe",
+    "comprando": "One moment…",
+    "restaurar": "I already paid on another phone",
+    "restaurando": "Looking…",
+    "gestionar": "Manage in the store",
+    "siempreTuyo": "Whatever happens with the subscription, your content stays yours: you can read it, write it, export it and recover it.",
+    "estado": {
+      "sinSuscripcion": "You don't have a subscription.",
+      "prueba": "You're in the trial period.",
+      "activa": "Your subscription is active.",
+      "gracia": "We couldn't take the last payment. You still have access while you sort it out.",
+      "terminaPronto": "Your subscription won't renew, and stays active until the period ends.",
+      "caducada": "Your subscription ended."
+    },
+    "periodicidad": {
+      "mensual": "per month",
+      "anual": "per year"
+    },
+    "prueba": "{{dias}}-day trial",
+    "renuevaEn": "Renews on {{fecha}}",
+    "terminaEn": "Ends on {{fecha}}"
   }
 }

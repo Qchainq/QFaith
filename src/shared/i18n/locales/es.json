@@ -784,5 +784,32 @@
       "reading_progress": "Días de planes",
       "private_media": "Archivos"
     }
+  },
+  "suscripcion": {
+    "titulo": "Suscripción",
+    "invitacion": "QFaith funciona sin pagar nada. La suscripción añade funciones; no desbloquea tu vida.",
+    "incluye": "Qué añade",
+    "noDisponible": "Todavía no se puede suscribir desde aquí.",
+    "comprar": "Suscribirme",
+    "comprando": "Un momento…",
+    "restaurar": "Ya pagué en otro teléfono",
+    "restaurando": "Buscando…",
+    "gestionar": "Gestionar en la tienda",
+    "siempreTuyo": "Pase lo que pase con la suscripción, tu contenido sigue siendo tuyo: puedes leerlo, escribirlo, exportarlo y recuperarlo.",
+    "estado": {
+      "sinSuscripcion": "No tienes suscripción.",
+      "prueba": "Estás en el periodo de prueba.",
+      "activa": "Tu suscripción está activa.",
+      "gracia": "No pudimos cobrar el último pago. Sigues teniendo acceso mientras lo resuelves.",
+      "terminaPronto": "Tu suscripción no se renovará, y sigue activa hasta que acabe el periodo.",
+      "caducada": "Tu suscripción terminó."
+    },
+    "periodicidad": {
+      "mensual": "al mes",
+      "anual": "al año"
+    },
+    "prueba": "{{dias}} días de prueba",
+    "renuevaEn": "Se renueva el {{fecha}}",
+    "terminaEn": "Termina el {{fecha}}"
   }
 }

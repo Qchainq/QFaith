@@ -77,12 +77,12 @@ begin
   end if;
 end $$;
 
--- ── El contenido de pago está cerrado antes de que exista la suscripción ──
+-- ── El contenido de pago está cerrado para quien no ha pagado ────────────
 
 do $$
 begin
   if public.fn_tiene_acceso_premium() then
-    raise exception 'Sin capa de suscripción, nadie debería tener acceso de pago';
+    raise exception 'Quien no ha pagado no debería tener acceso de pago';
   end if;
 
   if (select count(*) from public.reading_plans

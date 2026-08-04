@@ -5,6 +5,7 @@
 // llenaría el botón «atrás» de pasos que nadie quiere deshacer uno a uno.
 import { useState } from 'react';
 import { ExportarContenedor } from '@modules/exportacion/screens/ExportarContenedor';
+import { SuscripcionContenedor } from '@modules/suscripcion/screens/SuscripcionContenedor';
 
 import { useEstadoSesion } from '@shared/state/estadoSesion';
 import { esErrorApp } from '@shared/errores/erroresApp';
@@ -28,7 +29,8 @@ import { PantallaEditarPerfil } from './PantallaEditarPerfil';
 import { PantallaEliminarCuenta } from './PantallaEliminarCuenta';
 import { PantallaPerfil } from './PantallaPerfil';
 
-type Vista = 'portada' | 'editar' | 'configuracion' | 'dispositivos' | 'eliminar' | 'exportar';
+type Vista =
+  'portada' | 'editar' | 'configuracion' | 'dispositivos' | 'eliminar' | 'exportar' | 'suscripcion';
 
 export interface PropsPerfilContenedor {
   /** Inyectable para las pruebas: evita depender de la red. */
@@ -109,6 +111,10 @@ export function PerfilContenedor({
     );
   }
 
+  if (vista === 'suscripcion') {
+    return <SuscripcionContenedor />;
+  }
+
   if (vista === 'exportar') {
     return <ExportarContenedor />;
   }
@@ -154,6 +160,7 @@ export function PerfilContenedor({
       alAbrirDispositivos={() => setVista('dispositivos')}
       alAbrirEliminacion={() => setVista('eliminar')}
       alAbrirExportacion={() => setVista('exportar')}
+      alAbrirSuscripcion={() => setVista('suscripcion')}
       alCerrarSesion={() => alCerrarSesion?.()}
       {...conAhora}
     />
