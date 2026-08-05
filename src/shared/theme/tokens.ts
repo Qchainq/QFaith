@@ -31,6 +31,11 @@ export const paleta = {
     100: '#F2F1EE',
     200: '#E4E2DD',
     400: '#A8A59E',
+    // Añadido al auditar el contraste: el 400 se usaba como texto tenue y se
+    // quedaba en 2,3:1 sobre el fondo claro, muy por debajo del 4,5:1 que
+    // exige WCAG AA. El 400 sigue valiendo para bordes e iconos, que solo
+    // necesitan 3:1; el texto usa este.
+    500: '#72706B',
     600: '#6B6862',
     800: '#2E2C29',
     900: '#1C1B19', // negro grafito
@@ -42,7 +47,10 @@ export const paleta = {
   },
   // Estados. Nunca saturados; siempre acompañados de icono o texto.
   exito: { claro: '#3F7D52', oscuro: '#7FBF92' },
-  advertencia: { claro: '#A8762A', oscuro: '#E0B369' },
+  // El claro se oscureció al auditar el contraste: a #A8762A se quedaba en
+  // 3,97:1 sobre blanco, y estos colores se usan como texto —«se guardará
+  // cuando haya conexión»—, no solo como adorno.
+  advertencia: { claro: '#946825', oscuro: '#E0B369' },
   error: { claro: '#A5484A', oscuro: '#E29193' },
   informacion: { claro: '#2F5DA8', oscuro: '#8AB0E8' },
   /**
@@ -98,7 +106,7 @@ export const coloresClaro: TemaColores = {
   cristalBorde: 'rgba(28, 27, 25, 0.08)',
   textoPrincipal: paleta.neutro[900],
   textoSecundario: paleta.neutro[600],
-  textoTenue: paleta.neutro[400],
+  textoTenue: paleta.neutro[500],
   acento: paleta.azul[500],
   acentoContraste: paleta.neutro[0],
   secundario: paleta.oliva[500],
@@ -125,7 +133,7 @@ export const coloresOscuro: TemaColores = {
   cristalBorde: 'rgba(255, 255, 255, 0.10)',
   textoPrincipal: '#F1EFEA',
   textoSecundario: '#B4B1AA',
-  textoTenue: '#7C7973',
+  textoTenue: '#88857F',
   acento: paleta.azul[300],
   acentoContraste: paleta.noche[900],
   secundario: paleta.oliva[300],
