@@ -3,14 +3,18 @@
 // Es el único punto del módulo que conoce React Query, y el único que la
 // pantalla llama. Nadie por encima toca el repositorio ni el motor
 // (invariante 10).
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { useSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
 import { claveDeDominio, clavesDerivadas } from '@shared/services/keys/servicioClaves';
 
-import type { BorradorEntrada } from '../models/entradaDiario';
-import { crearRepositorioDiario, type RepositorioDiario } from '../repositories/repositorioDiario';
+import type { BorradorEntrada, EntradaDiario } from '../models/entradaDiario';
+import {
+  crearRepositorioDiario,
+  type Lectura,
+  type RepositorioDiario,
+} from '../repositories/repositorioDiario';
 import { eliminarEntrada, guardarEntrada, listarEntradas } from '../use-cases/gestionEntradas';
 
 /** Clave de caché. Lleva el usuario dentro: dos cuentas no comparten caché. */
@@ -37,14 +41,44 @@ export function useRepositorioDiario(): RepositorioDiario {
   );
 }
 
+/**
+ * La lista del Diario, por páginas.
+ *
+ * Por páginas y no entera porque cada entrada hay que descifrarla, y con años
+ * de escritura eso convierte abrir la pantalla en una espera: la medida está
+ * en `rendimiento.medicion.test.ts` y el motivo, en `paginacion.ts`. Se pide
+ * la siguiente cuando la persona llega abajo, que es cuando de verdad hace
+ * falta.
+ */
 export function useEntradasDiario() {
   const repositorio = useRepositorioDiario();
   const { usuarioId } = useSincronizacion();
 
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: clavesConsulta.entradas(usuarioId),
-    queryFn: () => listarEntradas(repositorio),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => listarEntradas(repositorio, { desde: pageParam }),
+    getNextPageParam: (ultima) => ultima.siguiente,
   });
+}
+
+/**
+ * Aplana las páginas en lo que la pantalla necesita.
+ *
+ * Los ilegibles se **suman** entre páginas: quedarse con los de la última
+ * haría desaparecer el aviso al seguir bajando, y eso es justo lo que no
+ * puede pasar con algo que la persona ha perdido.
+ */
+export function unirPaginas(paginas: readonly Lectura[]): {
+  readonly entradas: readonly EntradaDiario[];
+  readonly ilegibles: number;
+  readonly total: number;
+} {
+  return {
+    entradas: paginas.flatMap((pagina) => [...pagina.entradas]),
+    ilegibles: paginas.reduce((suma, pagina) => suma + pagina.ilegibles, 0),
+    total: paginas[0]?.total ?? 0,
+  };
 }
 
 export function useGuardarEntrada() {

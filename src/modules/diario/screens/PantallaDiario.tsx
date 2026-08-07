@@ -15,7 +15,7 @@ import { Texto } from '@shared/components/Texto';
 import { useTema } from '@shared/theme/ProveedorTema';
 
 import type { EntradaDiario } from '../models/entradaDiario';
-import { useEntradasDiario } from '../hooks/useDiario';
+import { unirPaginas, useEntradasDiario } from '../hooks/useDiario';
 
 export interface PropsPantallaDiario {
   readonly alCrear: () => void;
@@ -44,7 +44,7 @@ export function PantallaDiario({ alCrear, alAbrir }: PropsPantallaDiario) {
     );
   }
 
-  const { entradas, ilegibles } = consulta.data;
+  const { entradas, ilegibles } = unirPaginas(consulta.data.pages);
 
   return (
     <PantallaBase titulo={t('diario.titulo')}>
@@ -62,10 +62,27 @@ export function PantallaDiario({ alCrear, alAbrir }: PropsPantallaDiario) {
       ) : null}
 
       <FlatList
+        testID="lista-diario"
         style={{ marginTop: tema.espaciado.lg }}
         data={entradas}
         keyExtractor={(entrada) => entrada.id}
         ItemSeparatorComponent={() => <View style={{ height: tema.espaciado.md }} />}
+        // La lista llega por páginas: cada entrada hay que descifrarla, y
+        // hacerlo con todas al abrir la pantalla dejaba esperando a quien
+        // lleva años escribiendo. Se pide la siguiente al llegar abajo.
+        onEndReachedThreshold={0.5}
+        onEndReached={() => {
+          if (consulta.hasNextPage && !consulta.isFetchingNextPage) {
+            void consulta.fetchNextPage();
+          }
+        }}
+        ListFooterComponent={
+          consulta.isFetchingNextPage ? (
+            <Texto nivel="nota" tono="secundario">
+              {t('diario.cargando')}
+            </Texto>
+          ) : null
+        }
         ListEmptyComponent={
           <Texto nivel="texto" tono="secundario">
             {t('diario.sinEntradas')}

@@ -8,7 +8,14 @@ module.exports = {
   testMatch: ['<rootDir>/src/**/*.test.{ts,tsx}'],
   // Las pruebas de integración hablan con el proyecto real: se lanzan aparte,
   // con `npm run test:integracion`. Ver jest.integracion.config.js.
-  testPathIgnorePatterns: ['/node_modules/', '\\.integracion\\.test\\.ts$'],
+  // Las medidas de rendimiento se lanzan con `npm run medir`. Ver
+  // jest.rendimiento.config.js: dependen del reloj de la máquina y no deben
+  // poder tumbar la suite normal.
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '\\.integracion\\.test\\.ts$',
+    '\\.medicion\\.test\\.ts$',
+  ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@app/(.*)$': '<rootDir>/src/app/$1',

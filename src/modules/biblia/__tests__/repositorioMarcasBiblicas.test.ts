@@ -242,6 +242,37 @@ describe('leer un capítulo', () => {
     expect(subrayadosDe(delCapitulo, 3)).toHaveLength(1);
     expect(subrayadosDe(delCapitulo, 9)).toHaveLength(0);
   });
+
+  it('no descifra los subrayados de otros capítulos', async () => {
+    // La referencia va en claro justamente para esto, y así lo dice la
+    // cabecera del repositorio. Escrito al revés —descifrar todo y luego
+    // filtrar— la pantalla daba el mismo resultado y costaba tanto como
+    // subrayados tuviera la persona en la Biblia entera: unos 375 ms con tres
+    // mil, en un servidor. Contando las veces que se pide la clave se ve la
+    // diferencia, que en el resultado no se ve.
+    const montado = montar();
+    let vecesQueSePidioLaClave = 0;
+    const repositorio = crearRepositorioMarcasBiblicas({
+      almacen: montado.almacen,
+      usuarioId: USUARIO,
+      motor: montado.motor,
+      claveNotas: () => {
+        vecesQueSePidioLaClave += 1;
+        return montado.clave;
+      },
+      claveHash: () => montado.hash,
+    });
+
+    await repositorio.subrayar(salmo({ nota: NOTA }));
+    for (let capitulo = 89; capitulo < 99; capitulo += 1) {
+      await repositorio.subrayar(salmo({ capitulo, nota: NOTA }));
+    }
+
+    vecesQueSePidioLaClave = 0;
+    await repositorio.delCapitulo({ traduccionId: TRADUCCION, libro: 'SAL', capitulo: 88 });
+
+    expect(vecesQueSePidioLaClave).toBe(1);
+  });
 });
 
 describe('quitar un subrayado', () => {

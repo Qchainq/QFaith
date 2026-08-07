@@ -13,6 +13,8 @@ import type { ClaveContenido } from '@shared/services/crypto/tipos';
 import { crearMotorSincronizacion } from '@shared/services/sync/motorSincronizacion';
 import { crearServidorEnMemoria } from '@shared/services/sync/__tests__/servidorEnMemoria';
 
+import { TAMANO_PAGINA } from '@shared/database/paginacion';
+
 import { crearRepositorioDiario, TIPO_ENTIDAD } from '../repositories/repositorioDiario';
 
 const USUARIO = 'usuario-1';
@@ -161,6 +163,128 @@ describe('listar', () => {
     await repositorio.eliminar(entrada.id);
 
     expect((await repositorio.listar()).entradas).toHaveLength(0);
+  });
+});
+
+describe('paginar', () => {
+  /** Cinco entradas, de la más antigua a la más reciente por fecha. */
+  async function conCinco() {
+    const montado = montar();
+    for (let dia = 1; dia <= 5; dia += 1) {
+      await montado.repositorio.guardar({
+        ...BORRADOR,
+        fecha: `2026-08-0${dia}`,
+        titulo: `Día ${dia}`,
+      });
+    }
+    return montado;
+  }
+
+  it('devuelve la página pedida y dice cuántas hay en total', async () => {
+    const { repositorio } = await conCinco();
+
+    const lectura = await repositorio.listar({ limite: 2 });
+
+    expect(lectura.entradas.map((e) => e.titulo)).toEqual(['Día 5', 'Día 4']);
+    expect(lectura.total).toBe(5);
+    expect(lectura.siguiente).toBe(2);
+  });
+
+  it('el orden es el mismo que sin paginar, repartido entre páginas', async () => {
+    // Lo que de verdad puede romperse al paginar: que cada página se ordene
+    // por su cuenta y el conjunto quede desordenado sin que se note en
+    // ninguna de las dos.
+    const { repositorio } = await conCinco();
+
+    const titulos: string[] = [];
+    let desde: number | null = 0;
+    while (desde !== null) {
+      const lectura = await repositorio.listar({ limite: 2, desde });
+      titulos.push(...lectura.entradas.map((e) => e.titulo));
+      desde = lectura.siguiente;
+    }
+
+    expect(titulos).toEqual(['Día 5', 'Día 4', 'Día 3', 'Día 2', 'Día 1']);
+  });
+
+  it('la última página cierra la lista', async () => {
+    const { repositorio } = await conCinco();
+
+    const ultima = await repositorio.listar({ limite: 2, desde: 4 });
+
+    expect(ultima.entradas).toHaveLength(1);
+    expect(ultima.siguiente).toBeNull();
+  });
+
+  it('solo descifra lo que devuelve', async () => {
+    // La razón de existir de la paginación. Con la clave contada por llamada
+    // se ve el número exacto de descifrados: si vuelve a ser cinco, el ahorro
+    // no está ocurriendo aunque la página salga bien.
+    const almacen = crearAlmacenEnMemoria();
+    const motor = crearMotorSincronizacion({
+      almacen,
+      remoto: crearServidorEnMemoria(),
+      usuarioId: USUARIO,
+      dispositivoId: 'dispositivo-1',
+    });
+    const clave = crearClaveContenido('diario');
+    const derivadas = derivarClaves(generarClaveMaestra());
+    let vecesQueSePidioLaClave = 0;
+
+    const repositorio = crearRepositorioDiario({
+      motor,
+      almacen,
+      usuarioId: USUARIO,
+      claveDiario: () => {
+        vecesQueSePidioLaClave += 1;
+        return clave;
+      },
+      claveHash: () => derivadas.claveHash,
+    });
+
+    for (let dia = 1; dia <= 5; dia += 1) {
+      await repositorio.guardar({ ...BORRADOR, fecha: `2026-08-0${dia}` });
+    }
+
+    vecesQueSePidioLaClave = 0;
+    await repositorio.listar({ limite: 2 });
+
+    expect(vecesQueSePidioLaClave).toBe(2);
+  });
+
+  it('sin opciones trae una página, no el diario entero', async () => {
+    // Si el valor por defecto fuera «todo», el ahorro dependería de que cada
+    // pantalla se acordara de pedirlo, y alguna no se acordaría.
+    const { repositorio } = montar();
+    for (let numero = 0; numero < TAMANO_PAGINA + 5; numero += 1) {
+      await repositorio.guardar({ ...BORRADOR, titulo: `Entrada ${numero}` });
+    }
+
+    const lectura = await repositorio.listar();
+
+    expect(lectura.entradas).toHaveLength(TAMANO_PAGINA);
+    expect(lectura.total).toBe(TAMANO_PAGINA + 5);
+  });
+
+  it('los ilegibles no descuadran el índice de la página siguiente', async () => {
+    // Si `siguiente` se calculara sumando las entradas devueltas, una página
+    // con un registro ilegible se saltaría una entrada legible al pasar a la
+    // siguiente: se perdería de la vista sin que nadie lo notara.
+    const { repositorio, almacen } = await conCinco();
+    const registros = await almacen.listar(TIPO_ENTIDAD);
+    const primero = registros[0];
+    if (primero === undefined) throw new Error('sin registros');
+    await almacen.guardar({
+      ...primero,
+      sobre: { ...primero.sobre, encryptedPayload: 'sobre-roto' },
+    });
+
+    const primera = await repositorio.listar({ limite: 2 });
+
+    expect(primera.ilegibles).toBe(1);
+    expect(primera.entradas).toHaveLength(1);
+    // Dos registros consumidos, aunque solo una entrada haya salido.
+    expect(primera.siguiente).toBe(2);
   });
 });
 

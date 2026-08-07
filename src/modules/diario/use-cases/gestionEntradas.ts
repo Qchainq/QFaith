@@ -3,6 +3,7 @@
 // Capa fina a propósito, pero no vacía: aquí vive la validación, que es una
 // regla del dominio y no de la pantalla. Si mañana se crea una entrada desde
 // una notificación o desde la IA, la regla sigue aplicándose sin duplicarla.
+import type { OpcionesPagina } from '@shared/database/paginacion';
 import { ErrorApp } from '@shared/errores/erroresApp';
 
 import { esquemaBorrador, type BorradorEntrada, type EntradaDiario } from '../models/entradaDiario';
@@ -17,8 +18,11 @@ function errorValidacion(claveMensaje: string): ErrorApp {
   });
 }
 
-export async function listarEntradas(repositorio: RepositorioDiario): Promise<Lectura> {
-  return repositorio.listar();
+export async function listarEntradas(
+  repositorio: RepositorioDiario,
+  opciones?: OpcionesPagina,
+): Promise<Lectura> {
+  return repositorio.listar(opciones);
 }
 
 export async function obtenerEntrada(

@@ -8,6 +8,7 @@
 // después y por su cuenta: guardar una entrada nunca espera a la red.
 import type { AlmacenLocal, RegistroLocal } from '@shared/database/tipos';
 import { obtenerVigente } from '@shared/database/lecturaVigente';
+import { paginarDescifrando, type OpcionesPagina } from '@shared/database/paginacion';
 import { generarUuid } from '@shared/services/crypto/aleatoriedad';
 import { cifrar, descifrar } from '@shared/services/crypto/servicioCriptografia';
 import type { ClaveContenido, VinculoRegistro } from '@shared/services/crypto/tipos';
@@ -34,15 +35,20 @@ export interface DependenciasRepositorio {
 }
 
 /**
- * Resultado de una lectura.
+ * Una página de la lista.
  *
  * Las entradas ilegibles se cuentan en lugar de esconderse. Pueden venir de
  * una clave rotada o de un registro dañado, y a quien le falte una entrada le
- * corresponde saberlo: desaparecer en silencio es peor que avisar.
+ * corresponde saberlo: desaparecer en silencio es peor que avisar. El recuento
+ * es el de **esta** página, por lo explicado en `paginacion.ts`.
  */
 export interface Lectura {
   readonly entradas: readonly EntradaDiario[];
   readonly ilegibles: number;
+  /** Entradas que hay en total. Se sabe sin descifrar ninguna. */
+  readonly total: number;
+  /** Desde dónde pedir la siguiente página, o `null` si no hay más. */
+  readonly siguiente: number | null;
 }
 
 const esTipoEntrada = (valor: unknown): valor is TipoEntrada =>
@@ -97,26 +103,45 @@ export function crearRepositorioDiario(dependencias: DependenciasRepositorio) {
     };
   }
 
-  async function listar(): Promise<Lectura> {
+  /**
+   * Fecha por la que se ordena, leída **sin abrir el sobre**.
+   *
+   * `entry_date` viaja en claro desde el Documento 12 y es lo que permite
+   * ordenar la lista entera sin descifrarla entera. Cuando falta se usa la de
+   * creación, que también está en claro: un registro sin fecha no puede
+   * quedarse fuera del orden y aparecer donde no toca.
+   */
+  const fechaDe = (registro: RegistroLocal): string =>
+    typeof registro.metadatos.entry_date === 'string'
+      ? registro.metadatos.entry_date
+      : registro.creadoEn.slice(0, 10);
+
+  /** Más recientes primero por fecha del diario; a igualdad, por escritura. */
+  const masRecientePrimero = (a: RegistroLocal, b: RegistroLocal): number =>
+    fechaDe(b).localeCompare(fechaDe(a)) || b.actualizadoEn.localeCompare(a.actualizadoEn);
+
+  /**
+   * Una página de la lista.
+   *
+   * Descifra **solo lo que devuelve**. Sin esto, abrir el Diario costaba
+   * tanto como todo lo que la persona hubiera escrito en su vida: ver
+   * `paginacion.ts` y la medida que lo motivó.
+   */
+  async function listar(opciones?: OpcionesPagina): Promise<Lectura> {
     const registros = await almacen.listar(TIPO_ENTIDAD);
-    const entradas: EntradaDiario[] = [];
-    let ilegibles = 0;
+    const pagina = paginarDescifrando({
+      registros,
+      ordenar: masRecientePrimero,
+      leer: aEntrada,
+      ...(opciones === undefined ? {} : { opciones }),
+    });
 
-    for (const registro of registros) {
-      const entrada = aEntrada(registro);
-      if (entrada === null) {
-        ilegibles += 1;
-      } else {
-        entradas.push(entrada);
-      }
-    }
-
-    // Más recientes primero por fecha del diario; a igualdad, por escritura.
-    entradas.sort(
-      (a, b) => b.fecha.localeCompare(a.fecha) || b.actualizadaEn.localeCompare(a.actualizadaEn),
-    );
-
-    return { entradas, ilegibles };
+    return {
+      entradas: pagina.elementos,
+      ilegibles: pagina.ilegibles,
+      total: pagina.total,
+      siguiente: pagina.siguiente,
+    };
   }
 
   async function obtener(id: string): Promise<EntradaDiario | null> {

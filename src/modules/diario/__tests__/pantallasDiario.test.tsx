@@ -10,9 +10,31 @@ import { PantallaDiario } from '../screens/PantallaDiario';
 import { PantallaEntradaDiario } from '../screens/PantallaEntradaDiario';
 
 const mockConsulta = jest.fn();
+// Se sustituye la consulta y **no** `unirPaginas`: esa es lógica de verdad
+// —suma los ilegibles de todas las páginas— y sustituirla dejaría sin probar
+// justo lo que puede equivocarse al paginar.
 jest.mock('../hooks/useDiario', () => ({
+  ...jest.requireActual('../hooks/useDiario'),
   useEntradasDiario: () => mockConsulta(),
 }));
+
+/** Respuesta del hook con las páginas ya cargadas. */
+const conPaginas = (
+  ...paginas: readonly { entradas: readonly EntradaDiario[]; ilegibles: number }[]
+) => ({
+  isPending: false,
+  isError: false,
+  data: {
+    pages: paginas.map((pagina, indice) => ({
+      ...pagina,
+      total: paginas.reduce((suma, p) => suma + p.entradas.length, 0),
+      siguiente: indice === paginas.length - 1 ? null : (indice + 1) * 30,
+    })),
+  },
+  hasNextPage: false,
+  isFetchingNextPage: false,
+  fetchNextPage: jest.fn(),
+});
 
 const ENTRADA: EntradaDiario = {
   id: 'entrada-1',
@@ -36,11 +58,7 @@ describe('lista del diario', () => {
   });
 
   it('el estado vacío invita sin culpabilizar', () => {
-    mockConsulta.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: { entradas: [], ilegibles: 0 },
-    });
+    mockConsulta.mockReturnValue(conPaginas({ entradas: [], ilegibles: 0 }));
     renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={jest.fn()} />);
 
     expect(screen.getByText(/Todavía no has escrito nada/)).toBeTruthy();
@@ -58,11 +76,7 @@ describe('lista del diario', () => {
 
   it('muestra las entradas y abre la que se pulsa', () => {
     const alAbrir = jest.fn();
-    mockConsulta.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: { entradas: [ENTRADA], ilegibles: 0 },
-    });
+    mockConsulta.mockReturnValue(conPaginas({ entradas: [ENTRADA], ilegibles: 0 }));
     renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={alAbrir} />);
 
     fireEvent.press(screen.getByRole('button', { name: 'Gratitud de hoy' }));
@@ -71,14 +85,67 @@ describe('lista del diario', () => {
   });
 
   it('avisa de las entradas que este dispositivo no puede abrir', () => {
-    mockConsulta.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: { entradas: [ENTRADA], ilegibles: 2 },
-    });
+    mockConsulta.mockReturnValue(conPaginas({ entradas: [ENTRADA], ilegibles: 2 }));
     renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={jest.fn()} />);
 
     expect(screen.getByText(/2 entradas que este dispositivo no puede abrir/)).toBeTruthy();
+  });
+
+  it('el aviso de ilegibles suma todas las páginas cargadas', () => {
+    // Quedarse con los de la última página haría que el aviso desapareciera al
+    // seguir bajando, y lo que la persona ha perdido no puede dejar de verse
+    // por haber avanzado en la lista.
+    mockConsulta.mockReturnValue(
+      conPaginas({ entradas: [ENTRADA], ilegibles: 2 }, { entradas: [], ilegibles: 3 }),
+    );
+    renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={jest.fn()} />);
+
+    expect(screen.getByText(/5 entradas que este dispositivo no puede abrir/)).toBeTruthy();
+  });
+
+  it('al llegar abajo pide la página siguiente', () => {
+    const fetchNextPage = jest.fn();
+    mockConsulta.mockReturnValue({
+      ...conPaginas({ entradas: [ENTRADA], ilegibles: 0 }),
+      hasNextPage: true,
+      fetchNextPage,
+    });
+    renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={jest.fn()} />);
+
+    fireEvent(screen.getByTestId('lista-diario'), 'endReached');
+
+    expect(fetchNextPage).toHaveBeenCalled();
+  });
+
+  it('no vuelve a pedirla mientras la anterior sigue llegando', () => {
+    // Sin esta guarda, un desplazamiento largo dispara varias peticiones de la
+    // misma página y cada una descifra su lote otra vez.
+    const fetchNextPage = jest.fn();
+    mockConsulta.mockReturnValue({
+      ...conPaginas({ entradas: [ENTRADA], ilegibles: 0 }),
+      hasNextPage: true,
+      isFetchingNextPage: true,
+      fetchNextPage,
+    });
+    renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={jest.fn()} />);
+
+    fireEvent(screen.getByTestId('lista-diario'), 'endReached');
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it('no pide nada cuando ya no quedan páginas', () => {
+    const fetchNextPage = jest.fn();
+    mockConsulta.mockReturnValue({
+      ...conPaginas({ entradas: [ENTRADA], ilegibles: 0 }),
+      hasNextPage: false,
+      fetchNextPage,
+    });
+    renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={jest.fn()} />);
+
+    fireEvent(screen.getByTestId('lista-diario'), 'endReached');
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
   });
 });
 

@@ -134,30 +134,57 @@ export function crearRepositorioMarcasBiblicas(dependencias: DependenciasReposit
     };
   }
 
+  /**
+   * ¿Este registro es de este capítulo? **Sin descifrar nada.**
+   *
+   * Es la razón de que la referencia viaje en claro, explicada en la cabecera
+   * de este archivo. Descartar aquí, mirando solo los metadatos, es lo que
+   * evita pagar un descifrado por cada subrayado de la Biblia entera cada vez
+   * que se abre un capítulo. La medida que lo motivó está en
+   * `rendimiento.medicion.test.ts`: con tres mil subrayados repartidos por la
+   * Biblia, descifrarlos todos costaba unos 375 ms **por capítulo abierto**, y
+   * el presupuesto del Documento 14 para abrir contenido privado es 500 ms —
+   * en un servidor, no en un teléfono.
+   */
+  function esDelCapitulo(
+    registro: RegistroLocal,
+    parametros: {
+      readonly traduccionId: string;
+      readonly libro: string;
+      readonly capitulo: number;
+    },
+  ): boolean {
+    const { metadatos } = registro;
+    return (
+      metadatos.translation_id === parametros.traduccionId &&
+      metadatos.book_code === parametros.libro &&
+      metadatos.chapter_number === parametros.capitulo
+    );
+  }
+
+  const leerSubrayados = (registros: readonly RegistroLocal[]): readonly Subrayado[] =>
+    registros.map(aSubrayado).filter((s): s is Subrayado => s !== null);
+
   const subrayadosVigentes = async (): Promise<readonly Subrayado[]> =>
-    (await almacen.listar(TIPO_SUBRAYADO))
-      .map(aSubrayado)
-      .filter((s): s is Subrayado => s !== null);
+    leerSubrayados(await almacen.listar(TIPO_SUBRAYADO));
 
   /**
    * Subrayados de un capítulo, del más antiguo al más reciente.
    *
    * En ese orden porque los solapados se pintan superpuestos y lo último que
    * marcó la persona debe quedar encima, igual que con dos rotuladores.
+   *
+   * Se filtra **antes** de descifrar, no después. Ver `esDelCapitulo`.
    */
   async function delCapitulo(parametros: {
     readonly traduccionId: string;
     readonly libro: string;
     readonly capitulo: number;
   }): Promise<readonly Subrayado[]> {
-    return (await subrayadosVigentes())
-      .filter(
-        (subrayado) =>
-          subrayado.traduccionId === parametros.traduccionId &&
-          subrayado.libro === parametros.libro &&
-          subrayado.capitulo === parametros.capitulo,
-      )
-      .sort((a, b) => a.creadoEn.localeCompare(b.creadoEn));
+    const registros = (await almacen.listar(TIPO_SUBRAYADO)).filter((registro) =>
+      esDelCapitulo(registro, parametros),
+    );
+    return [...leerSubrayados(registros)].sort((a, b) => a.creadoEn.localeCompare(b.creadoEn));
   }
 
   /** Todos los subrayados, del más reciente al más antiguo. Para repasarlos. */
@@ -181,11 +208,11 @@ export function crearRepositorioMarcasBiblicas(dependencias: DependenciasReposit
     // Seleccionar de abajo arriba es tan normal como al revés.
     const rango = ordenarRango(borrador.versiculoInicio, borrador.versiculoFin);
 
-    const existente = (await subrayadosVigentes()).find(
+    // Por el mismo motivo que en `delCapitulo`: se descarta por la referencia
+    // en claro y solo se descifra lo que queda, que son los subrayados de ese
+    // capítulo y no los de la Biblia entera.
+    const existente = (await delCapitulo(borrador)).find(
       (subrayado) =>
-        subrayado.traduccionId === borrador.traduccionId &&
-        subrayado.libro === borrador.libro &&
-        subrayado.capitulo === borrador.capitulo &&
         subrayado.versiculoInicio === rango.versiculoInicio &&
         subrayado.versiculoFin === rango.versiculoFin &&
         subrayado.estilo === borrador.estilo,
