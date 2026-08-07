@@ -31,7 +31,7 @@ export interface Interactivo {
 }
 
 /** Aplana los estilos de React Native, que pueden venir anidados en listas. */
-function estiloPlano(estilo: unknown): Record<string, unknown> {
+export function estiloPlano(estilo: unknown): Record<string, unknown> {
   if (Array.isArray(estilo)) {
     return estilo.reduce<Record<string, unknown>>(
       (acumulado, parte) => ({ ...acumulado, ...estiloPlano(parte) }),
