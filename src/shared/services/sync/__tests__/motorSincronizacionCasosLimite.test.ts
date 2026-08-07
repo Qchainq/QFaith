@@ -248,6 +248,124 @@ describe('resolución de conflictos', () => {
   });
 });
 
+describe('lo que baja del servidor no pisa lo que aún no ha subido', () => {
+  // El invariante 5 tiene dos caras y esta es la que faltaba. La otra —el
+  // servidor rechaza nuestro envío por conflicto— sí estaba cubierta; esta,
+  // que es la peligrosa, no lo estaba: aquí nadie rechaza nada, el cambio
+  // llega y **se guarda encima** si no hay quien lo pare.
+  //
+  // La historia es esta. Alguien escribe en su diario en un avión, sin
+  // conexión. Esa misma entrada la había editado por la mañana desde la
+  // tableta. Al aterrizar, la aplicación sincroniza y baja la versión de la
+  // tableta. Sin esta guarda, lo que escribió en el avión desaparece: no hay
+  // aviso, no hay conflicto, no hay forma de recuperarlo.
+
+  /** Un cambio remoto sobre `ID`, listo para bajar. */
+  const remotoQueEnvia = (sobre: SobreCifrado): PuertoRemoto => ({
+    enviar: async () => [],
+    descargar: async () => ({
+      cambios: [
+        {
+          id: ID,
+          tipoEntidad: TIPO,
+          operacion: 'update',
+          revision: 9,
+          version: 5,
+          sobre,
+          metadatos: {},
+          eliminadoEn: null,
+        },
+      ],
+      revisionFinal: 9,
+    }),
+  });
+
+  it('se marca conflicto en vez de sobrescribir', async () => {
+    const mat = material();
+    const enElAvion = sobreDe(mat, ID, 'Lo que escribí sin conexión.');
+    const enLaTableta = sobreDe(mat, ID, 'Lo que escribí por la mañana.');
+    const almacen = crearAlmacenEnMemoria();
+    const { motor } = montar(remotoQueEnvia(enLaTableta), almacen);
+
+    // Escrito en local y todavía sin enviar.
+    await motor.registrarCambioLocal({ id: ID, tipoEntidad: TIPO, sobre: enElAvion });
+
+    const resumen = await motor.sincronizar();
+
+    expect(resumen.conflictos).toBe(1);
+    expect(resumen.recibidos).toBe(0);
+    expect((await almacen.obtener(TIPO, ID))?.estado).toBe('conflicto');
+  });
+
+  it('y lo escrito sin conexión sigue estando, entero', async () => {
+    // La comprobación que de verdad importa: no que el estado diga
+    // «conflicto», sino que el texto siga ahí y se pueda leer.
+    const mat = material();
+    const EN_EL_AVION = 'Lo que escribí sin conexión.';
+    const almacen = crearAlmacenEnMemoria();
+    const { motor } = montar(
+      remotoQueEnvia(sobreDe(mat, ID, 'Lo que escribí por la mañana.')),
+      almacen,
+    );
+
+    await motor.registrarCambioLocal({
+      id: ID,
+      tipoEntidad: TIPO,
+      sobre: sobreDe(mat, ID, EN_EL_AVION),
+    });
+    await motor.sincronizar();
+
+    const registro = await almacen.obtener(TIPO, ID);
+    if (registro === null) throw new Error('el registro desapareció');
+    expect(descifrar({ sobre: registro.sobre, clave: mat.clave, vinculo: vinculoDe(ID) })).toBe(
+      EN_EL_AVION,
+    );
+  });
+
+  it('y la versión de la tableta tampoco se pierde: se guarda para elegir', async () => {
+    // Conservar las dos es lo que permite que la persona decida. Quedarse
+    // solo con la local sería el mismo error al revés.
+    const mat = material();
+    const EN_LA_TABLETA = 'Lo que escribí por la mañana.';
+    const almacen = crearAlmacenEnMemoria();
+    const { motor } = montar(remotoQueEnvia(sobreDe(mat, ID, EN_LA_TABLETA)), almacen);
+
+    await motor.registrarCambioLocal({
+      id: ID,
+      tipoEntidad: TIPO,
+      sobre: sobreDe(mat, ID, 'Lo que escribí sin conexión.'),
+    });
+    await motor.sincronizar();
+
+    const conflicto = (await motor.conflictosPendientes())[0];
+    if (conflicto === undefined) throw new Error('no se guardó el conflicto');
+    expect(
+      descifrar({ sobre: conflicto.sobreRemoto, clave: mat.clave, vinculo: vinculoDe(ID) }),
+    ).toBe(EN_LA_TABLETA);
+  });
+
+  it('si no hay nada sin enviar, el cambio entrante sí se aplica', async () => {
+    // El otro lado de la regla, y hace falta: una guarda que marcara
+    // conflicto siempre dejaría la sincronización sin servir para nada, y
+    // esta prueba fallaría en cuanto alguien la escribiera así.
+    const mat = material();
+    const DEL_SERVIDOR = 'Lo que llega del otro dispositivo.';
+    const almacen = crearAlmacenEnMemoria();
+    const { motor } = montar(remotoQueEnvia(sobreDe(mat, ID, DEL_SERVIDOR)), almacen);
+
+    const resumen = await motor.sincronizar();
+
+    expect(resumen.conflictos).toBe(0);
+    expect(resumen.recibidos).toBe(1);
+    const registro = await almacen.obtener(TIPO, ID);
+    if (registro === null) throw new Error('el cambio entrante no se guardó');
+    expect(registro.estado).toBe('sincronizado');
+    expect(descifrar({ sobre: registro.sobre, clave: mat.clave, vinculo: vinculoDe(ID) })).toBe(
+      DEL_SERVIDOR,
+    );
+  });
+});
+
 describe('descarga de cambios', () => {
   it('un cambio ya conocido no se vuelve a aplicar', async () => {
     const mat = material();
@@ -260,13 +378,81 @@ describe('descarga de cambios', () => {
       sobre: sobreDe(mat, ID, 'texto'),
     });
     await motor.sincronizar();
-
-    // Se rebobina el cursor: el servidor devolverá cambios ya vistos.
     const registro = await almacen.obtener(TIPO, ID);
+
+    // Se rebobina el cursor **de verdad**. Antes esto lo decía un comentario
+    // y no lo hacía nadie: la segunda vuelta no descargaba nada, así que la
+    // prueba pasaba sin llegar a ejercitar la guarda que dice comprobar.
+    await almacen.escribirCursorSincronizacion(0);
     const segunda = await motor.sincronizar();
 
     expect(segunda.recibidos).toBe(0);
     expect((await almacen.obtener(TIPO, ID))?.version).toBe(registro?.version);
+    expect((await almacen.obtener(TIPO, ID))?.actualizadoEn).toBe(registro?.actualizadoEn);
+  });
+
+  it('la revisión que ya tenemos se descarta, no solo las anteriores', async () => {
+    // La comparación es «mayor o igual». Con «mayor» a secas, el cambio con
+    // la misma revisión que ya guardamos se vuelve a aplicar, y con él se
+    // pisa el registro local: es un fallo de uno con pérdida de datos detrás.
+    const mat = material();
+    const sobreRemoto = sobreDe(mat, ID, 'lo que hay en el servidor');
+    const remoto: PuertoRemoto = {
+      enviar: async () => [],
+      descargar: async () => ({
+        cambios: [
+          {
+            id: ID,
+            tipoEntidad: TIPO,
+            operacion: 'update',
+            revision: 5,
+            version: 9,
+            sobre: sobreRemoto,
+            metadatos: {},
+            eliminadoEn: null,
+          },
+        ],
+        revisionFinal: 5,
+      }),
+    };
+    const almacen = crearAlmacenEnMemoria();
+    const { motor } = montar(remoto, almacen);
+
+    // Ya conocemos exactamente esa revisión.
+    await almacen.guardar({
+      id: ID,
+      usuarioId: USUARIO,
+      tipoEntidad: TIPO,
+      sobre: sobreDe(mat, ID, 'lo que ya teníamos'),
+      metadatos: {},
+      version: 4,
+      revisionRemota: 5,
+      estado: 'sincronizado',
+      creadoEn: '2026-01-01T00:00:00.000Z',
+      actualizadoEn: '2026-01-01T00:00:00.000Z',
+      eliminadoEn: null,
+      dispositivoId: 'movil-1',
+    });
+
+    const resumen = await motor.sincronizar();
+
+    expect(resumen.recibidos).toBe(0);
+    expect((await almacen.obtener(TIPO, ID))?.version).toBe(4);
+  });
+
+  it('el cursor avanza, o cada sincronización se descargaría entera', async () => {
+    // Sin avanzar, la aplicación vuelve a bajar todo el historial en cada
+    // vuelta: en una cuenta de años eso es la batería y los datos de alguien.
+    const remoto: PuertoRemoto = {
+      enviar: async () => [],
+      descargar: async () => ({ cambios: [], revisionFinal: 42 }),
+    };
+    const { almacen, motor } = montar(remoto);
+
+    const resumen = await motor.sincronizar();
+
+    expect(await almacen.leerCursorSincronizacion()).toBe(42);
+    expect(resumen.revisionFinal).toBe(42);
   });
 
   it('un borrado remoto de algo que no tenemos en local se ignora', async () => {
