@@ -69,6 +69,7 @@ llega a escribirse en él.
 | --- | --- |
 | `npm run verify` | Lint, formato, tipos y las pruebas |
 | `npm test` | Solo las pruebas |
+| `npm run medir` | Mide el rendimiento contra los presupuestos del Documento 14 |
 | `bash supabase/tests/ejecutar-pruebas.sh` | Migraciones y aislamiento sobre un PostgreSQL local |
 | `npm run supabase:verificar` | Lo mismo contra el proyecto real |
 
@@ -76,6 +77,12 @@ Las dos últimas se complementan: la local corre sobre un sustituto del esquema
 `auth` de Supabase, y la remota usa sesiones y JWT de verdad, que es lo único
 que confirma que `auth.uid()` se comporta como se espera. Sin la clave
 secreta, la remota ejecuta igualmente todo lo que no necesita dos sesiones.
+
+`npm run medir` va aparte de `npm test` a propósito: sus números dependen de
+la máquina, y una comprobación de tiempo mezclada con las demás acaba fallando
+en integración continua un día cualquiera. Lo que sí exige son propiedades que
+no dependen de la máquina —que abrir una pantalla no cueste proporcional a
+todo lo que la persona ha escrito— y esas sí viajan al teléfono.
 
 ## Documentación
 
