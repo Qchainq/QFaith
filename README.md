@@ -89,3 +89,7 @@ todo lo que la persona ha escrito— y esas sí viajan al teléfono.
 La especificación son los quince documentos de
 [`docs/master-prompt/`](docs/master-prompt/README.md). Para trabajar en un
 área concreta, carga su skill: [`CLAUDE.md`](CLAUDE.md) tiene la tabla.
+
+[`docs/auditoria-fase-3.md`](docs/auditoria-fase-3.md) revisa los veinticinco
+criterios de la definición final, uno a uno, y dice de qué depende cada uno de
+los que faltan.

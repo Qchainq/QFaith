@@ -188,6 +188,38 @@ describe('leer un día', () => {
   });
 });
 
+/**
+ * Solo lo que una persona llega a leer.
+ *
+ * Serializar el árbol entero metía en la comparación los estilos y los
+ * nombres de las propiedades, y eso da falsos positivos: un `width: '100%'`
+ * hacía fallar la prueba de que la pantalla no habla de porcentajes. Mirar el
+ * texto es lo que la prueba dice que hace, y además es más estricto, porque
+ * ya no puede pasar por casualidad gracias a un nombre de propiedad.
+ */
+function textoVisible(): string {
+  const partes: string[] = [];
+  const recorrer = (nodo: unknown): void => {
+    if (typeof nodo === 'string') {
+      partes.push(nodo);
+      return;
+    }
+    if (Array.isArray(nodo)) {
+      nodo.forEach(recorrer);
+      return;
+    }
+    if (typeof nodo !== 'object' || nodo === null) return;
+    const elemento = nodo as { children?: unknown; props?: Record<string, unknown> };
+    // La etiqueta de accesibilidad también la «lee» quien usa un lector de
+    // pantalla, así que cuenta como algo que la pantalla dice.
+    const etiqueta = elemento.props?.accessibilityLabel;
+    if (typeof etiqueta === 'string') partes.push(etiqueta);
+    recorrer(elemento.children);
+  };
+  recorrer(screen.toJSON());
+  return partes.join(' ').toLowerCase();
+}
+
 describe('lo que la pantalla nunca dice', () => {
   it('no habla de rachas, de días perdidos ni de porcentajes', async () => {
     montar();
@@ -197,9 +229,11 @@ describe('lo que la pantalla nunca dice', () => {
     await pulsar('Volver');
 
     // Un plan es un acompañamiento, no un marcador (invariante 12).
-    const texto = JSON.stringify(screen.toJSON());
+    const texto = textoVisible();
+    // Y que haya texto, o esto pasaría en una pantalla en blanco.
+    expect(texto.length).toBeGreaterThan(50);
     for (const prohibido of ['racha', 'seguidos', 'perdid', 'pendientes', '%', 'faltan']) {
-      expect(texto.toLowerCase()).not.toContain(prohibido);
+      expect(texto).not.toContain(prohibido);
     }
   });
 
@@ -207,7 +241,8 @@ describe('lo que la pantalla nunca dice', () => {
     montar();
     await pulsar('Empezar este plan');
 
-    const texto = JSON.stringify(screen.toJSON()).toLowerCase();
+    const texto = textoVisible();
+    expect(texto.length).toBeGreaterThan(50);
     for (const prohibido of ['al día', 'no pierdas', 'sigue así', 'te queda']) {
       expect(texto).not.toContain(prohibido);
     }
