@@ -123,17 +123,24 @@ afterAll(() => {
   expect(columnas).toBeGreaterThan(PANTALLAS.length);
 });
 
-/** Los `maxWidth` que hay puestos en el árbol, vengan de donde vengan. */
-function anchosMaximos(nodo: unknown): number[] {
-  const encontrados: number[] = [];
+/**
+ * Todos los valores que el árbol pone para una propiedad de estilo.
+ *
+ * Genérica y no solo para `maxWidth` porque la adaptación son tres cosas
+ * —el tope de ancho, el margen y el centrado— y comprobar únicamente la
+ * primera dejaba pasar que `PantallaBase` volviera al margen fijo o dejara de
+ * centrar. Lo descubrió la batería de mutación, que es donde se nota que una
+ * prueba mira menos de lo que su nombre promete.
+ */
+function valoresDeEstilo(nodo: unknown, propiedad: string): unknown[] {
+  const encontrados: unknown[] = [];
 
   const recorrer = (elemento: {
     props?: Record<string, unknown>;
     children?: readonly unknown[];
   }): void => {
-    const estilo = estiloPlano(elemento.props?.style);
-    const maximo = estilo.maxWidth;
-    if (typeof maximo === 'number') encontrados.push(maximo);
+    const valor = estiloPlano(elemento.props?.style)[propiedad];
+    if (valor !== undefined) encontrados.push(valor);
     for (const hijo of elemento.children ?? []) {
       if (typeof hijo === 'object' && hijo !== null) {
         recorrer(hijo as Parameters<typeof recorrer>[0]);
@@ -152,7 +159,7 @@ describe.each(PANTALLAS)('%s', (_nombre, Componente) => {
     // se mediría un árbol vacío y la prueba pasaría sin ver nada.
     await screen.findByRole('header');
 
-    const maximos = anchosMaximos(screen.UNSAFE_root);
+    const maximos = valoresDeEstilo(screen.UNSAFE_root, 'maxWidth');
     columnas += maximos.length;
 
     // Hay una columna, y no es más ancha de lo que se puede leer. Una
@@ -164,6 +171,39 @@ describe.each(PANTALLAS)('%s', (_nombre, Componente) => {
     // Y coincide con lo que la regla dice para este tamaño: así, cambiar la
     // regla y olvidarse de una pantalla se nota.
     expect(maximos).toContain(medidaDe(ancho, alto).anchoDeContenido);
+
+    unmount();
+  });
+
+  it.each(TAMANOS)('en %s usa el margen que le toca', async (_donde, ancho, alto) => {
+    // El margen es la mitad de la adaptación en un teléfono pequeño: con el
+    // holgado, un iPhone SE pierde 48 de sus 320 puntos de ancho.
+    const { unmount } = montar(Componente, ancho, alto);
+    await screen.findByRole('header');
+
+    expect(valoresDeEstilo(screen.UNSAFE_root, 'paddingHorizontal')).toContain(
+      medidaDe(ancho, alto).margenLateral,
+    );
+
+    unmount();
+  });
+
+  it.each(TAMANOS)('en %s centra la columna solo si sobra sitio', async (_donde, ancho, alto) => {
+    // Sin centrar, en una tableta el texto queda pegado al borde izquierdo con
+    // medio palmo de fondo vacío a la derecha, que es exactamente «estirar la
+    // interfaz móvil sin adaptación» con otra forma.
+    const { unmount } = montar(Componente, ancho, alto);
+    await screen.findByRole('header');
+
+    const centrados = valoresDeEstilo(screen.UNSAFE_root, 'alignSelf').filter(
+      (valor) => valor === 'center',
+    );
+
+    if (medidaDe(ancho, alto).seCentra) {
+      expect(centrados.length).toBeGreaterThan(0);
+    } else {
+      expect(centrados).toHaveLength(0);
+    }
 
     unmount();
   });
