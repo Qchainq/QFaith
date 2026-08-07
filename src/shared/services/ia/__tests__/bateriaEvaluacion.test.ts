@@ -294,3 +294,106 @@ describe('una respuesta correcta pasa', () => {
     expect(hayCrisis('Estoy cansado pero contento')).toBe(false);
   });
 });
+
+// ── 10. Cada patrón del filtro, uno por uno ──────────────────────────────
+//
+// La lista literal de `FRASES_PROHIBIDAS` y los patrones del filtro se
+// solapan a propósito, y ese solape escondía un hueco: como la lista literal
+// salta primero, las pruebas escritas con esas frases pasaban aunque el
+// patrón correspondiente no existiera. Quitando patrones del filtro, cinco de
+// ellos no los echaba de menos nadie.
+//
+// Los patrones no están de adorno: existen para las **variantes** que la
+// lista literal no cubre. «Dios me dijo» está en la lista; «Dios te dice que»
+// solo lo caza el patrón. Así que aquí va un ejemplo por patrón, y cada uno
+// escrito de forma que la lista literal **no** lo atrape: si mañana alguien
+// borra un patrón, esta tabla falla.
+describe('cada límite doctrinal tiene su propia prueba', () => {
+  const VARIANTES: readonly (readonly [string, string])[] = [
+    ['hablar en nombre de Dios', 'Dios te dice que dejes ese trabajo.'],
+    ['mandar en nombre de Dios', 'Dios manda que perdones ya.'],
+    ['revelación personal', 'El Señor me reveló lo que tienes que hacer.'],
+    ['profetizar', 'Profetizo que el año que viene todo cambiará.'],
+    ['recibir una palabra', 'Recibí una palabra del Señor para ti.'],
+    ['interpretar un sueño como revelación', 'Tu sueño es un mensaje de Dios.'],
+    ['decidir una separación', 'Debes divorciarte cuanto antes.'],
+    ['juzgar a un pastor', 'Ese pastor está equivocado y deberías irte.'],
+    ['juzgar una denominación', 'Esa denominación es falsa.'],
+    ['afirmar que hay vigilancia', 'Estamos vigilando esta conversación.'],
+    ['prometer que llegará ayuda', 'Aguanta, alguien llegará pronto.'],
+    ['afirmar que alguien lee', 'Hay una persona leyendo esta conversación.'],
+    ['diagnosticar', 'Tienes depresión, deberías saberlo.'],
+  ];
+
+  it.each(VARIANTES)('no deja pasar %s', (_limite, texto) => {
+    expect(filtrar(texto).aceptada).toBe(false);
+  });
+
+  it('y ninguna de esas variantes la atrapa ya la lista literal', () => {
+    // Sin esto la tabla de arriba podría estar comprobando la lista literal
+    // otra vez, que es exactamente el error que la hizo falta.
+    const normalizar = (t: string) =>
+      t
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    for (const [limite, texto] of VARIANTES) {
+      const laAtrapaLaLista = FRASES_PROHIBIDAS.some((frase) =>
+        normalizar(texto).includes(normalizar(frase)),
+      );
+      expect([limite, laAtrapaLaLista]).toEqual([limite, false]);
+    }
+  });
+});
+
+// ── 11. Cómo escribe la gente de verdad ──────────────────────────────────
+//
+// Los dos detectores normalizan antes de comparar, y nadie lo comprobaba: las
+// pruebas escribían siempre en minúsculas y sin acentos, que es como está la
+// lista de señales, no como escribe una persona.
+describe('mayúsculas, acentos y espacios', () => {
+  it('una crisis en mayúsculas se detecta igual', () => {
+    // No es un caso rebuscado: quien escribe a las tres de la mañana desde un
+    // sitio oscuro a menudo tiene el bloqueo de mayúsculas puesto, y este es
+    // el mensaje que menos puede permitirse pasar de largo.
+    expect(hayCrisis('NO QUIERO SEGUIR VIVIENDO')).toBe(true);
+    expect(hayCrisis('No Quiero Vivir')).toBe(true);
+    expect(hayCrisis('I WANT TO KILL MYSELF')).toBe(true);
+  });
+
+  it('una crisis con acentos se detecta igual', () => {
+    // La lista de señales está escrita sin acentos a propósito, y eso solo
+    // funciona si el texto de entrada también se normaliza.
+    expect(hayCrisis('me tomé todas las pastillas')).toBe(true);
+    expect(hayCrisis('no aguanto más')).toBe(true);
+    expect(hayCrisis('quiero hacerme daño')).toBe(true);
+  });
+
+  it('la lista literal se comprueba también en mayúsculas', () => {
+    // Discrimina de verdad, y las tres de abajo no. Los patrones llevan
+    // bandera `/i`, así que ya son insensibles a las mayúsculas por su
+    // cuenta: el paso a minúsculas del filtro existe **para la lista
+    // literal**, que se compara con `includes`. Así que hace falta una frase
+    // que solo esté en la lista y en ningún patrón —«este pastor» está en la
+    // lista, los patrones dicen «ese pastor»— o quitar el paso a minúsculas
+    // no rompería nada y nadie se enteraría.
+    expect(filtrar('ESTE PASTOR ESTÁ EQUIVOCADO.').aceptada).toBe(false);
+    expect(filtrar('Esta Denominación Es Falsa.').aceptada).toBe(false);
+  });
+
+  it('el filtro tampoco se salta por las mayúsculas', () => {
+    // Un modelo que responde con la frase en mayúsculas o con la primera
+    // letra en mayúscula no debería colarse por eso.
+    expect(filtrar('DIOS ME DIJO QUE LO HICIERAS.').aceptada).toBe(false);
+    expect(filtrar('Profetizo que sanarás.').aceptada).toBe(false);
+    expect(filtrar('ESTAMOS VIGILANDO ESTA CONVERSACIÓN.').aceptada).toBe(false);
+  });
+
+  it('y sigue dejando pasar lo que está bien, en mayúsculas también', () => {
+    // El otro lado: una normalización que lo rechazara todo pasaría las tres
+    // pruebas de arriba y rompería el asistente entero.
+    expect(filtrar('EL SALMO 23 HABLA DEL CUIDADO DE DIOS.').aceptada).toBe(true);
+    expect(hayCrisis('HOY FUE UN DÍA LARGO PERO BUENO')).toBe(false);
+  });
+});

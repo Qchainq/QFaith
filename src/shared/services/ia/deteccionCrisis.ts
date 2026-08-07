@@ -60,8 +60,26 @@ const SENALES = [
   'sobredosis',
 ] as const;
 
+/**
+ * Minúsculas y sin acentos, para comparar contra la lista.
+ *
+ * Las dos mitades hacen falta y las dos se comprueban en la batería de
+ * evaluación. Sin minúsculas, «NO QUIERO SEGUIR VIVIENDO» no se detecta, y
+ * quien escribe eso a las tres de la mañana a menudo tiene el bloqueo de
+ * mayúsculas puesto. Sin quitar acentos, «no aguanto más» tampoco, porque la
+ * lista de señales está escrita sin ellos.
+ *
+ * El rango de marcas combinantes va escrito con escapes y no con los
+ * caracteres dentro: puestos tal cual son invisibles en cualquier editor, y
+ * una herramienta que normalizara el archivo podría alterarlos sin que se
+ * notara en ninguna revisión. En el archivo del que depende la respuesta ante
+ * una crisis, eso no compensa.
+ */
 function normalizar(texto: string): string {
-  return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 }
 
 /**
