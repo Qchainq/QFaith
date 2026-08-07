@@ -28,7 +28,7 @@
 // distinto no cambie la clave. Así que el contrato que hay que preservar es
 // que las mismas palabras den siempre los mismos bytes de entropía.
 import { entropyToMnemonic, mnemonicToEntropy } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 import {
   crearSobreRecuperacion,

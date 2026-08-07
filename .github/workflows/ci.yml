@@ -41,6 +41,38 @@ jobs:
       - name: Auditoría de dependencias
         run: npm audit --audit-level=high
 
+  empaquetado:
+    # El Documento 14 pide «Build Android» y «Validación iOS». Compilar el
+    # binario nativo necesita certificados de firma que aquí no hay, pero
+    # **empaquetar el JavaScript sí se puede**, y es donde está el fallo que
+    # ninguna otra comprobación ve: mil doscientas pruebas en verde no dicen
+    # nada sobre si la aplicación llega a arrancar. Una importación que solo
+    # existe en Node, un módulo nativo mal declarado o una dependencia que no
+    # resuelve pasan la suite entera y rompen el arranque.
+    #
+    # Se hace para las dos plataformas porque el empaquetado resuelve
+    # extensiones `.ios.ts` y `.android.ts` por separado: un archivo que
+    # falte en una y no en la otra solo se ve haciendo las dos.
+    name: La aplicación empaqueta
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        plataforma: [android, ios]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalación limpia
+        run: npm ci
+
+      - name: Empaquetar
+        run: npx expo export --platform ${{ matrix.plataforma }} --output-dir dist-ci
+
   esquema:
     name: Migraciones y aislamiento entre usuarios
     runs-on: ubuntu-latest

@@ -70,6 +70,7 @@ llega a escribirse en él.
 | `npm run verify` | Lint, formato, tipos y las pruebas |
 | `npm test` | Solo las pruebas |
 | `npm run medir` | Mide el rendimiento contra los presupuestos del Documento 14 |
+| `npm run empaquetar` | Empaqueta para iOS y Android: comprueba que la aplicación arranca |
 | `bash supabase/tests/ejecutar-pruebas.sh` | Migraciones y aislamiento sobre un PostgreSQL local |
 | `npm run supabase:verificar` | Lo mismo contra el proyecto real |
 

@@ -1,7 +1,7 @@
 // Pruebas de cifrado exigidas por el Documento 14. Cada bloque corresponde a
 // una comprobación literal de esa lista.
 import { mnemonicToEntropy } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 import { aBytes, aBase64, desdeBase64 } from '../codificacion';
 import {

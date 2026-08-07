@@ -259,9 +259,13 @@ Se agrupan en tres:
 
 ## Lo que además falta y no está en los 25
 
-- **CI no compila la aplicación.** El Documento 14 pide *Build Android* y
-  *Validación iOS*; la tubería hace las otras ocho comprobaciones y no estas
-  dos. Necesitan credenciales de firma.
+- **CI no compila el binario nativo.** El Documento 14 pide *Build Android* y
+  *Validación iOS*, y firmar un binario necesita certificados que aquí no hay.
+  Lo que sí hace ya la tubería es **empaquetar el JavaScript para las dos
+  plataformas**, que es donde está el fallo que ninguna otra comprobación
+  veía: mil cuatrocientas pruebas en verde no dicen nada sobre si la
+  aplicación llega a arrancar. Una importación que solo existe en Node o una
+  dependencia que no resuelve pasan la suite entera y rompen el arranque.
 - **La base local no está cifrada por completo.** El Documento 7 lo pide y
   `expo-sqlite` no trae SQLCipher, así que hoy los metadatos —fechas, estados,
   tipo de entrada— son legibles para quien tenga acceso al sistema de archivos
