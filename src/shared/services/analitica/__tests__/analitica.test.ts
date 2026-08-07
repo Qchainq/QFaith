@@ -210,6 +210,28 @@ describe('lo que nunca sale', () => {
 
     expect(enviados).toHaveLength(0);
   });
+
+  it('una función que no está en la lista tampoco', async () => {
+    // Con el nombre bien formado y **sin campos de más**, que es lo que de
+    // verdad ejercita la comprobación contra la lista. Los otros casos de
+    // función inventada de este archivo llevan un campo extra, y ahí quien
+    // los rechaza es la comprobación de campos: la lista podría no mirarse y
+    // seguirían pasando. Aquí el nombre es lo único que puede fallar, y por
+    // ese hueco cabe justo lo que no debe medirse.
+    const { servicio, enviados } = montar();
+    await servicio.consentir(true);
+
+    await servicio.registrar({
+      tipo: 'funcion.usada',
+      funcion: 'diario.leer-texto',
+    } as unknown as EventoAnalitica);
+    await servicio.registrar({
+      tipo: 'funcion.usada',
+      funcion: 'pulso.animo-tentado',
+    } as unknown as EventoAnalitica);
+
+    expect(enviados).toHaveLength(0);
+  });
 });
 
 describe('el código de error es el único campo de texto, y está acotado', () => {
@@ -245,6 +267,28 @@ describe('el código de error es el único campo de texto, y está acotado', () 
     });
 
     expect(enviados).toHaveLength(0);
+  });
+
+  it('el fallo de sincronización se acota igual: son dos campos, no uno', async () => {
+    // Comprobarlo solo en `error.ocurrido` dejaba el otro evento con código
+    // sin cubrir, y con él la misma rendija abierta. Cada campo de texto
+    // necesita su prueba: no hay uno que cubra al otro.
+    const { servicio, enviados } = montar();
+    await servicio.consentir(true);
+
+    await servicio.registrar({
+      tipo: 'sincronizacion.fallida',
+      codigo: CONFESION,
+      pendientes: 4,
+    });
+    await servicio.registrar({
+      tipo: 'sincronizacion.fallida',
+      codigo: NOMBRE_EN_PETICION,
+      pendientes: 1,
+    });
+
+    expect(enviados).toHaveLength(0);
+    expect(JSON.stringify(enviados)).not.toContain('Marta');
   });
 
   it('el registro seguro de un ErrorApp sí se puede medir', async () => {
