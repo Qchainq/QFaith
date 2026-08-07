@@ -198,12 +198,16 @@ describe('paginar', () => {
 
     const titulos: string[] = [];
     let desde: number | null = 0;
-    while (desde !== null) {
+    // Con freno. Si `siguiente` nunca llegara a `null` esto sería un bucle
+    // infinito, y como cada vuelta espera una promesa ya resuelta, el
+    // temporizador de Jest no llega a saltar: la prueba no falla, se cuelga.
+    for (let vuelta = 0; vuelta < 100 && desde !== null; vuelta += 1) {
       const lectura = await repositorio.listar({ limite: 2, desde });
       titulos.push(...lectura.entradas.map((e) => e.titulo));
       desde = lectura.siguiente;
     }
 
+    expect(desde).toBeNull();
     expect(titulos).toEqual(['Día 5', 'Día 4', 'Día 3', 'Día 2', 'Día 1']);
   });
 

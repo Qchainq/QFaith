@@ -30,13 +30,45 @@ const registro = (id: string, fecha: string): RegistroLocal => ({
 const porFecha = (a: RegistroLocal, b: RegistroLocal): number =>
   String(b.metadatos.fecha).localeCompare(String(a.metadatos.fecha));
 
-const cinco = [
-  registro('a', '2026-08-01'),
-  registro('b', '2026-08-02'),
+/**
+ * Cinco registros **en desorden**, y una lista nueva en cada llamada.
+ *
+ * Las dos cosas por el mismo motivo. Compartir una sola lista entre pruebas
+ * dejaba pasar una versión que ordenaba en el sitio: la primera prueba la
+ * dejaba ya ordenada y la que comprobaba «no altera la lista que recibe»
+ * comparaba una lista ordenada consigo misma. Y en orden de entrada, ordenar
+ * no cambiaría nada y tampoco se notaría.
+ */
+const desordenados = (): RegistroLocal[] => [
   registro('c', '2026-08-03'),
-  registro('d', '2026-08-04'),
   registro('e', '2026-08-05'),
+  registro('a', '2026-08-01'),
+  registro('d', '2026-08-04'),
+  registro('b', '2026-08-02'),
 ];
+
+/**
+ * Recorre todas las páginas, con freno.
+ *
+ * El freno no es paranoia: una versión en la que `siguiente` nunca llegue a
+ * `null` convierte este bucle en infinito, y como cada vuelta espera una
+ * promesa ya resuelta, el temporizador de Jest no llega a saltar nunca. La
+ * prueba no falla: **se cuelga**, y con ella la integración continua. Un
+ * bucle de paginación sin tope es una trampa, aquí y en la aplicación.
+ */
+function recorrerPaginas<T>(
+  pedir: (desde: number) => { elementos: readonly T[]; siguiente: number | null },
+): readonly T[] {
+  const todos: T[] = [];
+  let desde: number | null = 0;
+  for (let vuelta = 0; vuelta < 100; vuelta += 1) {
+    if (desde === null) return todos;
+    const pagina = pedir(desde);
+    todos.push(...pagina.elementos);
+    desde = pagina.siguiente;
+  }
+  throw new Error('la paginación no termina: `siguiente` nunca llega a null');
+}
 
 /** Lee el registro y anota cuál se abrió, para poder contarlos. */
 function lectorQueCuenta(abiertos: string[], ilegibles: readonly string[] = []) {
@@ -51,7 +83,7 @@ describe('cortar antes de descifrar', () => {
     const abiertos: string[] = [];
 
     paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: lectorQueCuenta(abiertos),
       opciones: { limite: 2 },
@@ -66,7 +98,7 @@ describe('cortar antes de descifrar', () => {
     const abiertos: string[] = [];
 
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: lectorQueCuenta(abiertos),
       opciones: { limite: 2 },
@@ -79,38 +111,40 @@ describe('cortar antes de descifrar', () => {
 
 describe('el orden se decide sobre el conjunto entero', () => {
   it('recorrer las páginas da el mismo orden que no paginar', () => {
-    const ids: string[] = [];
-    let desde: number | null = 0;
+    const registros = desordenados();
 
-    while (desde !== null) {
-      const pagina: ReturnType<typeof paginarDescifrando<string>> = paginarDescifrando({
-        registros: cinco,
+    const ids = recorrerPaginas((desde) =>
+      paginarDescifrando({
+        registros,
         ordenar: porFecha,
         leer: (reg) => reg.id,
         opciones: { limite: 2, desde },
-      });
-      ids.push(...pagina.elementos);
-      desde = pagina.siguiente;
-    }
+      }),
+    );
 
     expect(ids).toEqual(['e', 'd', 'c', 'b', 'a']);
   });
 
   it('no altera la lista que recibe', () => {
     // Ordenar en el sitio dejaría reordenada la lista de quien llama, que en
-    // el almacén en memoria es la de verdad.
-    const originales = [...cinco];
+    // el almacén en memoria es **la de verdad**: paginar el Diario cambiaría
+    // el orden guardado de las entradas de alguien.
+    const registros = desordenados();
+    const ordenDeEntrada = registros.map((reg) => reg.id);
 
-    paginarDescifrando({ registros: cinco, ordenar: porFecha, leer: (reg) => reg.id });
+    paginarDescifrando({ registros, ordenar: porFecha, leer: (reg) => reg.id });
 
-    expect(cinco).toEqual(originales);
+    expect(registros.map((reg) => reg.id)).toEqual(ordenDeEntrada);
+    // Y que el orden de entrada no sea ya el ordenado, o esto no comprobaría
+    // nada: una lista ya ordenada pasa esta prueba aunque se ordene en el sitio.
+    expect(ordenDeEntrada).not.toEqual(['e', 'd', 'c', 'b', 'a']);
   });
 });
 
 describe('final de la lista', () => {
   it('la última página no ofrece continuación', () => {
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: (reg) => reg.id,
       opciones: { limite: 2, desde: 4 },
@@ -122,7 +156,7 @@ describe('final de la lista', () => {
 
   it('pedir más allá del final devuelve una página vacía y cerrada', () => {
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: (reg) => reg.id,
       opciones: { desde: 99 },
@@ -144,7 +178,7 @@ describe('final de la lista', () => {
 describe('registros que no abren', () => {
   it('se cuentan en lugar de esconderse', () => {
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: lectorQueCuenta([], ['e']),
       opciones: { limite: 2 },
@@ -159,7 +193,7 @@ describe('registros que no abren', () => {
     // siguiente empezaría en «d», que ya se ha visto, dejando fuera un
     // elemento del final sin que nadie lo notara.
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: lectorQueCuenta([], ['e']),
       opciones: { limite: 2 },
@@ -172,7 +206,7 @@ describe('registros que no abren', () => {
     // Si no avanzara, quien tuviera dos registros dañados seguidos se
     // quedaría atascado sin poder llegar a lo que hay detrás.
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: lectorQueCuenta([], ['e', 'd']),
       opciones: { limite: 2 },
@@ -204,7 +238,7 @@ describe('valores por defecto y límites', () => {
     // Un límite de cero devolvería páginas vacías eternamente y quien
     // recorriera la lista se quedaría girando en el sitio.
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: (reg) => reg.id,
       opciones: { limite: 0 },
@@ -214,13 +248,18 @@ describe('valores por defecto y límites', () => {
   });
 
   it('un índice negativo empieza por el principio', () => {
+    // Con `-2` y límite 3, sin recortar a cero, `slice(-2, 1)` sale vacío: la
+    // lista aparecería sin nada y con `siguiente` descuadrado. Un `-5` no
+    // sirve para comprobarlo —`slice(-5, -4)` acierta el primero por
+    // casualidad— y deja pasar la versión sin recorte.
     const pagina = paginarDescifrando({
-      registros: cinco,
+      registros: desordenados(),
       ordenar: porFecha,
       leer: (reg) => reg.id,
-      opciones: { limite: 1, desde: -5 },
+      opciones: { limite: 3, desde: -2 },
     });
 
-    expect(pagina.elementos).toEqual(['e']);
+    expect(pagina.elementos).toEqual(['e', 'd', 'c']);
+    expect(pagina.siguiente).toBe(3);
   });
 });
