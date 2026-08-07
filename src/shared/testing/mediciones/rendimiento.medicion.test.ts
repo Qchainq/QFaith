@@ -48,8 +48,7 @@ const PARRAFO =
   'manera. Anoté esto para acordarme cuando vuelva a costarme. ';
 
 /** Un texto de `veces` párrafos, distinto en cada registro. */
-const textoDe = (veces: number, semilla: number): string =>
-  `${semilla}. ${PARRAFO.repeat(veces)}`;
+const textoDe = (veces: number, semilla: number): string => `${semilla}. ${PARRAFO.repeat(veces)}`;
 
 const mediciones: Medicion[] = [];
 
@@ -310,7 +309,7 @@ describe('abrir un capítulo con subrayados', () => {
     return repositorio;
   }
 
-  it('el coste de abrir un capítulo depende de cuántos subrayados hay en toda la Biblia', async () => {
+  it('quince veces más subrayados no cuesta quince veces más', async () => {
     const pocos = await conSubrayados(200);
     const muchos = await conSubrayados(3000);
     const capitulo = { traduccionId: 'traduccion-1', libro: 'L5', capitulo: 6 };
@@ -322,12 +321,16 @@ describe('abrir un capítulo con subrayados', () => {
       muchos.delCapitulo(capitulo),
     );
 
-    // Se documenta el crecimiento, no se prohíbe: es lineal por construcción
-    // y esa es justamente la observación que importa. Quince veces más
-    // subrayados, quince veces más coste, aunque el capítulo tenga los mismos.
-    expect(factorDeCrecimiento(conPocos, conMuchos)).toBeGreaterThan(3);
-    // Presupuesto: «apertura de contenido privado < 500 ms». Con holgura.
-    expect(conMuchos.mediana).toBeLessThan(2000);
+    // Quince veces más subrayados en la Biblia entera, y el capítulo sigue
+    // teniendo los mismos. Descifrándolos todos el factor era quince —374 ms
+    // por capítulo abierto—; filtrando antes por la referencia en claro, lo
+    // que queda es leer la lista del almacén, que es mucho más barato que
+    // abrir un sobre. Este número es la prueba de que el filtro está donde
+    // debe: si alguien lo moviera detrás del descifrado, subiría a quince.
+    expect(factorDeCrecimiento(conPocos, conMuchos)).toBeLessThan(10);
+    // Presupuesto: «apertura de contenido privado < 500 ms». Con holgura para
+    // absorber una máquina lenta y el transpilador de pruebas.
+    expect(conMuchos.mediana).toBeLessThan(100);
   });
 });
 
@@ -335,7 +338,8 @@ describe('abrir un capítulo con subrayados', () => {
 //
 // La lista más larga de la aplicación, y la que más crece: quien escribe a
 // diario durante cinco años tiene casi dos mil entradas. El repositorio
-// descifra todas para pintarla.
+// descifra solo la página que devuelve, y esta medida existe para que siga
+// siendo así.
 
 describe('abrir la lista del Diario', () => {
   async function conEntradas(cuantas: number) {
@@ -361,7 +365,7 @@ describe('abrir la lista del Diario', () => {
     });
   }
 
-  it('el coste crece con el total de entradas escritas', async () => {
+  it('abrir el diario cuesta casi lo mismo con diez veces más entradas escritas', async () => {
     const pocas = await conEntradas(300);
     const muchas = await conEntradas(3000);
 
@@ -372,9 +376,15 @@ describe('abrir la lista del Diario', () => {
       repeticiones: 10,
     });
 
-    // Diez veces más entradas escritas a lo largo de los años, diez veces más
-    // coste al abrir la pantalla, aunque en ella quepan las mismas doce.
-    expect(factorDeCrecimiento(conPocas, conMuchas)).toBeGreaterThan(3);
+    // Es la propiedad que justifica la paginación, escrita como número. Sin
+    // ella, diez veces más entradas costaban diez veces más —de 94 ms a
+    // 961 ms— aunque en la pantalla quepan siempre las mismas. Descifrando
+    // solo la página, lo que crece es leer la lista del almacén, y eso es
+    // barato al lado de abrir tres mil sobres.
+    expect(factorDeCrecimiento(conPocas, conMuchas)).toBeLessThan(4);
+    // Presupuesto: «consultas locales frecuentes < 100 ms». Holgado porque
+    // esto no es un teléfono, pero ya no crece.
+    expect(conMuchas.mediana).toBeLessThan(200);
   });
 });
 

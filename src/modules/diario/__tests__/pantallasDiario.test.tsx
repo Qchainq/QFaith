@@ -91,6 +91,20 @@ describe('lista del diario', () => {
     expect(screen.getByText(/2 entradas que este dispositivo no puede abrir/)).toBeTruthy();
   });
 
+  it('pinta las entradas de todas las páginas, no solo las de la última', () => {
+    // Quedarse con la última haría que lo ya leído desapareciera de la
+    // pantalla al pedir más, que es exactamente lo contrario de lo que espera
+    // quien sigue bajando.
+    const otra: EntradaDiario = { ...ENTRADA, id: 'entrada-2', titulo: 'Lo de ayer' };
+    mockConsulta.mockReturnValue(
+      conPaginas({ entradas: [ENTRADA], ilegibles: 0 }, { entradas: [otra], ilegibles: 0 }),
+    );
+    renderizar(<PantallaDiario alCrear={jest.fn()} alAbrir={jest.fn()} />);
+
+    expect(screen.getByText('Gratitud de hoy')).toBeTruthy();
+    expect(screen.getByText('Lo de ayer')).toBeTruthy();
+  });
+
   it('el aviso de ilegibles suma todas las páginas cargadas', () => {
     // Quedarse con los de la última página haría que el aviso desapareciera al
     // seguir bajando, y lo que la persona ha perdido no puede dejar de verse

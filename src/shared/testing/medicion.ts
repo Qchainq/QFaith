@@ -194,9 +194,7 @@ export function tabla(mediciones: readonly Medicion[]): string {
   const linea = (fila: readonly string[]): string =>
     fila
       .map((celda, columna) =>
-        columna === 0
-          ? celda.padEnd(anchos[columna] ?? 0)
-          : celda.padStart(anchos[columna] ?? 0),
+        columna === 0 ? celda.padEnd(anchos[columna] ?? 0) : celda.padStart(anchos[columna] ?? 0),
       )
       .join('  ');
 

@@ -270,6 +270,29 @@ describe('paginar', () => {
     expect(lectura.total).toBe(TAMANO_PAGINA + 5);
   });
 
+  it('una entrada sin fecha en claro se ordena por la de creación, no al final', async () => {
+    // Puede llegar de una versión anterior que no escribía `entry_date`, o de
+    // un metadato dañado. Sin la fecha de respaldo se ordenaría por cadena
+    // vacía y caería al fondo del diario, que para quien tiene años escritos
+    // es lo mismo que desaparecer.
+    const { repositorio, almacen } = await conCinco();
+    const registros = await almacen.listar(TIPO_ENTIDAD);
+    const delMedio = registros.find((registro) => registro.metadatos.entry_date === '2026-08-03');
+    if (delMedio === undefined) throw new Error('sin registro del día 3');
+
+    const { entry_date: _sin, ...resto } = delMedio.metadatos;
+    await almacen.guardar({
+      ...delMedio,
+      metadatos: resto,
+      // Su fecha de creación lo deja donde estaba: en medio.
+      creadoEn: '2026-08-03T10:00:00.000Z',
+    });
+
+    const { entradas } = await repositorio.listar();
+
+    expect(entradas.map((e) => e.titulo)).toEqual(['Día 5', 'Día 4', 'Día 3', 'Día 2', 'Día 1']);
+  });
+
   it('los ilegibles no descuadran el índice de la página siguiente', async () => {
     // Si `siguiente` se calculara sumando las entradas devueltas, una página
     // con un registro ilegible se saltaría una entrada legible al pasar a la

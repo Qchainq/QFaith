@@ -195,21 +195,37 @@ describe('subrayar', () => {
 
 describe('leer un capítulo', () => {
   it('solo trae los de ese capítulo y esa traducción', async () => {
-    const { repositorio } = montar();
+    const { repositorio, almacen } = montar();
 
-    await repositorio.subrayar(salmo());
-    await repositorio.subrayar(salmo({ capitulo: 89 }));
-    await repositorio.subrayar(salmo({ libro: 'JOB' }));
-    await repositorio.subrayar(salmo({ traduccionId: 'otra-traduccion' }));
+    // Mismo pasaje y mismo color en cuatro sitios distintos, que es el caso
+    // que de verdad separa un filtro correcto de uno que ignora un campo.
+    const enSalmo88 = await repositorio.subrayar(salmo());
+    const enSalmo89 = await repositorio.subrayar(salmo({ capitulo: 89 }));
+    const enJob = await repositorio.subrayar(salmo({ libro: 'JOB' }));
+    const enOtraTraduccion = await repositorio.subrayar(salmo({ traduccionId: 'otra' }));
+
+    // Cuatro marcas distintas, no una reutilizada. Comprobarlo importa porque
+    // `subrayar` busca el duplicado con este mismo filtro: si el filtro
+    // ignorara un campo, marcar Job 88 **reutilizaría** el subrayado del
+    // Salmo 88 en lugar de crear el suyo, y entonces contar lo que devuelve
+    // el capítulo seguiría dando uno. El fallo no sería una lista mal
+    // filtrada: sería una marca de la persona que se pierde.
+    expect(new Set([enSalmo88.id, enSalmo89.id, enJob.id, enOtraTraduccion.id]).size).toBe(4);
+    expect(await almacen.listar(TIPO_SUBRAYADO)).toHaveLength(4);
 
     // La traducción importa: el versículo 3 de un capítulo no cae en el mismo
     // sitio en dos traducciones distintas.
-    const delCapitulo = await repositorio.delCapitulo({
-      traduccionId: TRADUCCION,
-      libro: 'SAL',
-      capitulo: 88,
-    });
-    expect(delCapitulo).toHaveLength(1);
+    const de = async (p: { traduccionId?: string; libro?: string; capitulo?: number }) =>
+      repositorio.delCapitulo({
+        traduccionId: p.traduccionId ?? TRADUCCION,
+        libro: p.libro ?? 'SAL',
+        capitulo: p.capitulo ?? 88,
+      });
+
+    expect((await de({})).map((s) => s.id)).toEqual([enSalmo88.id]);
+    expect((await de({ capitulo: 89 })).map((s) => s.id)).toEqual([enSalmo89.id]);
+    expect((await de({ libro: 'JOB' })).map((s) => s.id)).toEqual([enJob.id]);
+    expect((await de({ traduccionId: 'otra' })).map((s) => s.id)).toEqual([enOtraTraduccion.id]);
   });
 
   it('llegan del más antiguo al más reciente, para pintarlos superpuestos', async () => {
