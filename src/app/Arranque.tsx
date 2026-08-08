@@ -26,6 +26,7 @@ import { pedirDesbloqueoBiometrico } from '@shared/services/keys/almacenSeguro';
 import { useEstadoSesion } from '@shared/state/estadoSesion';
 import i18n from '@shared/i18n';
 
+import { ProveedorAnalitica } from '@modules/analitica/services/contextoAnalitica';
 import { AvisosAlDia } from '@modules/notificaciones/services/AvisosAlDia';
 import { ProveedorNotificaciones } from '@modules/notificaciones/services/contextoNotificaciones';
 import { ProveedorSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
@@ -224,7 +225,14 @@ export function Arranque() {
         */}
         <ProveedorNotificaciones traducir={traducirClave}>
           <AvisosAlDia />
-          <NavegacionRaiz alCerrarSesion={() => void cerrarSesion()} />
+          {/*
+            La analítica va por dentro y no por fuera: sin consentimiento no
+            envía nada, y el consentimiento vive en los ajustes, que necesitan
+            la sesión abierta.
+          */}
+          <ProveedorAnalitica>
+            <NavegacionRaiz alCerrarSesion={() => void cerrarSesion()} />
+          </ProveedorAnalitica>
         </ProveedorNotificaciones>
       </ProveedorSincronizacion>
     );
