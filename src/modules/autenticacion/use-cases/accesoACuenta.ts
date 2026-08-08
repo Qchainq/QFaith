@@ -254,13 +254,48 @@ export async function reanudarSesion(dependencias: DependenciasAcceso): Promise<
  *
  * Para borrar también la clave guardada está `olvidarEsteDispositivo`.
  */
-export async function salir(): Promise<void> {
+/**
+ * Lo que hace falta para salir del todo.
+ *
+ * El servicio de notificaciones llega por parámetro y no se importa: este
+ * archivo es un caso de uso y no debe construir infraestructura. Que sea
+ * opcional permite que quien no lo tenga a mano —una prueba, un camino de
+ * arranque— siga pudiendo cerrar sesión.
+ */
+export interface DependenciasSalida {
+  readonly notificaciones?: { olvidarTodo: () => Promise<void> };
+}
+
+/**
+ * Retira los avisos programados al salir.
+ *
+ * No es limpieza: es privacidad. Los recordatorios hablan del contenido de
+ * quien acaba de irse —«tu momento de oración» a las diez— y seguirían
+ * apareciendo en la pantalla bloqueada de un teléfono en el que esa persona
+ * ya no tiene sesión. Es el caso del teléfono prestado o compartido, que es
+ * exactamente para el que existe cerrar sesión.
+ *
+ * Un fallo aquí **no impide salir**. Quedarse dentro por no haber podido
+ * cancelar un recordatorio sería el peor de los dos males.
+ */
+async function retirarAvisos(dependencias?: DependenciasSalida): Promise<void> {
+  try {
+    await dependencias?.notificaciones?.olvidarTodo();
+  } catch {
+    // Nunca se registra el motivo: vendría del sistema de notificaciones y
+    // podría llevar dentro el identificador de un aviso (invariante 2).
+  }
+}
+
+export async function salir(dependencias?: DependenciasSalida): Promise<void> {
   bloquear();
+  await retirarAvisos(dependencias);
   await cerrarSesionRemota();
 }
 
 /** Cierra sesión y borra la clave maestra de este dispositivo. */
-export async function olvidarEsteDispositivo(): Promise<void> {
+export async function olvidarEsteDispositivo(dependencias?: DependenciasSalida): Promise<void> {
   await olvidarDispositivo();
+  await retirarAvisos(dependencias);
   await cerrarSesionRemota();
 }

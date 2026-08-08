@@ -295,6 +295,43 @@ describe('salida', () => {
     expect(mockClaves.olvidarDispositivo).toHaveBeenCalled();
     expect(mockAuth.cerrarSesion).toHaveBeenCalled();
   });
+
+  it('retira los avisos programados', async () => {
+    // No es limpieza, es privacidad: «tu momento de oración» a las diez
+    // seguiría apareciendo en la pantalla bloqueada de un teléfono donde esa
+    // persona ya no tiene sesión. Es el caso del teléfono compartido, que es
+    // exactamente para el que existe cerrar sesión.
+    const olvidarTodo = jest.fn(async () => undefined);
+
+    await salir({ notificaciones: { olvidarTodo } });
+
+    expect(olvidarTodo).toHaveBeenCalled();
+  });
+
+  it('olvidar el dispositivo también los retira', async () => {
+    const olvidarTodo = jest.fn(async () => undefined);
+
+    await olvidarEsteDispositivo({ notificaciones: { olvidarTodo } });
+
+    expect(olvidarTodo).toHaveBeenCalled();
+  });
+
+  it('si no se pueden retirar, se sale igual', async () => {
+    // Quedarse dentro por no haber podido cancelar un recordatorio sería el
+    // peor de los dos males.
+    const olvidarTodo = jest.fn(async () => {
+      throw new Error('el sistema de notificaciones no responde');
+    });
+
+    await expect(salir({ notificaciones: { olvidarTodo } })).resolves.toBeUndefined();
+    expect(mockAuth.cerrarSesion).toHaveBeenCalled();
+    expect(mockClaves.bloquear).toHaveBeenCalled();
+  });
+
+  it('sin servicio de notificaciones se sale sin romperse', async () => {
+    await expect(salir()).resolves.toBeUndefined();
+    expect(mockAuth.cerrarSesion).toHaveBeenCalled();
+  });
 });
 
 describe('dominios de cifrado añadidos después', () => {
