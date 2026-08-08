@@ -30,17 +30,30 @@ const CONTEXTO_BASE: Contexto = {
 const con = (cambios: Partial<Contexto>): Contexto => ({ ...CONTEXTO_BASE, ...cambios });
 
 describe('lenguaje prohibido', () => {
+  // Un ejemplo por patrón, y **cada uno que solo dispare el suyo**.
+  //
+  // Antes había un «Vas a perder tu racha» que disparaba dos a la vez, y ese
+  // solape los tapaba mutuamente: se podía borrar cualquiera de los dos
+  // patrones sin que fallara nada. Lo encontró la batería de mutación. La
+  // regla vale para toda la tabla: si un ejemplo casa con dos patrones, deja
+  // de defender a ninguno de los dos.
   it.each([
-    'Has fallado otra vez.',
-    'Llevas 3 días sin orar.',
-    'No has leído la Biblia hoy.',
-    'Vas a perder tu racha.',
-    'Perderás tu progreso si no entras.',
-    'Última oportunidad para tu devocional.',
-    'Dios está esperando y tú no has orado.',
-    'Dios quiere que abras la aplicación.',
-    'Deberías haber orado ayer.',
-  ])('rechaza «%s»', (texto) => {
+    ['reproche directo', 'Has fallado otra vez.'],
+    ['contar los días', 'Llevas 3 días sin escribir.'],
+    ['señalar lo no hecho', 'No has orado hoy.'],
+    ['recordar un olvido', 'Te olvidaste de tu momento de hoy.'],
+    ['lo que debería haber hecho', 'Deberías haber dedicado un rato ayer.'],
+    ['rachas', 'Tu racha sigue viva.'],
+    ['amenazar con la pérdida', 'Perderás lo conseguido.'],
+    ['anunciar la pérdida', 'Vas a perder lo que llevas.'],
+    ['volver a empezar', 'Si no entras, empiezas de cero.'],
+    ['urgencia falsa', 'Última oportunidad para tu devocional.'],
+    ['prisa', 'Entra antes de que sea tarde.'],
+    ['oferta que caduca', 'Solo por hoy, entra a leer.'],
+    ['Dios esperando', 'Dios está esperando tu oración.'],
+    ['Dios mandando', 'Dios quiere que abras la aplicación.'],
+    ['hablar por Dios', 'Dios me dijo que entraras.'],
+  ])('rechaza %s: «%s»', (_regla, texto) => {
     expect(textoPermitido(texto).aceptado).toBe(false);
   });
 
@@ -118,6 +131,35 @@ describe('límites de frecuencia', () => {
         con({ consumo: { espiritualesHoy: 3, resumenesHoy: 0, promocionalesEstaSemana: 0 } }),
       ).motivo,
     ).toBe('notificaciones.errores.limiteAlcanzado');
+  });
+
+  it('los avisos de hábitos también cuentan para ese límite', () => {
+    // El contexto por defecto usa «devocional», así que el límite solo se
+    // probaba con esa categoría y se podía sacar «habito» de la lista de
+    // espirituales sin que fallara nada. Y es la categoría que más avisos
+    // genera: dejarla fuera del techo diario es justo lo que convertiría a
+    // QFaith en una aplicación que insiste.
+    expect(
+      puedeEnviarse(
+        con({
+          categoria: 'habito',
+          consumo: { espiritualesHoy: 3, resumenesHoy: 0, promocionalesEstaSemana: 0 },
+        }),
+      ).motivo,
+    ).toBe('notificaciones.errores.limiteAlcanzado');
+  });
+
+  it('y las categorías que no son espirituales no gastan ese cupo', () => {
+    // El otro lado: si todo contara, un aviso de un evento de la iglesia
+    // desaparecería por haber leído tres devocionales, y no tiene que ver.
+    expect(
+      puedeEnviarse(
+        con({
+          categoria: 'evento',
+          consumo: { espiritualesHoy: 3, resumenesHoy: 0, promocionalesEstaSemana: 0 },
+        }),
+      ).aceptado,
+    ).toBe(true);
   });
 
   it('el usuario puede pedir menos y se respeta', () => {
