@@ -139,9 +139,25 @@ describe('la política manda', () => {
   });
 
   it('una hora imposible no programa nada en vez de sonar cuando le parezca', async () => {
-    const { servicio, programados } = montar();
+    // **Sin horario de silencio a propósito.** Con el de por defecto esta
+    // prueba pasaba por casualidad: al quitar la guarda, la hora sin resolver
+    // caía dentro del tramo silencioso y el resultado era el mismo cero. Un
+    // verde por el motivo equivocado, que es peor que un rojo.
+    const { servicio, programados } = montar({
+      silencio: { desdeMinuto: 0, hastaMinuto: 0 },
+    });
 
     await servicio.reprogramar([{ ...PEDIDO, recordatorio: { minutoDelDia: 1500, dias: [] } }]);
+
+    expect(programados.size).toBe(0);
+  });
+
+  it('y un minuto negativo tampoco', async () => {
+    const { servicio, programados } = montar({
+      silencio: { desdeMinuto: 0, hastaMinuto: 0 },
+    });
+
+    await servicio.reprogramar([{ ...PEDIDO, recordatorio: { minutoDelDia: -30, dias: [] } }]);
 
     expect(programados.size).toBe(0);
   });
