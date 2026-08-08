@@ -45,6 +45,11 @@ module.exports = {
     // La política de qué hacer cuando el disco falla vive en
     // `almacenamientoExpo`, y esa sí se prueba.
     '!src/shared/services/storage/sistemaDeArchivosExpo.ts',
+    // Igual: traduce entre el puerto de notificaciones y expo-notifications.
+    // Cuándo suena, qué se ve y si puede enviarse lo deciden
+    // `servicioNotificaciones`, `contenidoVisible` y `politica`, y esos sí se
+    // prueban.
+    '!src/shared/services/notificaciones/notificacionesExpo.ts',
   ],
   coverageThreshold: {
     global: {
