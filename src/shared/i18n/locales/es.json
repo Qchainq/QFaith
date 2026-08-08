@@ -603,6 +603,63 @@
       "sinConsentimiento": "Hace falta tu permiso para estos avisos.",
       "desactivadas": "Tienes las notificaciones desactivadas.",
       "horaInvalida": "La hora debe tener la forma HH:MM."
+    },
+    "visible": {
+      "generico": {
+        "titulo": "QFaith",
+        "cuerpo": "Tienes un recordatorio en QFaith."
+      },
+      "habito": {
+        "titulo": "Tu hábito",
+        "cuerpo": "Tu momento de hoy está disponible."
+      },
+      "oracion": {
+        "titulo": "Tu momento de oración",
+        "cuerpo": "Puedes dedicarle unos minutos cuando quieras."
+      },
+      "devocional": {
+        "titulo": "Tu devocional",
+        "cuerpo": "Está listo cuando tú lo estés."
+      },
+      "lectura": {
+        "titulo": "Tu lectura",
+        "cuerpo": "Puedes continuar donde quedaste."
+      },
+      "sermon": {
+        "titulo": "Tus notas de sermón",
+        "cuerpo": "Tienes algo pendiente de repasar."
+      },
+      "evento": {
+        "titulo": "Evento",
+        "cuerpo": "Tienes un evento próximo."
+      },
+      "iglesia": {
+        "titulo": "Tu iglesia",
+        "cuerpo": "Hay una novedad en tu iglesia."
+      },
+      "respaldo": {
+        "titulo": "Copia de seguridad",
+        "cuerpo": "Conviene revisar tu copia de seguridad."
+      },
+      "resumen": {
+        "titulo": "Tu resumen",
+        "cuerpo": "Tu resumen está disponible."
+      },
+      "promocional": {
+        "titulo": "QFaith",
+        "cuerpo": "Hay novedades que quizá te interesen."
+      },
+      "seguridad": {
+        "titulo": "Seguridad",
+        "cuerpo": "Hay una actividad de tu cuenta que conviene revisar."
+      }
+    },
+    "apertura": {
+      "sinSesion": "Inicia sesión para continuar.",
+      "dispositivoNoAutorizado": "Este dispositivo no está autorizado para abrir tu contenido.",
+      "sinPermiso": "No puedes abrir esto.",
+      "noExiste": "Eso ya no está disponible.",
+      "requiereDesbloqueo": "Desbloquea QFaith para continuar."
     }
   },
   "pulso": {

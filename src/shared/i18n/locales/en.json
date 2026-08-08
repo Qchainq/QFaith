@@ -603,6 +603,63 @@
       "sinConsentimiento": "We need your permission for these alerts.",
       "desactivadas": "You have notifications turned off.",
       "horaInvalida": "The time must look like HH:MM."
+    },
+    "visible": {
+      "generico": {
+        "titulo": "QFaith",
+        "cuerpo": "You have a reminder in QFaith."
+      },
+      "habito": {
+        "titulo": "Your habit",
+        "cuerpo": "Today's moment is available."
+      },
+      "oracion": {
+        "titulo": "Your prayer time",
+        "cuerpo": "You can spend a few minutes whenever you like."
+      },
+      "devocional": {
+        "titulo": "Your devotional",
+        "cuerpo": "It's ready when you are."
+      },
+      "lectura": {
+        "titulo": "Your reading",
+        "cuerpo": "You can pick up where you left off."
+      },
+      "sermon": {
+        "titulo": "Your sermon notes",
+        "cuerpo": "You have something to review."
+      },
+      "evento": {
+        "titulo": "Event",
+        "cuerpo": "You have an upcoming event."
+      },
+      "iglesia": {
+        "titulo": "Your church",
+        "cuerpo": "There's news from your church."
+      },
+      "respaldo": {
+        "titulo": "Backup",
+        "cuerpo": "It's worth checking your backup."
+      },
+      "resumen": {
+        "titulo": "Your summary",
+        "cuerpo": "Your summary is available."
+      },
+      "promocional": {
+        "titulo": "QFaith",
+        "cuerpo": "There are updates you might like."
+      },
+      "seguridad": {
+        "titulo": "Security",
+        "cuerpo": "There's account activity worth reviewing."
+      }
+    },
+    "apertura": {
+      "sinSesion": "Sign in to continue.",
+      "dispositivoNoAutorizado": "This device is not authorised to open your content.",
+      "sinPermiso": "You can't open this.",
+      "noExiste": "That's no longer available.",
+      "requiereDesbloqueo": "Unlock QFaith to continue."
     }
   },
   "pulso": {
