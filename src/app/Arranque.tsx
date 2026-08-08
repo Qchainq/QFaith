@@ -26,6 +26,8 @@ import { pedirDesbloqueoBiometrico } from '@shared/services/keys/almacenSeguro';
 import { useEstadoSesion } from '@shared/state/estadoSesion';
 import i18n from '@shared/i18n';
 
+import { AvisosAlDia } from '@modules/notificaciones/services/AvisosAlDia';
+import { ProveedorNotificaciones } from '@modules/notificaciones/services/contextoNotificaciones';
 import { ProveedorSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
 
 import { FlujoAutenticacion, type AccionesAutenticacion } from './FlujoAutenticacion';
@@ -34,6 +36,15 @@ import { NavegacionRaiz } from './NavegacionRaiz';
 const DEPENDENCIAS: DependenciasAcceso = {
   plataforma: Platform.OS === 'android' ? 'android' : Platform.OS === 'ios' ? 'ios' : 'web',
 };
+
+/**
+ * Traduce una clave del catálogo de notificaciones.
+ *
+ * A nivel de módulo y no dentro del render: el proveedor memoriza el servicio
+ * con esta función entre sus dependencias, y una función nueva en cada vuelta
+ * lo reconstruiría —y con él, la referencia de preferencias— sin motivo.
+ */
+const traducirClave = (clave: string): string => i18n.t(clave);
 
 export function Arranque() {
   const fase = useEstadoSesion((estado) => estado.fase);
@@ -205,7 +216,16 @@ export function Arranque() {
     }
     return (
       <ProveedorSincronizacion usuarioId={usuario.id} dispositivoId={dispositivoId}>
-        <NavegacionRaiz alCerrarSesion={() => void cerrarSesion()} />
+        {/*
+          Los avisos van dentro de la sincronización porque salen de los
+          hábitos, que viven en la base local. Y `AvisosAlDia` no pinta nada:
+          solo mantiene programado lo que corresponde mientras la aplicación
+          está abierta.
+        */}
+        <ProveedorNotificaciones traducir={traducirClave}>
+          <AvisosAlDia />
+          <NavegacionRaiz alCerrarSesion={() => void cerrarSesion()} />
+        </ProveedorNotificaciones>
       </ProveedorSincronizacion>
     );
   }

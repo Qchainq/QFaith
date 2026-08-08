@@ -191,8 +191,11 @@ export function crearRepositorioHabitos(dependencias: DependenciasRepositorioHab
         configuracion: borrador.configuracion ?? existente?.configuracion ?? { dias: [] },
         fechaInicio: borrador.fechaInicio ?? existente?.fechaInicio ?? ahora().slice(0, 10),
         fechaFin: existente?.fechaFin ?? null,
-        recordatorioActivo: existente?.recordatorioActivo ?? false,
-        horaRecordatorio: existente?.horaRecordatorio ?? null,
+        recordatorioActivo: borrador.recordatorioActivo ?? existente?.recordatorioActivo ?? false,
+        horaRecordatorio:
+          borrador.horaRecordatorio === undefined
+            ? (existente?.horaRecordatorio ?? null)
+            : borrador.horaRecordatorio,
         activo: borrador.activo ?? existente?.activo ?? true,
       }),
     });

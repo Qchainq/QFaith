@@ -54,6 +54,81 @@ const BORRADOR = {
   fechaInicio: '2026-08-01',
 };
 
+describe('recordatorio', () => {
+  it('se puede poner al crear el hábito', async () => {
+    // No se podía: `BorradorHabito` no aceptaba estos dos campos, así que el
+    // repositorio los leía y los guardaba pero siempre valían `false` y
+    // `null`. Un hábito no podía tener recordatorio de ninguna manera, y no
+    // se vio hasta montar el recorrido hasta el sistema de notificaciones.
+    const { repositorio } = montar();
+
+    const habito = await repositorio.guardar({
+      ...BORRADOR,
+      recordatorioActivo: true,
+      horaRecordatorio: '08:00',
+    });
+
+    expect(habito.recordatorioActivo).toBe(true);
+    expect(habito.horaRecordatorio).toBe('08:00');
+  });
+
+  it('se puede quitar después', async () => {
+    const { repositorio } = montar();
+    const creado = await repositorio.guardar({
+      ...BORRADOR,
+      recordatorioActivo: true,
+      horaRecordatorio: '08:00',
+    });
+
+    const sinAviso = await repositorio.guardar({
+      ...BORRADOR,
+      id: creado.id,
+      recordatorioActivo: false,
+      horaRecordatorio: null,
+    });
+
+    expect(sinAviso.recordatorioActivo).toBe(false);
+    expect(sinAviso.horaRecordatorio).toBeNull();
+  });
+
+  it('editar otra cosa no lo borra sin querer', async () => {
+    // El caso que el valor por defecto tiene que respetar: cambiar el título
+    // no puede llevarse por delante el aviso que alguien configuró.
+    const { repositorio } = montar();
+    const creado = await repositorio.guardar({
+      ...BORRADOR,
+      recordatorioActivo: true,
+      horaRecordatorio: '08:00',
+    });
+
+    const editado = await repositorio.guardar({
+      ...BORRADOR,
+      id: creado.id,
+      titulo: 'Otro título',
+    });
+
+    expect(editado.recordatorioActivo).toBe(true);
+    expect(editado.horaRecordatorio).toBe('08:00');
+  });
+
+  it('la hora no llega cifrada: hace falta en claro para programar', async () => {
+    // Es un metadato a propósito. La hora a la que alguien reza dice algo,
+    // pero sin ella en claro no se puede programar un aviso local sin
+    // descifrar la base entera en cada arranque.
+    const { repositorio, almacen } = montar();
+
+    const habito = await repositorio.guardar({
+      ...BORRADOR,
+      recordatorioActivo: true,
+      horaRecordatorio: '08:00',
+    });
+    const registro = await almacen.obtener(TIPO_HABITO, habito.id);
+
+    expect(registro?.metadatos.reminder_time).toBe('08:00');
+    expect(registro?.metadatos.reminder_enabled).toBe(true);
+  });
+});
+
 describe('privacidad', () => {
   it('el título y la descripción no salen del sobre', async () => {
     // Un hábito puede ser «dejar de beber». No es una lista de tareas neutra.

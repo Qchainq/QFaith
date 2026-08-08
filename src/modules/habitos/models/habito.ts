@@ -72,6 +72,22 @@ export interface BorradorHabito extends ContenidoHabito {
   readonly configuracion?: ConfiguracionRepeticion;
   readonly fechaInicio?: string;
   readonly activo?: boolean;
+  /**
+   * Si este hábito avisa, y a qué hora local.
+   *
+   * Estaban en `Habito` y no aquí, de modo que el repositorio los leía y los
+   * guardaba pero nadie podía ponerlos: cualquier hábito nacía sin
+   * recordatorio y no había manera de dárselo. Se descubrió al montar el
+   * recorrido entero hasta el sistema de notificaciones, que es donde ese
+   * tipo de hueco aparece.
+   *
+   * La hora es local y con la forma `HH:MM`. Local porque «las ocho» es a las
+   * ocho donde está la persona; el instante en UTC lo calcula
+   * `proximaOcurrencia` cada vez, para que un vuelo o un cambio de horario no
+   * dejen el aviso descolocado.
+   */
+  readonly recordatorioActivo?: boolean;
+  readonly horaRecordatorio?: string | null;
 }
 
 export const esquemaBorradorHabito = z.object({
