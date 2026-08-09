@@ -42,6 +42,13 @@ const AJUSTES: FilaAjustes = {
   auto_lock_seconds: 60,
   cloud_backup_enabled: true,
   wifi_only_downloads: false,
+  notification_detail: 'generico',
+  quiet_from_minute: 1320,
+  quiet_to_minute: 420,
+  max_spiritual_per_day: 3,
+  max_summaries_per_day: 1,
+  max_promotional_per_week: 1,
+  promotional_consent: false,
 };
 
 interface Espia {

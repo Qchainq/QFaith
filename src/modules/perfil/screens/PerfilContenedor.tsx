@@ -23,6 +23,7 @@ import {
   useSolicitarEliminacion,
 } from '../hooks/usePerfil';
 import type { BorradorPerfil } from '../models/perfil';
+import { AJUSTES_POR_DEFECTO } from '../use-cases/gestionPerfil';
 import { PantallaConfiguracion } from './PantallaConfiguracion';
 import { PantallaDispositivos } from './PantallaDispositivos';
 import { PantallaEditarPerfil } from './PantallaEditarPerfil';
@@ -81,18 +82,7 @@ export function PerfilContenedor({
   if (vista === 'configuracion') {
     return (
       <PantallaConfiguracion
-        ajustes={
-          ajustes.data ?? {
-            tema: 'system',
-            escalaTexto: 1,
-            notificaciones: true,
-            analitica: false,
-            bloqueoBiometrico: false,
-            segundosBloqueo: 60,
-            respaldoEnNube: true,
-            descargasSoloWifi: false,
-          }
-        }
+        ajustes={ajustes.data ?? AJUSTES_POR_DEFECTO}
         cargando={ajustes.isPending}
         guardando={guardarAjustes.isPending}
         error={errorAjustes}

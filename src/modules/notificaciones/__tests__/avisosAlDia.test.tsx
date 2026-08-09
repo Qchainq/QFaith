@@ -8,6 +8,7 @@
 import { screen, waitFor } from '@testing-library/react-native';
 
 import { crearRepositorioHabitos } from '@modules/habitos/repositories/repositorioHabitos';
+import type { Ajustes } from '@modules/perfil/models/perfil';
 import { crearSincronizacionDePrueba } from '@modules/sincronizacion/__tests__/sincronizacionDePrueba';
 import { ProveedorSincronizacion } from '@modules/sincronizacion/services/contextoSincronizacion';
 import { crearAlmacenEnMemoria } from '@shared/database/almacenEnMemoria';
@@ -75,12 +76,41 @@ function puertoDePrueba() {
   return { puerto, programados };
 }
 
+/** Los ajustes que el perfil devolvería, con lo discreto por defecto. */
+const AJUSTES: Pick<
+  Ajustes,
+  | 'notificaciones'
+  | 'detalleNotificacion'
+  | 'silencioDesde'
+  | 'silencioHasta'
+  | 'maxEspiritualesAlDia'
+  | 'maxResumenesAlDia'
+  | 'maxPromocionalesALaSemana'
+  | 'aceptaPromocionales'
+> = {
+  notificaciones: true,
+  detalleNotificacion: 'generico',
+  silencioDesde: 22 * 60,
+  silencioHasta: 7 * 60,
+  maxEspiritualesAlDia: 3,
+  maxResumenesAlDia: 1,
+  maxPromocionalesALaSemana: 1,
+  aceptaPromocionales: false,
+};
+
 async function montar(parametros: {
   readonly notificacionesActivas: boolean;
   readonly puerto: PuertoNotificaciones;
   readonly almacen: AlmacenLocal;
+  readonly ajustes?: Partial<typeof AJUSTES>;
 }) {
-  mockAjustes.mockReturnValue({ data: { notificaciones: parametros.notificacionesActivas } });
+  mockAjustes.mockReturnValue({
+    data: {
+      ...AJUSTES,
+      notificaciones: parametros.notificacionesActivas,
+      ...parametros.ajustes,
+    },
+  });
 
   const sincronizacion = crearSincronizacionDePrueba({
     almacen: parametros.almacen,
@@ -170,6 +200,77 @@ describe('un hábito con recordatorio acaba programado', () => {
 
     // Se espera un poco para no confundir «no programa» con «todavía no ha
     // llegado»: sin esto la prueba pasaría aunque el efecto no hubiera corrido.
+    await new Promise((resolver) => setTimeout(resolver, 50));
+    expect(programados.size).toBe(0);
+  });
+
+  it('la vista previa del perfil decide qué se ve', async () => {
+    // La cadena entera: alguien enciende un interruptor en Configuración y lo
+    // que cambia es el texto que aparecerá en la pantalla bloqueada. Cada
+    // pieza estaba probada; que estén enganchadas es otra cosa.
+    const almacen = crearAlmacenEnMemoria();
+    const { puerto, programados } = puertoDePrueba();
+    await crearHabito({ almacen, titulo: 'Leer por la mañana', hora: '08:00' });
+
+    await montar({
+      notificacionesActivas: true,
+      puerto,
+      almacen,
+      ajustes: { detalleNotificacion: 'area' },
+    });
+    await screen.findByText('montado');
+    await waitFor(() => expect(programados.size).toBe(1));
+
+    expect([...programados.values()][0]?.claveTitulo).toBe('notificaciones.visible.habito.titulo');
+  });
+
+  it('y sin ella, ni siquiera se dice de qué módulo es', async () => {
+    const almacen = crearAlmacenEnMemoria();
+    const { puerto, programados } = puertoDePrueba();
+    await crearHabito({ almacen, titulo: 'Leer por la mañana', hora: '08:00' });
+
+    await montar({ notificacionesActivas: true, puerto, almacen });
+    await screen.findByText('montado');
+    await waitFor(() => expect(programados.size).toBe(1));
+
+    expect([...programados.values()][0]?.claveTitulo).toBe(
+      'notificaciones.visible.generico.titulo',
+    );
+  });
+
+  it('el techo diario del perfil corta de verdad', async () => {
+    // Poner el techo a cero significa «no quiero ninguno de estos», y tiene
+    // que notarse: un ajuste que no hace nada es peor que no ofrecerlo.
+    const almacen = crearAlmacenEnMemoria();
+    const { puerto, programados } = puertoDePrueba();
+    await crearHabito({ almacen, titulo: 'Leer por la mañana', hora: '08:00' });
+
+    await montar({
+      notificacionesActivas: true,
+      puerto,
+      almacen,
+      ajustes: { maxEspiritualesAlDia: 0 },
+    });
+    await screen.findByText('montado');
+
+    await new Promise((resolver) => setTimeout(resolver, 50));
+    expect(programados.size).toBe(0);
+  });
+
+  it('el horario de silencio del perfil también', async () => {
+    // Con el silencio abarcando la hora del recordatorio, no se programa.
+    const almacen = crearAlmacenEnMemoria();
+    const { puerto, programados } = puertoDePrueba();
+    await crearHabito({ almacen, titulo: 'Leer por la mañana', hora: '08:00' });
+
+    await montar({
+      notificacionesActivas: true,
+      puerto,
+      almacen,
+      ajustes: { silencioDesde: 7 * 60, silencioHasta: 9 * 60 },
+    });
+    await screen.findByText('montado');
+
     await new Promise((resolver) => setTimeout(resolver, 50));
     expect(programados.size).toBe(0);
   });

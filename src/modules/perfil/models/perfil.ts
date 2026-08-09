@@ -32,7 +32,29 @@ export interface Ajustes {
   readonly segundosBloqueo: number;
   readonly respaldoEnNube: boolean;
   readonly descargasSoloWifi: boolean;
+  /**
+   * Cuánto se nombra en la pantalla bloqueada.
+   *
+   * `generico` no dice ni de qué módulo es; `area` dice «tu momento de
+   * oración». **Nunca contenido** en ninguno de los dos: el texto sale de un
+   * catálogo cerrado y esta preferencia solo elige entre dos entradas de él.
+   */
+  readonly detalleNotificacion: DetalleNotificacion;
+  /** Minutos locales desde medianoche. Ver `HorarioSilencio`. */
+  readonly silencioDesde: number;
+  readonly silencioHasta: number;
+  readonly maxEspiritualesAlDia: number;
+  readonly maxResumenesAlDia: number;
+  readonly maxPromocionalesALaSemana: number;
+  /** Sin esto no salen promocionales, aunque el interruptor general esté dado. */
+  readonly aceptaPromocionales: boolean;
 }
+
+export const DETALLES_NOTIFICACION = ['generico', 'area'] as const;
+export type DetalleNotificacion = (typeof DETALLES_NOTIFICACION)[number];
+
+export const esDetalleNotificacion = (valor: unknown): valor is DetalleNotificacion =>
+  typeof valor === 'string' && (DETALLES_NOTIFICACION as readonly string[]).includes(valor);
 
 export type EstadoDispositivo = 'active' | 'revoked' | 'lost' | 'inactive';
 

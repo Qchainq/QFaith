@@ -413,7 +413,16 @@
       "analitica": "Compartir estadísticas de uso anónimas",
       "analiticaNota": "Está desactivado. Nunca incluye nada de lo que escribes.",
       "respaldoEnNube": "Copia de seguridad cifrada",
-      "descargasSoloWifi": "Descargar solo con wifi"
+      "descargasSoloWifi": "Descargar solo con wifi",
+      "vistaPrevia": "Decir de qué es el aviso",
+      "vistaPreviaNota": "Con esto encendido, la pantalla bloqueada dirá «Tu momento de oración» en lugar de «Tienes un recordatorio». Nunca muestra lo que has escrito.",
+      "silencio": "Sin avisos desde",
+      "silencioNota": "Hasta las 07:00. Solo los avisos de seguridad de tu cuenta pueden sonar en ese rato.",
+      "maxDiarios_one": "Como mucho {{count}} aviso al día",
+      "maxDiarios_other": "Como mucho {{count}} avisos al día",
+      "maxDiarios_zero": "Ningún aviso de este tipo",
+      "maxDiariosNota": "Vale para hábitos, oración, lectura y devocional. Puedes pedir menos cuando quieras.",
+      "promocionales": "Novedades de QFaith"
     },
     "bloqueo": {
       "titulo": "Bloqueo",

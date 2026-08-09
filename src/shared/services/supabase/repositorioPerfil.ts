@@ -33,6 +33,13 @@ export interface FilaAjustes {
   readonly auto_lock_seconds: number;
   readonly cloud_backup_enabled: boolean;
   readonly wifi_only_downloads: boolean;
+  readonly notification_detail: string;
+  readonly quiet_from_minute: number;
+  readonly quiet_to_minute: number;
+  readonly max_spiritual_per_day: number;
+  readonly max_summaries_per_day: number;
+  readonly max_promotional_per_week: number;
+  readonly promotional_consent: boolean;
 }
 
 export interface FilaDispositivo {
@@ -55,7 +62,9 @@ const COLUMNAS_PERFIL =
   'id,display_name,language_code,timezone,country_code,birth_year,onboarding_completed';
 const COLUMNAS_AJUSTES =
   'user_id,theme,font_scale,notifications_enabled,analytics_enabled,' +
-  'biometric_lock_enabled,auto_lock_seconds,cloud_backup_enabled,wifi_only_downloads';
+  'biometric_lock_enabled,auto_lock_seconds,cloud_backup_enabled,wifi_only_downloads,' +
+  'notification_detail,quiet_from_minute,quiet_to_minute,' +
+  'max_spiritual_per_day,max_summaries_per_day,max_promotional_per_week,promotional_consent';
 const COLUMNAS_DISPOSITIVO = 'id,device_name,platform,status,last_seen_at,revoked_at';
 const COLUMNAS_ELIMINACION = 'id,requested_at,scheduled_for,status';
 

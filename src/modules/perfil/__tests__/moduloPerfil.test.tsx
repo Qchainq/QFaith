@@ -101,6 +101,13 @@ beforeEach(() => {
     auto_lock_seconds: 60,
     cloud_backup_enabled: true,
     wifi_only_downloads: false,
+    notification_detail: 'generico',
+    quiet_from_minute: 1320,
+    quiet_to_minute: 420,
+    max_spiritual_per_day: 3,
+    max_summaries_per_day: 1,
+    max_promotional_per_week: 1,
+    promotional_consent: false,
   };
   dispositivos = [
     {
@@ -202,6 +209,67 @@ describe('configuración', () => {
     const interruptor = await screen.findByLabelText('Compartir estadísticas de uso anónimas');
     expect(interruptor.props.value).toBe(false);
     expect(screen.getByText(/Nunca incluye nada de lo que escribes/)).toBeTruthy();
+  });
+
+  it('los ajustes de aviso solo aparecen si las notificaciones están encendidas', async () => {
+    // Seis controles que no hacen nada es de las formas más rápidas de que
+    // alguien deje de fiarse de una pantalla de ajustes.
+    montar();
+    fireEvent.press(await screen.findByRole('button', { name: 'Configuración' }));
+
+    expect(await screen.findByLabelText('Decir de qué es el aviso')).toBeTruthy();
+
+    // Un interruptor no se «pulsa»: emite `valueChange`. Con `press` la
+    // prueba pasaba por no hacer nada, que es el falso verde de siempre.
+    fireEvent(screen.getByLabelText('Recordatorios y avisos'), 'valueChange', false);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Decir de qué es el aviso')).toBeNull();
+    });
+  });
+
+  it('la vista previa nace apagada y explica qué enseña y qué no', async () => {
+    // Privacidad por defecto, y la nota tiene que dejar claro el límite: lo
+    // que se gana es saber de qué va el aviso, nunca ver lo que se escribió.
+    montar();
+    fireEvent.press(await screen.findByRole('button', { name: 'Configuración' }));
+
+    const interruptor = await screen.findByLabelText('Decir de qué es el aviso');
+    expect(interruptor.props.value).toBe(false);
+    expect(screen.getByText(/Nunca muestra lo que has escrito/)).toBeTruthy();
+  });
+
+  it('el horario de silencio se puede cambiar y se guarda', async () => {
+    montar();
+    fireEvent.press(await screen.findByRole('button', { name: 'Configuración' }));
+
+    fireEvent.press(await screen.findByRole('button', { name: 'Sin avisos desde: 22:00 – 07:00' }));
+
+    expect(
+      await screen.findByRole('button', { name: 'Sin avisos desde: 23:00 – 07:00' }),
+    ).toBeTruthy();
+  });
+
+  it('el techo diario se puede bajar, incluso hasta ninguno', async () => {
+    // Cero es una elección legítima: «no quiero ninguno de estos». Que exista
+    // como opción es lo que hace que el resto no se sienta impuesto.
+    montar();
+    fireEvent.press(await screen.findByRole('button', { name: 'Configuración' }));
+
+    fireEvent.press(await screen.findByRole('button', { name: 'Como mucho 3 avisos al día' }));
+    expect(await screen.findByRole('button', { name: 'Como mucho 2 avisos al día' })).toBeTruthy();
+
+    fireEvent.press(screen.getByRole('button', { name: 'Como mucho 2 avisos al día' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Como mucho 1 aviso al día' }));
+
+    expect(await screen.findByRole('button', { name: 'Ningún aviso de este tipo' })).toBeTruthy();
+  });
+
+  it('las novedades nacen apagadas: exigen consentimiento explícito', async () => {
+    montar();
+    fireEvent.press(await screen.findByRole('button', { name: 'Configuración' }));
+
+    expect((await screen.findByLabelText('Novedades de QFaith')).props.value).toBe(false);
   });
 
   it('sin biometría en el dispositivo, el interruptor no se queda encendido en falso', async () => {

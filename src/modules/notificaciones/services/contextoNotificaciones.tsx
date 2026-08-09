@@ -22,8 +22,9 @@
 import { createContext, useContext, useMemo, useRef, type ReactNode } from 'react';
 
 import { useAjustes } from '@modules/perfil/hooks/usePerfil';
+import type { Ajustes } from '@modules/perfil/models/perfil';
 import { crearNotificacionesExpo } from '@shared/services/notificaciones/notificacionesExpo';
-import type { Consumo } from '@shared/services/notificaciones/politica';
+import { limitesValidos, type Consumo } from '@shared/services/notificaciones/politica';
 import type { PuertoNotificaciones } from '@shared/services/notificaciones/puertoNotificaciones';
 import {
   crearServicioNotificaciones,
@@ -41,18 +42,35 @@ export const zonaHorariaActual = (): string =>
 /**
  * Preferencias a partir de lo que el perfil guarda.
  *
- * El perfil guarda hoy el interruptor general; lo demás son los valores por
- * defecto, que son los discretos. Cuando la pantalla de ajustes ofrezca el
- * resto —vista previa, horario de silencio, límites— se leerá de ahí, y el
- * resto del sistema no se entera porque pasa por esta única función.
+ * Único punto de traducción entre los ajustes —que son del perfil y viajan
+ * con la persona— y lo que la política de notificaciones necesita. Que sea
+ * uno solo es lo que permitió añadir la vista previa, el horario de silencio
+ * y los techos sin que el servicio ni las pantallas se enteraran.
  */
 export function preferenciasDesdePerfil(parametros: {
-  readonly notificacionesActivas: boolean;
+  readonly ajustes?: Ajustes;
   readonly zonaHoraria?: string;
 }): Preferencias {
+  const base = PREFERENCIAS_POR_DEFECTO(parametros.zonaHoraria ?? zonaHorariaActual());
+  const ajustes = parametros.ajustes;
+  // Mientras la consulta no ha traído nada se usan los discretos: programar
+  // con un interruptor que quizá esté apagado es peor que tardar un segundo.
+  if (ajustes === undefined) return base;
+
   return {
-    ...PREFERENCIAS_POR_DEFECTO(parametros.zonaHoraria ?? zonaHorariaActual()),
-    activas: parametros.notificacionesActivas,
+    ...base,
+    activas: ajustes.notificaciones,
+    detalle: ajustes.detalleNotificacion,
+    silencio: { desdeMinuto: ajustes.silencioDesde, hastaMinuto: ajustes.silencioHasta },
+    // Se recortan aquí aunque el caso de uso ya lo haga al guardar: es la
+    // última puerta antes de programar, y lo que llega del servidor no tiene
+    // por qué haber pasado por el caso de uso.
+    limites: limitesValidos({
+      espiritualesAlDia: ajustes.maxEspiritualesAlDia,
+      resumenesAlDia: ajustes.maxResumenesAlDia,
+      promocionalesALaSemana: ajustes.maxPromocionalesALaSemana,
+    }),
+    aceptaPromocionales: ajustes.aceptaPromocionales,
   };
 }
 
@@ -93,11 +111,9 @@ export function ProveedorNotificaciones({
 }: PropsProveedorNotificaciones) {
   const ajustes = useAjustes();
 
-  // Mientras los ajustes no han cargado se toma el valor discreto: programar
-  // con un interruptor que quizá esté apagado es peor que tardar un segundo.
   const actuales =
     preferencias ??
-    preferenciasDesdePerfil({ notificacionesActivas: ajustes.data?.notificaciones ?? false });
+    preferenciasDesdePerfil(ajustes.data === undefined ? {} : { ajustes: ajustes.data });
 
   const referencia = useRef(actuales);
   referencia.current = actuales;

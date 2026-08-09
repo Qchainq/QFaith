@@ -413,7 +413,16 @@
       "analitica": "Share anonymous usage statistics",
       "analiticaNota": "It's off. It never includes anything you write.",
       "respaldoEnNube": "Encrypted backup",
-      "descargasSoloWifi": "Download over wifi only"
+      "descargasSoloWifi": "Download over wifi only",
+      "vistaPrevia": "Say what the reminder is about",
+      "vistaPreviaNota": "With this on, the lock screen will say “Your prayer time” instead of “You have a reminder”. It never shows what you wrote.",
+      "silencio": "No reminders from",
+      "silencioNota": "Until 07:00. Only security alerts about your account can come through then.",
+      "maxDiarios_one": "At most {{count}} reminder a day",
+      "maxDiarios_other": "At most {{count}} reminders a day",
+      "maxDiarios_zero": "No reminders of this kind",
+      "maxDiariosNota": "Applies to habits, prayer, reading and devotionals. You can ask for fewer whenever you like.",
+      "promocionales": "News from QFaith"
     },
     "bloqueo": {
       "titulo": "Lock",

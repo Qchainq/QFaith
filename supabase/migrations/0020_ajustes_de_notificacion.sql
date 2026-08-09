@@ -1,21 +1,3 @@
--- ═══════════════════════════════════════════════════════════════════════
--- QFaith · Migraciones desde la 0020
---
--- ARCHIVO GENERADO. No lo edites: se regenera desde supabase/migrations/.
--- Solo las migraciones 0020 en adelante. Para una base que ya tiene
--- aplicadas las anteriores. Comprueba en cuál estás con:
---
---   select version from public.schema_migrations order by version;
---
--- No incluye supabase/tests/00_sustituto_auth.sql, que solo sirve para
--- ejecutar las migraciones en un PostgreSQL local: en Supabase, el esquema
--- `auth` y la función `auth.uid()` los proporciona la propia plataforma.
--- ═══════════════════════════════════════════════════════════════════════
-
--- ───────────────────────────────────────────────────────────
--- 0020_ajustes_de_notificacion.sql
--- ───────────────────────────────────────────────────────────
-
 -- Migración 0020 — Ajustes de notificación (Documento 13).
 --
 -- El interruptor general ya estaba; faltaba lo demás: qué se ve en la
@@ -90,21 +72,3 @@ comment on column public.user_settings.notification_detail is
   'Cuánto se nombra en la pantalla bloqueada. Nunca contenido: el texto sale de un catálogo cerrado.';
 comment on column public.user_settings.quiet_from_minute is
   'Inicio del horario de silencio, en minutos locales. Solo lo atraviesan los avisos críticos de seguridad.';
-
--- ───────────────────────────────────────────────────────────
--- Registro de migraciones aplicadas
--- ───────────────────────────────────────────────────────────
-
-create table if not exists public.schema_migrations (
-  version text primary key,
-  applied_at timestamptz not null default now()
-);
-
-alter table public.schema_migrations enable row level security;
--- Sin políticas y sin privilegios: es información de operación, no del
--- usuario. Solo la ve quien entra por el panel o con la clave de servicio.
-revoke all on public.schema_migrations from anon, authenticated;
-
-insert into public.schema_migrations (version) values
-  ('0020_ajustes_de_notificacion')
-on conflict (version) do nothing;
